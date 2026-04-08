@@ -196,11 +196,11 @@ footer { border-top: 1px solid var(--border); padding: 20px 32px; text-align: ce
 
   <div class="main-card">
     <h2>Аналіз складу збірної партії</h2>
-    <p>Вставте посилання на Google Drive, Google Sheets або будь-яку URL-таблицю з товарами (Invoice, Packing List, CMR, EX1). Модуль автоматично розпізнає структуру та оцінить ризики.</p>
+    <p>Вставте посилання на Google Sheets таблицю з товарами (Invoice, Packing List, CMR, EX1). Переконайтеся що таблиця має доступ "Може переглядати будь-хто з посиланням". Модуль автоматично прочитає дані та оцінить ризики.</p>
     <div class="input-row">
       <div class="url-wrap">
         <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5c-1.8 2-1.8 9 0 11M8 2.5c1.8 2 1.8 9 0 11M2.5 8h11"/></svg>
-        <input class="url-input" id="driveUrl" type="text" placeholder="https://drive.google.com/drive/folders/...">
+        <input class="url-input" id="driveUrl" type="text" placeholder="https://docs.google.com/spreadsheets/d/...">
       </div>
       <button class="go-btn" id="goBtn" onclick="runAudit()">
         <span id="goTxt">Розпочати аналіз</span>
@@ -273,19 +273,92 @@ async function runAudit() {
 
   btn.disabled = true; txt.textContent = 'Аналізуємо...'; spin.style.display = 'block';
   sb.classList.remove('error'); sb.style.display = 'block';
-  sb.textContent = '> Підключення до AI-модуля...\n> Аналіз складу партії...';
+  sb.textContent = '> Підключення до Google Sheets...\n> Читання даних...';
   document.getElementById('resultsArea').innerHTML = '';
 
-  const prompt = `Ти — митний аудитор вантажів ЄС-Україна. Користувач надав посилання: ${url}
-
-Оскільки ти не можеш відкрити URL напряму, змоделюй реалістичний аналіз збірної LCL партії ЄС→Україна (3-5 позицій різного типу: промтовари, хімія або метал, можливо один ризиковий товар).
-
-Поверни ТІЛЬКИ JSON без markdown та коментарів:
-{"summary":{"totalCustomsValue":число,"totalDuty":число,"totalVAT":число,"borderDelay":"рядок"},"items":[{"name":"назва","uctzedCode":"код 10 цифр","qty":"кількість+одиниця","buyPrice":число,"customsValue":число,"duty":число,"vat":число,"euChecks":"перевірки в порту ЄС","uaChecks":"перевірки UA митниця","risk":"Критичний|Середній|Низький","riskNote":"пояснення"}],"criticalAlert":"попередження або null","nctsList":["пункт1","пункт2","пункт3","пункт4"]}
-
-Правила: митна вартість = ціна × 1.10; мито: електроніка 0%, хімія 6%, метал 4%, одяг 12%; ПДВ = 20% × (митна вартість + мито). Для небезпечних товарів вкажи клас ADR.`;
-
   try {
+    // Извлекаем ID таблицы и gid листа из URL
+    const sheetId = extractSheetId(url);
+    const gid = extractGid(url);
+    
+    if (!sheetId) {
+      throw new Error('Невірне посилання на Google Sheets. Переконайтеся що це посилання на таблицю.');
+    }
+
+    sb.textContent = '> Читання даних з таблиці...\n> ID: ' + sheetId.slice(0, 20) + '...';
+
+    // Читаем данные через Google Sheets API (публичный доступ)
+    const csvUrl = gid 
+      ? `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`
+      : `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+    
+    const sheetRes = await fetch(csvUrl);
+    if (!sheetRes.ok) {
+      throw new Error('Не вдалося прочитати таблицю. Переконайтеся що доступ "Може переглядати будь-хто з посиланням"');
+    }
+
+    const csvText = await sheetRes.text();
+    const rows = parseCSV(csvText);
+    
+    if (rows.length === 0) {
+      throw new Error('Таблиця порожня або не вдалося прочитати дані');
+    }
+
+    sb.textContent = `> Прочитано ${rows.length} рядків\n> Відправка на аналіз AI...`;
+
+    // Формируем данные таблицы для GPT
+    const tableData = formatTableForAI(rows);
+
+    const systemPrompt = `Ти — професійний аналітик міжнародної логістики та митного оформлення вантажів ЄС-Україна.
+
+Проаналізуй таблицю зі складом збірної партії/контейнера та надай детальний висновок.
+
+ОБОВ'ЯЗКОВО поверни ТІЛЬКИ валідний JSON без markdown, коментарів чи пояснень у такому форматі:
+
+{
+  "summary": {
+    "totalCustomsValue": число,
+    "totalDuty": число,
+    "totalVAT": число,
+    "borderDelay": "текст прогнозу затримки"
+  },
+  "items": [
+    {
+      "name": "назва товару",
+      "uctzedCode": "10-значний код УКТЗЕД",
+      "qty": "кількість з одиницею",
+      "buyPrice": число,
+      "customsValue": число,
+      "duty": число,
+      "vat": число,
+      "euChecks": "перевірки в ЄС",
+      "uaChecks": "перевірки в UA",
+      "risk": "Критичний|Середній|Низький",
+      "riskNote": "пояснення ризику"
+    }
+  ],
+  "criticalAlert": "текст критичного попередження або null",
+  "nctsList": ["пункт чеклісту 1", "пункт 2", "пункт 3", "пункт 4"]
+}
+
+Правила розрахунку:
+- Митна вартість = ціна × 1.10 (додаємо фрахт)
+- Мито: електроніка 0%, хімія 6%, метал 4%, одяг 12%, інше 5-10%
+- ПДВ = 20% × (митна вартість + мито)
+- Для небезпечних товарів вкажи клас ADR у riskNote
+
+Важливо:
+- Якщо в таблиці немає достатньо даних для точного аналізу - використай типові значення для категорії товару
+- Виявляй ризики: небезпечні товари (ADR), санкційні, сумісність вантажів, документальні
+- Прогнозуй затримку на кордоні виходячи з типу товарів та їх ризикованості`;
+
+    const userPrompt = `Посилання на таблицю: ${url}
+
+ДАНІ З ТАБЛИЦІ:
+${tableData}
+
+Проаналізуй ці дані та поверни JSON з детальним аналізом кожної позиції.`;
+
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -294,8 +367,12 @@ async function runAudit() {
       },
       body: JSON.stringify({
         model: 'gpt-4o',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content: prompt }]
+        max_tokens: 3000,
+        temperature: 0.3,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ]
       })
     });
 
@@ -327,6 +404,61 @@ async function runAudit() {
   } finally {
     btn.disabled = false; txt.textContent = 'Розпочати аналіз'; spin.style.display = 'none';
   }
+}
+
+// Извлечение ID таблицы из URL
+function extractSheetId(url) {
+  const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : null;
+}
+
+// Извлечение GID листа из URL
+function extractGid(url) {
+  const match = url.match(/[#&]gid=([0-9]+)/);
+  return match ? match[1] : null;
+}
+
+// Парсинг CSV
+function parseCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  return lines.map(line => {
+    const cells = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        cells.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    cells.push(current.trim());
+    return cells;
+  });
+}
+
+// Форматирование таблицы для AI
+function formatTableForAI(rows) {
+  if (rows.length === 0) return 'Таблиця порожня';
+  
+  let output = 'ЗАГОЛОВКИ:\n';
+  output += rows[0].map((h, i) => `[${i}] ${h}`).join(' | ') + '\n\n';
+  
+  output += 'ДАНІ (перші 50 рядків):\n';
+  const dataRows = rows.slice(1, 51);
+  dataRows.forEach((row, idx) => {
+    output += `Рядок ${idx + 1}: ` + row.map(c => c || '—').join(' | ') + '\n';
+  });
+  
+  if (rows.length > 51) {
+    output += `\n... та ще ${rows.length - 51} рядків`;
+  }
+  
+  return output;
 }
 
 function fmt(n) { return '$' + Math.round(n).toLocaleString('uk-UA'); }
