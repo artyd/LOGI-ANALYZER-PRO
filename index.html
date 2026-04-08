@@ -294,51 +294,87 @@ async function runAudit() {
   document.getElementById('resultsArea').innerHTML = '';
 
   try {
-    let rows;
+    let sheets = []; // Массив листов: [{name, rows}, ...]
     let sourceUrl = url || 'Завантажений файл';
 
     // Если есть загруженный файл - используем его
     if (uploadedFileData) {
       sb.textContent = '> Обробка завантаженого файлу...\n> Підготовка даних...';
-      rows = uploadedFileData;
+      sheets = uploadedFileData;
     } else {
-      // Иначе читаем из Google Sheets
-      sb.textContent = '> Підключення до Google Sheets...\n> Читання даних...';
+      // Читаем из Google Sheets - получаем ВСЕ листы
+      sb.textContent = '> Підключення до Google Sheets...\n> Читання всіх листів...';
       
       const sheetId = extractSheetId(url);
+      if (!sheetId) {
+        throw new Error('Невірне посилання на Google Sheets.');
+      }
+
+      // Получаем список всех листов через метаданные
+      const metaUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+      
+      // Читаем основной лист и все другие если есть gid в URL
       const gid = extractGid(url);
       
-      if (!sheetId) {
-        throw new Error('Невірне посилання на Google Sheets. Переконайтеся що це посилання на таблицю.');
+      if (gid) {
+        // Если указан конкретный лист - читаем только его
+        sb.textContent = '> Читання вказаного листа...';
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+        const res = await fetch(csvUrl);
+        if (!res.ok) throw new Error('Не вдалося прочитати лист. Перевірте доступ.');
+        const csvText = await res.text();
+        sheets = [{
+          name: 'Лист ' + gid,
+          rows: parseCSV(csvText)
+        }];
+      } else {
+        // Если gid не указан - пробуем прочитать несколько листов
+        // Так как Google Sheets API без авторизации ограничен, читаем первые 5 листов (gid=0,1,2,3,4)
+        sb.textContent = '> Читання всіх листів таблиці...';
+        
+        for (let i = 0; i < 10; i++) {
+          try {
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${i}`;
+            const res = await fetch(csvUrl);
+            if (res.ok) {
+              const csvText = await res.text();
+              const rows = parseCSV(csvText);
+              if (rows.length > 0) {
+                sheets.push({
+                  name: `Лист ${i + 1}`,
+                  rows: rows
+                });
+              }
+            }
+          } catch (e) {
+            // Лист не существует, продолжаем
+            break;
+          }
+        }
+        
+        if (sheets.length === 0) {
+          throw new Error('Не вдалося прочитати жодного листа. Перевірте доступ.');
+        }
       }
-
-      sb.textContent = '> Читання даних з таблиці...\n> ID: ' + sheetId.slice(0, 20) + '...';
-
-      const csvUrl = gid 
-        ? `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`
-        : `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
-      
-      const sheetRes = await fetch(csvUrl);
-      if (!sheetRes.ok) {
-        throw new Error('Не вдалося прочитати таблицю. Переконайтеся що доступ "Може переглядати будь-хто з посиланням"');
-      }
-
-      const csvText = await sheetRes.text();
-      rows = parseCSV(csvText);
     }
     
-    if (rows.length === 0) {
-      throw new Error('Таблиця порожня або не вдалося прочитати дані');
+    if (sheets.length === 0) {
+      throw new Error('Не знайдено даних для аналізу');
     }
 
-    sb.textContent = `> Прочитано ${rows.length} рядків\n> Відправка на аналіз AI...`;
+    const totalRows = sheets.reduce((sum, s) => sum + s.rows.length, 0);
+    sb.textContent = `> Прочитано ${sheets.length} листів (${totalRows} рядків)\n> Відправка на аналіз AI...`;
 
-    // Формируем данные таблицы для GPT
-    const tableData = formatTableForAI(rows);
+    // Формируем данные ВСЕХ листов для GPT
+    let allSheetsData = '';
+    sheets.forEach((sheet, idx) => {
+      allSheetsData += `\n\n========== ЛИСТ ${idx + 1}: "${sheet.name}" ==========\n`;
+      allSheetsData += formatTableForAI(sheet.rows);
+    });
 
     const systemPrompt = `Ти — професійний аналітик міжнародної логістики та митного оформлення вантажів ЄС-Україна.
 
-Проаналізуй таблицю зі складом збірної партії/контейнера та надай детальний висновок.
+Проаналізуй УСІІ листи таблиці зі складом збірної партії/контейнера та надай детальний висновок по ВСІМ товарам з УСІХ листів.
 
 ОБОВ'ЯЗКОВО поверни ТІЛЬКИ валідний JSON без markdown, коментарів чи пояснень у такому форматі:
 
@@ -369,11 +405,13 @@ async function runAudit() {
 }
 
 КРИТИЧНО ВАЖЛИВО:
+- Проаналізуй ВСІ листи та включи товари з КОЖНОГО листа
 - Використовуй ЛИШЕ дані з таблиці, НЕ вигадуй товари
 - Якщо в таблиці є стовпці з цінами - використовуй їх
 - Якщо є коди УКТЗЕД - використовуй їх
 - Якщо є назви товарів - використовуй їх точно
 - НЕ додавай товари яких немає в таблиці
+- Сумуй вартості по ВСІМ листам
 
 Правила розрахунку (якщо ціни є в таблиці):
 - Митна вартість = ціна × 1.10 (додаємо фрахт)
@@ -382,11 +420,12 @@ async function runAudit() {
 - Для небезпечних товарів вкажи клас ADR у riskNote`;
 
     const userPrompt = `Джерело даних: ${sourceUrl}
+Кількість листів: ${sheets.length}
 
-ДАНІ З ТАБЛИЦІ:
-${tableData}
+ДАНІ З УСІХ ЛИСТІВ ТАБЛИЦІ:
+${allSheetsData}
 
-Проаналізуй ЦІ КОНКРЕТНІ дані та поверни JSON з аналізом КОЖНОЇ позиції з таблиці. НЕ вигадуй товари - використовуй тільки те що є в таблиці.`;
+Проаналізуй ВСІ листи та поверни JSON з аналізом КОЖНОЇ позиції з УСІХ листів. НЕ вигадуй товари - використовуй тільки те що є в таблиці.`;
 
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -654,32 +693,55 @@ async function handleFileUpload(event) {
     const data = new Uint8Array(e.target.result);
     
     if (file.name.endsWith('.csv')) {
-      // CSV файл
+      // CSV файл - это один лист
       const text = new TextDecoder().decode(data);
-      uploadedFileData = parseCSV(text);
+      uploadedFileData = [{
+        name: 'Sheet1',
+        rows: parseCSV(text)
+      }];
     } else {
-      // Excel файл - используем SheetJS
+      // Excel файл - читаем ВСЕ листы
       try {
-        // Загружаем библиотеку xlsx если еще не загружена
         if (typeof XLSX === 'undefined') {
           await loadXLSX();
         }
         const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const csvText = XLSX.utils.sheet_to_csv(firstSheet);
-        uploadedFileData = parseCSV(csvText);
+        
+        uploadedFileData = [];
+        let totalRows = 0;
+        
+        // Читаем каждый лист
+        workbook.SheetNames.forEach(sheetName => {
+          const sheet = workbook.Sheets[sheetName];
+          const csvText = XLSX.utils.sheet_to_csv(sheet);
+          const rows = parseCSV(csvText);
+          if (rows.length > 0) {
+            uploadedFileData.push({
+              name: sheetName,
+              rows: rows
+            });
+            totalRows += rows.length;
+          }
+        });
+        
+        if (uploadedFileData.length > 0) {
+          fileNameEl.textContent = `✅ ${file.name} (${uploadedFileData.length} листів, ${totalRows} рядків)`;
+        } else {
+          fileNameEl.textContent = '❌ Файл порожній';
+          uploadedFileData = null;
+        }
+        
       } catch (err) {
         alert('Помилка читання Excel файлу: ' + err.message);
         uploadedFileData = null;
+        fileNameEl.textContent = '❌ Помилка читання файлу';
       }
     }
     
-    if (uploadedFileData && uploadedFileData.length > 0) {
-      fileNameEl.textContent = `✅ ${file.name} (${uploadedFileData.length} рядків)`;
-      document.getElementById('driveUrl').value = ''; // Очищаем поле URL
-    } else {
-      fileNameEl.textContent = '❌ Не вдалося прочитати файл';
+    if (!uploadedFileData || uploadedFileData.length === 0) {
       uploadedFileData = null;
+    } else {
+      document.getElementById('driveUrl').value = ''; // Очищаем поле URL
     }
   };
   
