@@ -420,6 +420,12 @@ async function runAudit() {
   "nctsList": ["MSDS required", "UN number declaration", "Proper packaging class", "Emergency response info"]
 }
 
+ВАЖЛИВО ПРО ФОРМАТ:
+- ВСІ числа БЕЗ КОМ - використовуй тільки точку як десятковий розділювач
+- Приклад правильно: 141682.8 (НЕ 141,682.8)
+- Приклад правильно: 9209.37 (НЕ 9,209.37)
+- Якщо кількість 0 або немає ціни - все ставиш 0
+
 СТАВКИ МИТА для фармацевтики та хімії:
 - Фармацевтичні субстанції (API): 0-5%
 - Хімічні реактиви: 5-6.5%
@@ -470,10 +476,16 @@ ${allSheetsData}
 
     let parsed;
     try {
-      parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      // Убираем markdown и очищаем JSON
+      let cleanJson = raw.replace(/```json|```/g, '').trim();
+      
+      // Исправляем запятые в числах: "141,682.8" -> "141682.8"
+      cleanJson = cleanJson.replace(/(\d),(\d)/g, '$1$2');
+      
+      parsed = JSON.parse(cleanJson);
     } catch(e) {
       sb.classList.add('error');
-      sb.textContent = 'Помилка парсингу відповіді:\n' + raw.slice(0, 500);
+      sb.textContent = 'Помилка парсингу JSON:\n' + e.message + '\n\nВідповідь AI (перші 500 символів):\n' + raw.slice(0, 500);
       btn.disabled = false; txt.textContent = 'Розпочати аналіз'; spin.style.display = 'none';
       return;
     }
