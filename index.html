@@ -3,254 +3,1485 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Logi-Analyzer Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>LOGI-ANALYZER PRO · Freight Intelligence Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
+/* ============================================
+   LOGI-ANALYZER PRO · CONTROL ROOM EDITION
+   Palette: deep graphite + signal amber
+   ============================================ */
+
 :root {
-  --bg: #0d1117;
-  --surface: #161b22;
-  --surface2: #1c2128;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.14);
-  --green: #1d9e75;
-  --green-light: #2dcc97;
-  --green-dim: rgba(29,158,117,0.12);
-  --text: #e6edf3;
-  --text2: #8b949e;
-  --text3: #6e7681;
-  --red: #f85149;
-  --red-dim: rgba(248,81,73,0.12);
-  --yellow: #e3b341;
-  --yellow-dim: rgba(227,179,65,0.12);
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', sans-serif;
+  /* BASE */
+  --bg: #0a0b0d;
+  --bg-grid: #101216;
+  --surface: #111317;
+  --surface-2: #15181d;
+  --surface-3: #1b1f25;
+  --surface-raise: #1f242b;
+  
+  /* BORDERS */
+  --line: rgba(255,255,255,0.06);
+  --line-2: rgba(255,255,255,0.10);
+  --line-3: rgba(255,255,255,0.16);
+  
+  /* INK */
+  --ink: #e8ebef;
+  --ink-2: #9ba3ac;
+  --ink-3: #6b7480;
+  --ink-4: #4a5159;
+  
+  /* SIGNAL — green primary accent (logistics go-signal) */
+  --amber: #2cb878;
+  --amber-bright: #3fd18c;
+  --amber-dim: rgba(44,184,120,0.12);
+  --amber-glow: rgba(44,184,120,0.35);
+  
+  /* STATUS LIGHTS */
+  --green: #2cb878;
+  --green-bright: #3fd18c;
+  --green-dim: rgba(44,184,120,0.12);
+  --yellow: #e5b53a;
+  --yellow-dim: rgba(229,181,58,0.14);
+  --red: #ef4a4a;
+  --red-bright: #ff6161;
+  --red-dim: rgba(239,74,74,0.12);
+  
+  /* FONTS */
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+  --serif: 'Instrument Serif', serif;
+  
+  /* LAYOUT */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+*::selection { background: var(--amber); color: var(--bg); }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--sans);
+  font-feature-settings: "ss01","ss02","cv11";
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Ambient background: grid + vignette */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: -1px -1px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 75%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 800px 400px at 15% -10%, var(--amber-dim), transparent 60%),
+    radial-gradient(ellipse 600px 300px at 95% 110%, rgba(44,184,120,0.06), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* =========== TOP BAR =========== */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,11,13,0.85);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 0 32px;
+  height: 72px;
+}
+
+/* BRAND */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+.brand-mark {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.brand-mark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--amber-dim) 0%, transparent 60%);
+}
+.brand-mark svg {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  stroke: var(--amber);
+  fill: none;
+  stroke-width: 1.8;
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.brand-title {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+.brand-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
 
 /* NAV */
-nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 32px; height: 68px; position: sticky; top: 0; z-index: 100; }
-.brand { display: flex; align-items: center; gap: 14px; margin-right: auto; text-decoration: none; }
-.brand-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--green); display: flex; align-items: center; justify-content: center; }
-.brand-icon svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2; }
-.brand-name { font-size: 19px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
-.brand-name span { color: var(--green-light); }
-.nav-links { display: flex; gap: 4px; }
-.nav-btn { background: none; border: none; padding: 10px 20px; font-size: 16px; color: var(--text2); cursor: pointer; border-radius: 8px; font-family: var(--sans); transition: all 0.15s; }
-.nav-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-.nav-btn.active { color: var(--green-light); }
-.api-status { display: flex; align-items: center; gap: 8px; font-size: 14px; font-family: var(--mono); color: var(--text3); margin-left: 20px; padding-left: 20px; border-left: 1px solid var(--border); }
-.api-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text3); }
-.api-dot.ok { background: var(--green); }
+.nav-links {
+  display: flex;
+  gap: 2px;
+  justify-self: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px;
+}
+.nav-btn {
+  background: transparent;
+  border: none;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: var(--ink-2);
+  cursor: pointer;
+  border-radius: 7px;
+  letter-spacing: 0.01em;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.nav-btn:hover { color: var(--ink); background: var(--surface-2); }
+.nav-btn.active {
+  color: var(--bg);
+  background: var(--amber);
+  box-shadow: 0 0 0 1px var(--amber), 0 4px 12px -4px var(--amber-glow);
+}
 
-/* PAGES */
-.page { display: none; max-width: 1200px; margin: 0 auto; padding: 40px 32px 80px; }
-.page.active { display: block; }
+/* META bar */
+.topbar-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.meta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.meta-label { color: var(--ink-4); }
+.meta-value { color: var(--ink-2); font-weight: 500; }
 
-/* API KEY BANNER */
-.key-banner { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 24px 28px; margin-bottom: 32px; display: flex; align-items: center; gap: 18px; }
-.key-banner.hidden { display: none; }
-.key-icon { width: 48px; height: 48px; border-radius: 10px; background: var(--yellow-dim); border: 1px solid rgba(227,179,65,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.key-icon svg { width: 24px; height: 24px; fill: none; stroke: var(--yellow); stroke-width: 1.8; }
-.key-text { flex: 1; }
-.key-text h4 { font-size: 17px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
-.key-text p { font-size: 15px; color: var(--text2); }
-.key-text p a { color: var(--green-light); text-decoration: none; }
-.key-text p a:hover { text-decoration: underline; }
-.key-input-row { display: flex; gap: 10px; margin-top: 14px; }
-.key-input { flex: 1; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 16px; font-size: 15px; font-family: var(--mono); color: var(--text); outline: none; }
-.key-input:focus { border-color: var(--green); }
-.key-save { background: var(--green); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: var(--sans); transition: background 0.15s; }
-.key-save:hover { background: var(--green-light); }
+.api-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  letter-spacing: 0.03em;
+}
+.api-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-4);
+  box-shadow: 0 0 0 2px rgba(107,116,128,0.2);
+}
+.api-dot.ok {
+  background: var(--green);
+  box-shadow: 0 0 0 2px rgba(44,184,120,0.3), 0 0 8px var(--green);
+  animation: pulse-ok 2s ease-in-out infinite;
+}
+@keyframes pulse-ok {
+  0%,100% { box-shadow: 0 0 0 2px rgba(44,184,120,0.3), 0 0 6px var(--green); }
+  50%     { box-shadow: 0 0 0 4px rgba(44,184,120,0.15), 0 0 12px var(--green-bright); }
+}
 
-/* MAIN CARD */
-.main-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 44px; text-align: center; }
-.main-card h2 { font-size: 28px; font-weight: 600; margin-bottom: 12px; }
-.main-card p { font-size: 16px; color: var(--text2); line-height: 1.6; max-width: 640px; margin: 0 auto 32px; }
-.input-row { display: flex; gap: 12px; max-width: 700px; margin: 0 auto; }
-.url-wrap { flex: 1; position: relative; }
-.url-wrap svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; fill: none; stroke: var(--text3); stroke-width: 1.8; pointer-events: none; }
-.url-input { width: 100%; height: 56px; padding: 0 18px 0 48px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; color: var(--text); font-size: 16px; font-family: var(--sans); outline: none; transition: border-color 0.15s; }
-.url-input:focus { border-color: var(--green); }
-.url-input::placeholder { color: var(--text3); }
-.go-btn { height: 56px; padding: 0 28px; background: var(--green); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: var(--sans); display: flex; align-items: center; gap: 10px; transition: background 0.15s; }
-.go-btn:hover { background: var(--green-light); }
-.go-btn:disabled { background: var(--surface2); color: var(--text3); cursor: not-allowed; }
-.spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.2); border-top: 2px solid #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+/* =========== PAGES =========== */
+.page {
+  display: none;
+  position: relative;
+  z-index: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 48px 32px 100px;
+}
+.page.active {
+  display: block;
+  animation: fade-in 0.4s ease-out;
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========== HERO / COMMAND DECK =========== */
+.deck {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+/* Deck header bar — looks like equipment readout */
+.deck-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+}
+.deck-head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.deck-head-left::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 10px var(--amber-glow);
+  animation: pulse-amber 2.2s ease-in-out infinite;
+}
+@keyframes pulse-amber {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.4; }
+}
+.deck-head-center {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-4);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.deck-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  letter-spacing: 0.08em;
+}
+.deck-route span.arrow { color: var(--amber); }
+
+.deck-body {
+  padding: 56px 48px 48px;
+  position: relative;
+}
+
+.deck-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 20px;
+}
+.deck-eyebrow::before {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background: var(--amber);
+}
+
+.deck-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(32px, 4.5vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 18px;
+  max-width: 820px;
+}
+.deck-title em {
+  font-style: italic;
+  color: var(--amber);
+}
+.deck-lede {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 620px;
+  margin-bottom: 36px;
+}
+
+/* INPUT ROW */
+.input-row {
+  display: flex;
+  gap: 10px;
+  max-width: 780px;
+}
+.url-wrap {
+  flex: 1;
+  position: relative;
+}
+.url-wrap .prefix {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+.url-input {
+  width: 100%;
+  height: 54px;
+  padding: 0 20px 0 72px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: var(--mono);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.url-input:focus {
+  border-color: var(--amber);
+  background: var(--surface-3);
+}
+.url-input::placeholder { color: var(--ink-4); }
+
+.go-btn {
+  height: 54px;
+  padding: 0 28px;
+  background: var(--amber);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--sans);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 8px 24px -8px var(--amber-glow);
+}
+.go-btn:hover { background: var(--amber-bright); }
+.go-btn:active { transform: translateY(1px); }
+.go-btn:disabled {
+  background: var(--surface-3);
+  color: var(--ink-4);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.go-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 1.8px solid rgba(0,0,0,0.25);
+  border-top-color: var(--bg);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* STATUS */
-.status-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; font-size: 15px; font-family: var(--mono); color: var(--text2); line-height: 1.7; margin-top: 20px; display: none; text-align: left; max-width: 700px; margin-left: auto; margin-right: auto; white-space: pre-wrap; }
-.status-box.error { border-color: rgba(248,81,73,0.3); color: var(--red); }
+/* Divider with OR */
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 780px;
+  margin: 22px 0 18px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-4);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.or-divider::before, .or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
 
-/* METRICS */
-.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 32px; }
-@media(max-width:700px) { .metrics { grid-template-columns: repeat(2,1fr); } }
-.metric { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; }
-.metric.acc { border-color: rgba(29,158,117,0.3); }
-.metric.warn { border-color: rgba(227,179,65,0.3); }
-.metric.danger { border-color: rgba(248,81,73,0.3); }
-.mlabel { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 8px; }
-.mval { font-size: 26px; font-weight: 600; font-family: var(--mono); color: var(--text); }
-.msub { font-size: 14px; color: var(--text3); margin-top: 6px; }
+.file-upload-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  background: transparent;
+  border: 1px dashed var(--line-3);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.file-upload-label:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-dim);
+}
+.file-upload-label svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 
-/* TABLE */
-.tbl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 20px; }
-.tbl-hdr { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
+.file-name-badge {
+  display: none;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--green-bright);
+  letter-spacing: 0.03em;
+}
+
+/* Corner decorations (control-room style) */
+.deck::before, .deck::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--amber);
+  opacity: 0.4;
+  pointer-events: none;
+}
+.deck::before {
+  top: 16px;
+  right: 16px;
+  border-left: none;
+  border-bottom: none;
+}
+.deck::after {
+  bottom: 16px;
+  left: 16px;
+  border-right: none;
+  border-top: none;
+}
+
+/* =========== API KEY BANNER =========== */
+.keybar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+.keybar.hidden { display: none; }
+.keybar-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--amber-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.keybar-icon svg { width: 18px; height: 18px; stroke: var(--amber); fill: none; stroke-width: 1.8; }
+.keybar-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 20px;
+}
+.keybar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.keybar-sub {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-family: var(--mono);
+}
+.keybar-sub a { color: var(--amber); text-decoration: none; }
+.keybar-sub a:hover { text-decoration: underline; }
+.keybar-input-row {
+  display: flex;
+  gap: 8px;
+}
+.key-input {
+  width: 260px;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--bg);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 12px;
+  font-family: var(--mono);
+  outline: none;
+}
+.key-input:focus { border-color: var(--amber); }
+.key-save {
+  height: 36px;
+  padding: 0 16px;
+  background: var(--amber);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.key-save:hover { background: var(--amber-bright); }
+
+/* =========== STATUS BOX =========== */
+.status-box {
+  display: none;
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--amber);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  max-width: 780px;
+  white-space: pre-wrap;
+}
+.status-box.error {
+  border-left-color: var(--red);
+  color: var(--red-bright);
+}
+
+/* =========== METRICS STRIP =========== */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 32px 0 20px;
+}
+@media (max-width: 900px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+
+.metric {
+  position: relative;
+  padding: 22px 24px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.metric:hover { border-color: var(--line-2); }
+.metric::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--amber);
+  opacity: 0.6;
+}
+.metric.is-duty::before  { background: var(--yellow); }
+.metric.is-vat::before   { background: #6c88a8; }
+.metric.is-total::before { background: var(--red); }
+
+.metric-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.metric-label .tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  color: var(--ink-4);
+  letter-spacing: 0.08em;
+}
+.metric-value {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.metric-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* =========== SECTION HEADER =========== */
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 36px 0 16px;
+}
+.sec-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--amber);
+}
+.sec-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.sec-line {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* =========== TABLE =========== */
+.tbl-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.tbl-head-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+.tbl-head-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tbl-head-title::before {
+  content: "■";
+  color: var(--amber);
+}
+.tbl-head-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.08em;
+}
 .tbl-scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-th { padding: 14px 20px; background: var(--surface2); color: var(--text3); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; text-align: left; white-space: nowrap; }
-td { padding: 16px 20px; border-top: 1px solid var(--border); font-size: 15px; color: var(--text); vertical-align: top; }
-tr:hover td { background: rgba(255,255,255,0.02); }
-.td-name { font-weight: 500; }
-.td-code { font-size: 13px; font-family: var(--mono); color: var(--text3); margin-top: 4px; }
-.td-price { font-family: var(--mono); font-size: 15px; }
-.td-vat { font-size: 14px; color: var(--red); margin-top: 3px; font-family: var(--mono); }
-.pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
-.pill-r { background: var(--red-dim); color: #f1908d; }
-.pill-y { background: var(--yellow-dim); color: #e3b341; }
-.pill-g { background: var(--green-dim); color: var(--green-light); }
-.pill-note { font-size: 13px; color: var(--text3); margin-top: 4px; line-height: 1.4; }
-td.check { font-size: 14px; color: var(--text2); line-height: 1.5; }
+.tbl-scroll::-webkit-scrollbar { height: 10px; }
+.tbl-scroll::-webkit-scrollbar-track { background: var(--surface); }
+.tbl-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 5px; }
+.tbl-scroll::-webkit-scrollbar-thumb:hover { background: var(--line-3); }
 
-/* ALERTS */
-.alerts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
-@media(max-width:600px) { .alerts { grid-template-columns: 1fr; } }
-.al { padding: 20px 22px; border-radius: 10px; border: 1px solid; }
-.al-red { background: var(--red-dim); border-color: rgba(248,81,73,0.25); }
-.al-red h4 { color: #f1908d; font-size: 16px; font-weight: 500; margin-bottom: 8px; }
-.al-red p { font-size: 15px; color: #c9706c; line-height: 1.5; }
-.al-green { background: var(--green-dim); border-color: rgba(29,158,117,0.25); }
-.al-green h4 { color: var(--green-light); font-size: 16px; font-weight: 500; margin-bottom: 10px; }
-.al-green li { font-size: 14px; color: var(--text2); padding: 4px 0; list-style: none; font-family: var(--mono); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px;
+}
+thead th {
+  padding: 14px 18px;
+  background: var(--surface);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+}
+tbody td {
+  padding: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink);
+  vertical-align: top;
+  line-height: 1.5;
+}
+tbody tr { transition: background 0.1s; }
+tbody tr:hover td { background: rgba(245,165,36,0.025); }
 
-/* ARCHIVE */
-.arch-empty { text-align: center; padding: 64px; color: var(--text3); font-size: 16px; }
-.arch-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; margin-bottom: 12px; display: flex; align-items: center; gap: 18px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
-.arch-item:hover { border-color: var(--border2); background: var(--surface2); }
-.arch-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
-.arch-url { font-size: 15px; font-family: var(--mono); color: var(--text2); }
-.arch-meta { font-size: 14px; color: var(--text3); margin-top: 3px; }
-.arch-total { font-size: 16px; font-weight: 500; font-family: var(--mono); color: var(--text); margin-left: auto; }
+.td-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+.td-code {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--ink-3);
+  margin-top: 5px;
+  letter-spacing: 0.06em;
+}
+.td-category {
+  font-size: 11px;
+  color: var(--ink-2);
+  margin-top: 8px;
+  padding: 3px 8px;
+  display: inline-block;
+  background: var(--surface-3);
+  border-radius: 4px;
+  border-left: 2px solid var(--amber);
+}
+.td-apps {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 6px;
+  line-height: 1.45;
+  font-family: var(--mono);
+}
 
-/* ZED */
-.page-title { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
-.page-sub { font-size: 16px; color: var(--text2); margin-bottom: 28px; }
-.zed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-.zed-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; cursor: pointer; transition: border-color 0.15s; }
-.zed-card:hover { border-color: var(--green); }
-.zed-ico { font-size: 28px; margin-bottom: 14px; }
-.zed-card h4 { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
-.zed-card p { font-size: 15px; color: var(--text2); line-height: 1.4; }
-.zed-detail { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-top: 20px; }
-.zed-detail.open { display: block; }
-.zed-back { background: none; border: 1px solid var(--border2); padding: 10px 20px; border-radius: 8px; font-size: 15px; color: var(--text2); cursor: pointer; margin-bottom: 20px; font-family: var(--sans); transition: all 0.15s; }
-.zed-back:hover { background: var(--surface2); color: var(--text); }
-.zed-sec { margin-bottom: 20px; }
-.zed-sec h5 { font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-.zed-row { display: flex; justify-content: space-between; padding: 9px 0; font-size: 15px; border-bottom: 1px solid var(--border); }
+.td-qty {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.td-price {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+.td-value-primary {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.td-value-line {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+.td-value-vat {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--amber);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.adr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 2px 7px;
+  background: var(--red-dim);
+  border: 1px solid rgba(239,74,74,0.25);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--red-bright);
+  letter-spacing: 0.06em;
+}
+
+/* Risk pill */
+.pill {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+.pill-r { background: var(--red-dim); color: var(--red-bright); border-color: rgba(239,74,74,0.3); }
+.pill-y { background: var(--yellow-dim); color: var(--yellow); border-color: rgba(229,181,58,0.3); }
+.pill-g { background: var(--green-dim); color: var(--green-bright); border-color: rgba(44,184,120,0.3); }
+.pill-note {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 8px;
+  line-height: 1.5;
+  font-family: var(--mono);
+}
+
+/* =========== CHECKS LIST (traffic-light docs) =========== */
+.checks-legend {
+  display: flex;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  letter-spacing: 0.08em;
+}
+.checks-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.checks-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.checks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-left-width: 2px;
+  border-radius: 7px;
+  transition: background 0.15s;
+}
+.check-item:hover { background: var(--surface-3); }
+.check-item.green  { border-left-color: var(--green); }
+.check-item.yellow { border-left-color: var(--yellow); }
+.check-item.red    { border-left-color: var(--red); }
+
+.check-light {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+  position: relative;
+}
+.check-light::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  opacity: 0.3;
+}
+.check-light.green  { background: var(--green-bright); box-shadow: 0 0 8px var(--green); }
+.check-light.green::after  { background: var(--green); }
+.check-light.yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+.check-light.yellow::after { background: var(--yellow); }
+.check-light.red    { background: var(--red-bright); box-shadow: 0 0 8px var(--red); }
+.check-light.red::after    { background: var(--red); }
+
+.check-content { flex: 1; min-width: 0; }
+.check-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+.check-note {
+  font-size: 11px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+/* Hazard / Storage info card inside td */
+.info-card {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-left: 2px solid;
+  border-radius: 6px;
+}
+.info-card.safe { border-left-color: var(--green); }
+.info-card.warn { border-left-color: var(--yellow); }
+.info-card.danger { border-left-color: var(--red); }
+.info-card-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 5px;
+}
+.info-card-body {
+  font-size: 11px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+/* =========== ALERTS =========== */
+.alerts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 22px;
+}
+@media (max-width: 720px) { .alerts { grid-template-columns: 1fr; } }
+
+.al {
+  padding: 22px 24px;
+  border-radius: var(--radius);
+  border: 1px solid;
+  background: var(--surface);
+}
+.al-red {
+  border-color: rgba(239,74,74,0.25);
+  background: linear-gradient(180deg, rgba(239,74,74,0.06), var(--surface));
+}
+.al-red h4 {
+  color: var(--red-bright);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.al-red h4::before { content: "▲"; font-size: 10px; }
+.al-red p { font-size: 13px; color: #ffb0ac; line-height: 1.55; }
+
+.al-green {
+  border-color: rgba(44,184,120,0.22);
+  background: linear-gradient(180deg, rgba(44,184,120,0.04), var(--surface));
+}
+.al-green h4 {
+  color: var(--green-bright);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.al-green h4::before { content: "✓"; }
+.al-green ul { list-style: none; }
+.al-green li {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  padding: 5px 0;
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+}
+.al-green li::before {
+  content: "›";
+  position: absolute;
+  left: 0;
+  color: var(--amber);
+  font-weight: 600;
+}
+
+/* =========== ARCHIVE =========== */
+.page-title {
+  font-family: var(--serif);
+  font-size: 38px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.page-title em { color: var(--amber); font-style: italic; }
+.page-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+
+.arch-empty {
+  text-align: center;
+  padding: 80px 32px;
+  background: var(--surface);
+  border: 1px dashed var(--line-2);
+  border-radius: var(--radius-lg);
+  color: var(--ink-3);
+  font-size: 14px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.arch-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.arch-item:hover {
+  border-color: var(--line-3);
+  background: var(--surface-2);
+  transform: translateX(2px);
+}
+.arch-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.arch-url {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arch-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+.arch-risk {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+.arch-total {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========== KNOWLEDGE BASE =========== */
+.zed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.zed-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px 24px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+.zed-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--amber-dim), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.zed-card:hover {
+  border-color: var(--amber);
+  transform: translateY(-2px);
+}
+.zed-card:hover::before { opacity: 1; }
+.zed-card::after {
+  content: "→";
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  font-size: 16px;
+  color: var(--ink-4);
+  transition: all 0.2s;
+}
+.zed-card:hover::after {
+  color: var(--amber);
+  transform: translateX(4px);
+}
+.zed-ico {
+  font-size: 30px;
+  margin-bottom: 16px;
+  display: inline-block;
+  filter: grayscale(0.2);
+}
+.zed-card h4 {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+.zed-card p {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+}
+
+.zed-detail {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
+}
+.zed-detail.open { display: block; animation: fade-in 0.3s ease-out; }
+.zed-back {
+  background: transparent;
+  border: 1px solid var(--line-2);
+  padding: 8px 16px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--ink-2);
+  cursor: pointer;
+  margin-bottom: 24px;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.zed-back:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: var(--line-3);
+}
+.zed-detail-title {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+.zed-detail-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.zed-sec { margin-bottom: 24px; }
+.zed-sec h5 {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.zed-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 13px;
+  border-bottom: 1px dashed var(--line);
+}
 .zed-row:last-child { border: none; }
-.zed-k { color: var(--text2); }
-.zed-v { font-weight: 500; color: var(--text); font-family: var(--mono); font-size: 14px; text-align: right; }
+.zed-k { color: var(--ink-2); font-family: var(--sans); }
+.zed-v {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 500;
+  text-align: right;
+  letter-spacing: 0.02em;
+}
 
-/* FOOTER */
-footer { border-top: 1px solid var(--border); padding: 20px 32px; text-align: center; font-size: 14px; color: var(--text3); }
+/* =========== FOOTER =========== */
+footer {
+  border-top: 1px solid var(--line);
+  padding: 28px 32px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-4);
+  letter-spacing: 0.1em;
+  position: relative;
+  z-index: 1;
+}
+footer strong { color: var(--ink-3); font-weight: 500; }
+
+/* =========== RESPONSIVE =========== */
+@media (max-width: 900px) {
+  .topbar-inner { grid-template-columns: auto auto; }
+  .topbar-meta { display: none; }
+  .nav-links { grid-column: 1/-1; justify-self: stretch; margin-bottom: 10px; }
+  .deck-body { padding: 36px 24px; }
+  .input-row { flex-direction: column; }
+  .go-btn { width: 100%; justify-content: center; }
+  .keybar-content { grid-template-columns: 1fr; gap: 12px; }
+  .key-input { width: 100%; }
+}
 </style>
 </head>
 <body>
 
-<nav>
-  <a class="brand" href="#">
-    <div class="brand-icon">
-      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5c-1.8 2-1.8 9 0 11M8 2.5c1.8 2 1.8 9 0 11M2.5 8h11"/></svg>
-    </div>
-    <div class="brand-name">LOGI-ANALYZER <span>PRO</span></div>
-  </a>
-  <div class="nav-links">
-    <button class="nav-btn active" onclick="showPage('new',this)">Новий аналіз</button>
-    <button class="nav-btn" onclick="showPage('arch',this)">Архів перевірок</button>
-    <button class="nav-btn" onclick="showPage('zed',this)">База знань ЗЕД</button>
-  </div>
-  <div class="api-status">
-    <div class="api-dot" id="apiDot"></div>
-    <span id="apiStatusTxt">API key не задано</span>
-  </div>
-</nav>
-
-<!-- NEW ANALYSIS -->
-<div class="page active" id="page-new">
-
-  <div class="key-banner" id="keyBanner">
-    <div class="key-icon">
-      <svg viewBox="0 0 18 18"><rect x="2" y="9" width="14" height="8" rx="2"/><path d="M5 9V6a4 4 0 018 0v3"/></svg>
-    </div>
-    <div class="key-text">
-      <h4>Потрібен OpenAI API ключ</h4>
-      <p>Отримайте на <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a> → API Keys → Create new secret key</p>
-      <div class="key-input-row">
-        <input class="key-input" id="keyInput" type="password" placeholder="sk-proj-...">
-        <button class="key-save" onclick="saveKey()">Зберегти</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="main-card">
-    <h2>Аналіз складу збірної партії</h2>
-    <p>Вставте посилання на Google Sheets таблицю з товарами або завантажте файл Excel/CSV. Переконайтеся що таблиця має доступ "Може переглядати будь-хто з посиланням".</p>
-    <div class="input-row">
-      <div class="url-wrap">
-        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5c-1.8 2-1.8 9 0 11M8 2.5c1.8 2 1.8 9 0 11M2.5 8h11"/></svg>
-        <input class="url-input" id="driveUrl" type="text" placeholder="https://docs.google.com/spreadsheets/d/...">
-      </div>
-      <button class="go-btn" id="goBtn" onclick="runAudit()">
-        <span id="goTxt">Розпочати аналіз</span>
-        <div id="goSpin" class="spinner" style="display:none"></div>
-      </button>
-    </div>
-    <div style="text-align:center;margin-top:16px;color:var(--text3);font-size:14px;">або</div>
-    <div style="display:flex;justify-content:center;margin-top:16px;">
-      <label for="fileUpload" style="display:inline-flex;align-items:center;gap:10px;padding:12px 24px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:15px;color:var(--text2);transition:all 0.15s;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#" onclick="showPage('new', document.querySelector('.nav-btn')); return false;">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3 12h18"/>
+          <path d="M12 3c2.8 3 2.8 15 0 18"/>
+          <path d="M12 3c-2.8 3-2.8 15 0 18"/>
+          <path d="M4.5 7h15M4.5 17h15"/>
+          <circle cx="16.5" cy="8" r="1.3" fill="currentColor" stroke="none"/>
         </svg>
-        Завантажити файл (Excel/CSV)
-      </label>
-      <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleFileUpload(event)">
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">LOGI·ANALYZER</span>
+        <span class="brand-sub">Freight Intelligence Terminal</span>
+      </div>
+    </a>
+    <nav class="nav-links">
+      <button class="nav-btn active" onclick="showPage('new', this)">Новий аналіз</button>
+      <button class="nav-btn" onclick="showPage('arch', this)">Архів</button>
+      <button class="nav-btn" onclick="showPage('zed', this)">База знань</button>
+    </nav>
+    <div class="topbar-meta">
+      <div class="meta-block">
+        <span class="meta-label">Terminal</span>
+        <span class="meta-value" id="termId">LAP-01 · KYIV</span>
+      </div>
+      <div class="api-chip">
+        <span class="api-dot" id="apiDot"></span>
+        <span id="apiStatusTxt">API OFFLINE</span>
+      </div>
     </div>
-    <div id="fileName" style="text-align:center;margin-top:12px;font-size:14px;color:var(--green-light);display:none;"></div>
-    <div class="status-box" id="statusBox"></div>
   </div>
+</header>
+
+<!-- ============ NEW ANALYSIS ============ -->
+<main class="page active" id="page-new">
+
+  <!-- API KEY BANNER -->
+  <div class="keybar" id="keyBanner">
+    <div class="keybar-icon">
+      <svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M12 15h9M17 19v-4M21 19v-4"/></svg>
+    </div>
+    <div class="keybar-content">
+      <div>
+        <div class="keybar-title">OpenAI API ключ не налаштовано</div>
+        <div class="keybar-sub">Отримайте ключ на <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a> → API Keys</div>
+      </div>
+      <div class="keybar-input-row">
+        <input class="key-input" id="keyInput" type="password" placeholder="sk-proj-...">
+        <button class="key-save" onclick="saveKey()">SAVE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMAND DECK -->
+  <section class="deck">
+    <div class="deck-head">
+      <div class="deck-head-left">SYSTEM READY · Ingestion Bay</div>
+      <div class="deck-head-center">PROTOCOL · NCTS PHASE 5 · ADR · REACH · UA-CUSTOMS</div>
+      <div class="deck-route">
+        <span>CN</span><span class="arrow">—→</span><span>EU</span><span class="arrow">—→</span><span>UA</span>
+      </div>
+    </div>
+    <div class="deck-body">
+      <div class="deck-eyebrow">Freight Intelligence · v2.0</div>
+      <h1 class="deck-title">
+        Аналіз <em>збірної партії</em> перед відправкою з Європи до України
+      </h1>
+      <p class="deck-lede">
+        Завантажте маніфест у форматі Google&nbsp;Sheets, Excel або CSV. Система автоматично розрахує митні платежі, підготує чекліст документів та оцінить ризики транзиту через порти&nbsp;ЄС.
+      </p>
+
+      <div class="input-row">
+        <div class="url-wrap">
+          <span class="prefix">SHEET://</span>
+          <input class="url-input" id="driveUrl" type="text" placeholder="docs.google.com/spreadsheets/d/...">
+        </div>
+        <button class="go-btn" id="goBtn" onclick="runAudit()">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span id="goTxt">Запустити аналіз</span>
+          <div id="goSpin" class="spinner" style="display:none"></div>
+        </button>
+      </div>
+
+      <div class="or-divider">or · upload file</div>
+
+      <label for="fileUpload" class="file-upload-label">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+        </svg>
+        Завантажити Excel або CSV
+      </label>
+      <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileUpload(event)">
+      <div id="fileName" class="file-name-badge"></div>
+
+      <div class="status-box" id="statusBox"></div>
+    </div>
+  </section>
 
   <div id="resultsArea"></div>
-</div>
+</main>
 
-<!-- ARCHIVE -->
-<div class="page" id="page-arch">
-  <div class="page-title">Архів перевірок</div>
-  <div class="page-sub" id="archCount">0 записів</div>
-  <div id="archList"><div class="arch-empty">Архів порожній — запустіть перший аналіз</div></div>
-</div>
+<!-- ============ ARCHIVE ============ -->
+<main class="page" id="page-arch">
+  <h1 class="page-title">Архів <em>перевірок</em></h1>
+  <div class="page-sub" id="archCount">0 records</div>
+  <div id="archList">
+    <div class="arch-empty">Архів порожній — запустіть перший аналіз</div>
+  </div>
+</main>
 
-<!-- ZED KNOWLEDGE BASE -->
-<div class="page" id="page-zed">
-  <div class="page-title">База знань ЗЕД</div>
-  <div class="page-sub">Довідник по митному оформленню вантажів ЄС — Україна</div>
+<!-- ============ KNOWLEDGE BASE ============ -->
+<main class="page" id="page-zed">
+  <h1 class="page-title">База знань <em>ЗЕД</em></h1>
+  <div class="page-sub">Reference · EU → UA customs operations</div>
   <div class="zed-grid" id="zedGrid"></div>
   <div class="zed-detail" id="zedDetail"></div>
-</div>
+</main>
 
-<footer>© 2026 Logi-Analyzer Pro · Створено для професійних логістів та брокерів</footer>
+<footer>
+  <strong>LOGI·ANALYZER PRO</strong> · © 2026 · Freight Intelligence Terminal for Logistics Professionals &amp; Customs Brokers
+</footer>
 
 <script>
 let apiKey = localStorage.getItem('lap_key') || '';
 let archive = JSON.parse(localStorage.getItem('lap_archive') || '[]');
-let uploadedFileData = null; // Данные из загруженного файла
+let uploadedFileData = null;
 
 function init() {
   if (apiKey) {
     document.getElementById('keyBanner').classList.add('hidden');
     document.getElementById('apiDot').classList.add('ok');
-    document.getElementById('apiStatusTxt').textContent = 'API підключено';
+    document.getElementById('apiStatusTxt').textContent = 'API ONLINE';
   }
   renderZed();
 }
@@ -262,7 +1493,7 @@ function saveKey() {
   localStorage.setItem('lap_key', v);
   document.getElementById('keyBanner').classList.add('hidden');
   document.getElementById('apiDot').classList.add('ok');
-  document.getElementById('apiStatusTxt').textContent = 'API підключено';
+  document.getElementById('apiStatusTxt').textContent = 'API ONLINE';
 }
 
 function showPage(name, btn) {
@@ -278,7 +1509,6 @@ async function runAudit() {
   
   const url = document.getElementById('driveUrl').value.trim();
   
-  // Проверяем есть ли данные: или из файла, или URL
   if (!uploadedFileData && !url) {
     alert('Вставте посилання на Google Sheets або завантажте файл!');
     return;
@@ -289,49 +1519,34 @@ async function runAudit() {
   const spin = document.getElementById('goSpin');
   const sb = document.getElementById('statusBox');
 
-  btn.disabled = true; txt.textContent = 'Аналізуємо...'; spin.style.display = 'block';
+  btn.disabled = true; txt.textContent = 'АНАЛІЗ...'; spin.style.display = 'block';
   sb.classList.remove('error'); sb.style.display = 'block';
   document.getElementById('resultsArea').innerHTML = '';
 
   try {
-    let sheets = []; // Массив листов: [{name, rows}, ...]
+    let sheets = [];
     let sourceUrl = url || 'Завантажений файл';
 
-    // Если есть загруженный файл - используем его
     if (uploadedFileData) {
       sb.textContent = '> Обробка завантаженого файлу...\n> Підготовка даних...';
       sheets = uploadedFileData;
     } else {
-      // Читаем из Google Sheets - получаем ВСЕ листы
       sb.textContent = '> Підключення до Google Sheets...\n> Читання всіх листів...';
       
       const sheetId = extractSheetId(url);
-      if (!sheetId) {
-        throw new Error('Невірне посилання на Google Sheets.');
-      }
+      if (!sheetId) throw new Error('Невірне посилання на Google Sheets.');
 
-      // Получаем список всех листов через метаданные
-      const metaUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
-      
-      // Читаем основной лист и все другие если есть gid в URL
       const gid = extractGid(url);
       
       if (gid) {
-        // Если указан конкретный лист - читаем только его
         sb.textContent = '> Читання вказаного листа...';
         const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
         const res = await fetch(csvUrl);
         if (!res.ok) throw new Error('Не вдалося прочитати лист. Перевірте доступ.');
         const csvText = await res.text();
-        sheets = [{
-          name: 'Лист ' + gid,
-          rows: parseCSV(csvText)
-        }];
+        sheets = [{ name: 'Лист ' + gid, rows: parseCSV(csvText) }];
       } else {
-        // Если gid не указан - пробуем прочитать несколько листов
-        // Так как Google Sheets API без авторизации ограничен, читаем первые 5 листов (gid=0,1,2,3,4)
         sb.textContent = '> Читання всіх листів таблиці...';
-        
         for (let i = 0; i < 10; i++) {
           try {
             const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${i}`;
@@ -339,41 +1554,24 @@ async function runAudit() {
             if (res.ok) {
               const csvText = await res.text();
               const rows = parseCSV(csvText);
-              if (rows.length > 0) {
-                sheets.push({
-                  name: `Лист ${i + 1}`,
-                  rows: rows
-                });
-              }
+              if (rows.length > 0) sheets.push({ name: `Лист ${i + 1}`, rows });
             }
-          } catch (e) {
-            // Лист не существует, продолжаем
-            break;
-          }
+          } catch (e) { break; }
         }
-        
-        if (sheets.length === 0) {
-          throw new Error('Не вдалося прочитати жодного листа. Перевірте доступ.');
-        }
+        if (sheets.length === 0) throw new Error('Не вдалося прочитати жодного листа. Перевірте доступ.');
       }
     }
     
-    if (sheets.length === 0) {
-      throw new Error('Не знайдено даних для аналізу');
-    }
+    if (sheets.length === 0) throw new Error('Не знайдено даних для аналізу');
 
     const totalRows = sheets.reduce((sum, s) => sum + s.rows.length, 0);
     sb.textContent = `> Прочитано ${sheets.length} листів (${totalRows} рядків)\n> Пошук актуальних правил ЄС...`;
 
-    // Получаем актуальные правила транзита через ЕС
     let euRegulations = '';
     try {
       const searchRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + apiKey
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
         body: JSON.stringify({
           model: 'gpt-4o',
           max_tokens: 2000,
@@ -390,23 +1588,15 @@ async function runAudit() {
           }]
         })
       });
-      
       if (searchRes.ok) {
         const searchData = await searchRes.json();
         euRegulations = searchData.choices[0].message.content;
         sb.textContent = `> Отримано актуальні правила ЄС\n> Відправка на аналіз AI...`;
       }
-    } catch (e) {
-      // Если не удалось получить - продолжаем без них
-      console.log('Could not fetch EU regulations:', e);
-    }
+    } catch (e) { console.log('Could not fetch EU regulations:', e); }
 
-    // Формируем данные ВСЕХ листов для GPT
     let allSheetsData = '';
-    
-    // Определяем самые свежие листы по датам в названиях
     const sheetsByDate = sheets.map((sheet, idx) => {
-      // Ищем дату в названии листа
       const dateMatch = sheet.name.match(/(\d{1,2})[\.\-\/](\d{1,2})[\.\-\/](\d{4})/);
       let date = null;
       if (dateMatch) {
@@ -417,14 +1607,12 @@ async function runAudit() {
       }
       return { sheet, idx, date, name: sheet.name };
     }).sort((a, b) => {
-      // Сортируем по дате (самые новые первыми)
       if (a.date && b.date) return b.date - a.date;
       if (a.date) return -1;
       if (b.date) return 1;
       return 0;
     });
     
-    // Формируем данные с пометкой о свежести
     sheetsByDate.forEach(({ sheet, idx, date, name }) => {
       const dateInfo = date ? ` [ДАТА: ${date.toLocaleDateString('uk-UA')}]` : '';
       const freshness = date && date >= new Date(2026, 2, 1) ? ' ⭐ НАЙСВІЖІШІ ДАНІ' : '';
@@ -466,34 +1654,88 @@ ${euRegulations}
 
 ФОРМАТ ВІДПОВІДІ - ТІЛЬКИ JSON без markdown:
 {
-  "summary": {
-    "totalCustomsValue": число (сума всіх customsValue),
-    "totalDuty": число (сума всіх duty),
-    "totalVAT": число (сума всіх vat),
-    "borderDelay": "прогноз затримки УКРАЇНСЬКОЮ"
-  },
   "items": [
     {
       "name": "ТОЧНА назва з таблиці",
-      "uctzedCode": "код якщо є, інакше підібрати для категорії",
-      "qty": "кількість з таблиці + кг",
-      "buyPrice": число з таблиці (ціна за кг),
-      "customsValue": buyPrice * qty * 1.10,
-      "duty": customsValue * ставка_мита,
-      "vat": (customsValue + duty) * 0.20,
-      "category": "ДЕТАЛЬНА класифікація товару: АФІ (фармацевтична субстанція) / Косметична сировина / Ветеринарна субстанція / Харчова добавка / Промислова хімія / Допоміжна речовина",
-      "applications": "ДЕТАЛЬНИЙ опис де може використовуватись: для виробництва ліків (які саме групи препаратів) / для косметики (які продукти) / для ветеринарії (для яких тварин) / для харчової промисловості / множинне застосування",
-      "hazardAnalysis": "ДЕТАЛЬНИЙ аналіз небезпеки: Чи є товар небезпечним за класифікацією ADR (вказати клас якщо є), CLP regulation (пиктограми небезпеки), температурні обмеження, вогненебезпека, токсичність, корозійність, реакційна здатність. Якщо НЕ небезпечний - чітко написати 'Не класифікується як небезпечний вантаж'",
-      "storageRequirements": "Вимоги до зберігання та транспортування: температурний режим, захист від вологи/світла, сумісність з іншими товарами, спеціальна упаковка",
-      "euChecks": "ДЕТАЛЬНИЙ опис перевірок при транзиті через ЄС УКРАЇНСЬКОЮ на основі АКТУАЛЬНИХ правил квітня 2026 З УРАХУВАННЯМ категорії товару та його небезпеки: які порти, які документи, які перевірки. Для АФІ - додаткові фармацевтичні перевірки. Для косметики - CPNP notification. Для ветеринарії - ветеринарний контроль",
-      "uaChecks": "ДЕТАЛЬНИЙ опис перевірок в Україні УКРАЇНСЬКОЮ З УРАХУВАННЯМ категорії: для АФІ - реєстрація МОЗ як субстанція, для косметики - нотифікація як косметична сировина, для ветеринарії - реєстрація Держпродспоживслужби, для харчових добавок - висновок СЕС",
-      "risk": "Критичний якщо небезпечний ADR/токсичний, Середній для подвійного призначення/регульованих, Низький для звичайних",
-      "riskNote": "конкретна причина ризику УКРАЇНСЬКОЮ: чому небезпечний, які обмеження, які додаткові перевірки через категорію застосування"
+      "uctzedCode": "код якщо є, інакше підібрати для категорії (10 цифр)",
+      "qtyKg": число_кількість_в_кг (тільки число, без 'кг'),
+      "buyPricePerKg": число_ціна_за_кг_USD,
+      "dutyRatePercent": число_ставка_мита_у_відсотках (напр. 6.5 для 6.5%, 0 для 0%),
+      "category": "ДЕТАЛЬНА класифікація: АФІ / Ветеринарна АФІ / Косметична сировина / Харчова добавка / Допоміжна речовина / Промислова хімія / ПОДВІЙНЕ ПРИЗНАЧЕННЯ",
+      "applications": "ДЕТАЛЬНИЙ опис застосування УКРАЇНСЬКОЮ",
+      "hazardAnalysis": "ДЕТАЛЬНИЙ аналіз небезпеки: ADR клас, CLP пиктограми, токсичність. Якщо НЕ небезпечний - чітко 'Не класифікується як небезпечний вантаж'",
+      "storageRequirements": "Вимоги до зберігання УКРАЇНСЬКОЮ",
+      "euChecks": [
+        {
+          "item": "Коротка назва документа або перевірки (напр. 'T1 транзитна декларація NCTS Phase 5')",
+          "status": "green|yellow|red",
+          "note": "Короткий коментар (1-2 речення) УКРАЇНСЬКОЮ: чому саме такий статус, що перевіряють, на що звернути увагу"
+        }
+      ],
+      "uaChecks": [
+        {
+          "item": "Коротка назва документа або перевірки (напр. 'Реєстрація МОЗ України')",
+          "status": "green|yellow|red",
+          "note": "Короткий коментар УКРАЇНСЬКОЮ"
+        }
+      ],
+      "risk": "Критичний|Середній|Низький",
+      "riskNote": "конкретна причина ризику УКРАЇНСЬКОЮ"
     }
   ],
-  "criticalAlert": "якщо є небезпечні товари або товари подвійного призначення - детально вказати УКРАЇНСЬКОЮ",
-  "nctsList": ["пункт 1 УКРАЇНСЬКОЮ", "пункт 2 УКРАЇНСЬКОЮ", "пункт 3 УКРАЇНСЬКОЮ", "пункт 4 УКРАЇНСЬКОЮ"]
+  "borderDelay": "прогноз затримки на кордоні УКРАЇНСЬКОЮ (напр. '12-24 год')",
+  "criticalAlert": "якщо є небезпечні товари - детально УКРАЇНСЬКОЮ, інакше null",
+  "nctsList": ["пункт 1 УКРАЇНСЬКОЮ", "пункт 2", "пункт 3", "пункт 4"]
 }
+
+⚠️ КРИТИЧНО ВАЖЛИВО ПРО ЧИСЛА:
+- qtyKg, buyPricePerKg, dutyRatePercent - ТІЛЬКИ числа, без одиниць виміру
+- НЕ рахуй сам митну вартість, мито, ПДВ - це зробить система на основі твоїх чисел
+- Твоя задача - правильно витягнути qtyKg, buyPricePerKg з таблиці та визначити dutyRatePercent за категорією
+- Якщо ціни чи кількості немає - ставиш 0
+
+⚠️ КРИТИЧНО ВАЖЛИВО ПРО СВІТЛОФОР СТАТУСІВ (status):
+- "green" 🟢 = документ/перевірка стандартна, проблем НЕ очікується, документи в порядку, звичайна процедура
+- "yellow" 🟡 = звернути увагу! документ потребує додаткової підготовки, можлива перевірка, є нюанси (напр. MSDS потрібен але не критичний, температурний режим потребує контролю)
+- "red" 🔴 = КРИТИЧНО! без цього документа вантаж не пройде, обов'язкова фізична перевірка, санкційні ризики, заборона на ввезення без спеціального дозволу
+
+ПРИКЛАДИ euChecks для АФІ (фармацевтична субстанція):
+[
+  {"item": "T1 транзитна декларація (NCTS Phase 5)", "status": "green", "note": "Стандартна процедура для всіх транзитних вантажів через ЄС. MRN видається автоматично."},
+  {"item": "MSDS / Safety Data Sheet (REACH)", "status": "yellow", "note": "Обов'язковий для фармсубстанцій. Має бути на англійській + мові країни транзиту. Перевірка в порту."},
+  {"item": "Certificate of Analysis (CoA)", "status": "yellow", "note": "Документ якості від виробника. Вимагається для ідентифікації субстанції."},
+  {"item": "Рентген-сканування контейнера", "status": "green", "note": "Стандартне сканування. Займає 1-2 години."},
+  {"item": "GMP сертифікат виробника", "status": "yellow", "note": "Для АФІ з Китаю/Індії обов'язкова перевірка GMP. Без нього - додаткова лабораторна перевірка."}
+]
+
+ПРИКЛАДИ euChecks для НЕБЕЗПЕЧНОГО ВАНТАЖУ (ADR клас 6.1):
+[
+  {"item": "T1 декларація + ADR позначення", "status": "yellow", "note": "Потребує додаткових полів в декларації про небезпечний характер вантажу."},
+  {"item": "ADR сертифікат перевізника", "status": "red", "note": "КРИТИЧНО: без дійсного ADR сертифіката перевізника - вантаж не пропустять через кордон ЄС."},
+  {"item": "UN номер + маркування упаковки", "status": "red", "note": "Обов'язкова перевірка маркування UN номера на кожній упаковці. Невідповідність - конфіскація."},
+  {"item": "Аварійні інструкції (Transport emergency card)", "status": "yellow", "note": "Мають бути в кабіні водія. Перевіряються вибірково."},
+  {"item": "MSDS українською + англійською", "status": "red", "note": "Обов'язковий документ для небезпечних вантажів."},
+  {"item": "Санкційна перевірка (17-й пакет ЄС)", "status": "yellow", "note": "Перевірка походження (Китай/Індія/РФ) на відповідність санкційним спискам."}
+]
+
+ПРИКЛАДИ uaChecks для АФІ:
+[
+  {"item": "Реєстрація МОЗ України як фармсубстанція", "status": "red", "note": "Без реєстрації АФІ в МОЗ - ввезення заборонено. Термін реєстрації - до 6 місяців."},
+  {"item": "Certificate of Analysis для митниці", "status": "yellow", "note": "Подається разом з ВМД. Підтверджує відповідність специфікації."},
+  {"item": "Висновок СЕС", "status": "yellow", "note": "Санітарно-епідеміологічний висновок. Термін оформлення 5-10 днів."},
+  {"item": "Ліцензія імпортера фармпродукції", "status": "red", "note": "Імпортер має мати чинну ліцензію Держлікслужби."},
+  {"item": "Код УКТЗЕД + розрахунок митних платежів", "status": "green", "note": "Стандартна процедура."}
+]
+
+ПРИКЛАДИ uaChecks для ЗВИЧАЙНОЇ ХІМІЇ:
+[
+  {"item": "ВМД (вантажна митна декларація)", "status": "green", "note": "Стандартна процедура."},
+  {"item": "Сертифікат походження", "status": "green", "note": "Для застосування преференцій."},
+  {"item": "Реєстрація в UA-REACH", "status": "yellow", "note": "Якщо ввезення >1 т/рік - обов'язкова пре-реєстрація."},
+  {"item": "Оплата мита + ПДВ 20%", "status": "green", "note": "Розрахунок автоматичний."}
+]
+
+ВАЖЛИВО: формуй 4-8 пунктів в euChecks та 4-8 пунктів в uaChecks для кожного товару. Статуси мають відображати РЕАЛЬНИЙ рівень ризику/уваги саме для цього товару!
 
 КРИТИЧНО ВАЖЛИВО - КЛАСИФІКАЦІЯ ТОВАРІВ:
 
@@ -509,11 +1751,7 @@ ${euRegulations}
    - "ПОДВІЙНЕ ПРИЗНАЧЕННЯ" - якщо може використовуватись в різних сферах
 
 2. ЗАСТОСУВАННЯ (applications):
-   Детально опиши ВСІ можливі застосування:
-   - Для АФІ: "Виробництво знеболювальних препаратів (НПЗП), протизапальних мазей, ветеринарних ін'єкцій для ВРХ"
-   - Для косметики: "Виробництво кремів для обличчя, шампунів, лосьйонів для тіла, антивікових сироваток"
-   - Для ветеринарії: "Лікування інфекцій у свиней, птиці, ВРХ; кормові добавки"
-   - Для харчів: "Харчова добавка E460, загущувач, стабілізатор в хлібобулочних виробах"
+   Детально опиши ВСІ можливі застосування.
 
 3. АНАЛІЗ НЕБЕЗПЕКИ (hazardAnalysis):
    ОБОВ'ЯЗКОВО перевір та вкажи:
@@ -521,102 +1759,36 @@ ${euRegulations}
    a) ЧИ Є НЕБЕЗПЕЧНИМ за ADR:
       - Клас 1: Вибухові речовини
       - Клас 2: Гази
-      - Клас 3: Легкозаймисті рідини (спирти, розчинники)
+      - Клас 3: Легкозаймисті рідини
       - Клас 4: Легкозаймисті тверді речовини
-      - Клас 5: Окиснювачі, органічні пероксиди
-      - Клас 6.1: ТОКСИЧНІ речовини (більшість АФІ!)
-      - Клас 8: Корозійні речовини (кислоти, луги)
+      - Клас 5: Окиснювачі
+      - Клас 6.1: ТОКСИЧНІ речовини
+      - Клас 8: Корозійні речовини
       - Клас 9: Інші небезпечні речовини
    
    b) CLP REGULATION (пиктограми):
-      - GHS02 - Вогненебезпечно
-      - GHS05 - Корозійно
-      - GHS06 - ТОКСИЧНО (череп з кістками)
-      - GHS07 - Шкідливо (оклик)
-      - GHS08 - Небезпека для здоров'я
-      - GHS09 - Небезпечно для довкілля
-   
-   c) ОСОБЛИВІ НЕБЕЗПЕКИ:
-      - Канцерогенність (може викликати рак)
-      - Мутагенність (впливає на ДНК)
-      - Репродуктивна токсичність
-      - Сенсибілізація шкіри/дихання
-      - Подразнення очей/шкіри
-   
-   d) ФІЗИКО-ХІМІЧНІ ВЛАСТИВОСТІ:
-      - Температура займання
-      - Реакція з водою/повітрям
-      - Несумісність з іншими речовинами
-      - Вимоги до температури зберігання
+      - GHS02, GHS05, GHS06, GHS07, GHS08, GHS09
 
    ЯКЩО ТОВАР НЕ НЕБЕЗПЕЧНИЙ - чітко написати:
    "Не класифікується як небезпечний вантаж. Не підпадає під ADR. Без пиктограм небезпеки CLP. Стандартні умови транспортування."
 
 4. ВИМОГИ ДО ЗБЕРІГАННЯ (storageRequirements):
-   - "Зберігати при температурі 2-8°C (холодильник), захист від світла"
-   - "Кімнатна температура 15-25°C, сухе місце, вдали від окиснювачів"
-   - "НЕ сумісний з: кислотами, лугами, окиснювачами"
-   - "Спеціальна герметична упаковка, інертна атмосфера"
+   - Температурний режим, захист від світла/вологи, сумісність, упаковка
 
-ПРИКЛАДИ КЛАСИФІКАЦІЇ:
-
-Приклад 1: Колістин сульфат
-- category: "Ветеринарна АФІ (також може використовуватись в медицині)"
-- applications: "Антибіотик для лікування бактеріальних інфекцій у ВРХ, свиней, птиці. Резервний препарат для людей при інфекціях, стійких до інших антибіотиків"
-- hazardAnalysis: "ТОКСИЧНИЙ - Клас 6.1 ADR, UN номер необхідний. Пиктограма GHS06 (череп). Може викликати подразнення дихальних шляхів, шкідливий при вдиханні. H302, H332 statements. Вимагає MSDS"
-- storageRequirements: "Зберігати при кімнатній температурі 15-25°C, в сухому місці, захист від вологи. Герметична упаковка."
-
-Приклад 2: МКЦ 102 (мікрокристалічна целюлоза)
-- category: "Допоміжна речовина подвійного призначення (фарма + харчі + косметика)"
-- applications: "У фармацевтиці: наповнювач для таблеток, дезінтегрант. У харчах: харчова добавка E460, загущувач у соусах, стабілізатор у випічці. У косметиці: загущувач кремів, скраби"
-- hazardAnalysis: "Не класифікується як небезпечний вантаж. Не підпадає під ADR. Без пиктограм небезпеки CLP. Може викликати подразнення при вдиханні пилу (механічне). Стандартні умови транспортування."
-- storageRequirements: "Кімнатна температура, сухе місце, захист від вологи. Стандартна упаковка - мішки по 20 кг на палетах"
-
-Приклад 3: Німесулід
-- category: "АФІ для людей (НПЗП - нестероїдний протизапальний)"
-- applications: "Виробництво знеболювальних та протизапальних препаратів: таблетки, гранули, гелі, мазі. Лікування болю, запалень, лихоманки"
-- hazardAnalysis: "ТОКСИЧНИЙ - Клас 6.1 ADR (UN2811). Пиктограми GHS06 + GHS08. Шкідливий при ковтанні (H302), токсичний для печінки. Може викликати серйозні побічні ефекти. Репродуктивна токсичність категорія 2. Вимагає MSDS та декларацію про походження"
-- storageRequirements: "Зберігати при 15-25°C, захист від світла та вологи. Не сумісний з окиснювачами. Герметична упаковка."
-- ВСІ числа БЕЗ КОМ - використовуй тільки точку як десятковий розділювач
-- Приклад правильно: 141682.8 (НЕ 141,682.8)
-- Приклад правильно: 9209.37 (НЕ 9,209.37)
-- Якщо кількість 0 або немає ціни - все ставиш 0
-- УСЯ ТЕКСТОВА ІНФОРМАЦІЯ ТІЛЬКИ УКРАЇНСЬКОЮ МОВОЮ (жодного англійського тексту)
-
-ПЕРЕВІРКИ В ПОРТАХ ЄС (euChecks) - пиши детально використовуючи АКТУАЛЬНІ правила квітня 2026:
-
-Для ФАРМАЦЕВТИКИ та ХІМІЇ:
-- "Транзит через порт [Гамбург/Роттердам/Гданськ]: подання документа T1 (транзитна декларація) згідно NCTS Phase 5, перевірка MSDS (паспорт безпеки) відповідно до актуальних вимог REACH 2026, контроль температурного режиму якщо потрібно. Сканування контейнера на предмет розбіжностей. [ДОДАЙ АКТУАЛЬНІ ВИМОГИ З ОТРИМАНОЇ ІНФОРМАЦІЇ]. Для небезпечних вантажів класу [ADR клас] - обов'язкова перевірка маркування UN [номер], наявність аварійних карток, дозвіл на транзит небезпечних вантажів відповідно до ADR 2026"
-
-Для НЕБЕЗПЕЧНИХ ВАНТАЖІВ (ADR):
-- "Посилені перевірки через клас небезпеки [вказати клас]. У порту [назва]: обов'язкова перевірка сертифіката ADR 2026, UN-номера, маркування упаковки згідно нових стандартів, аварійних інструкцій. [ДОДАЙ НОВІ ВИМОГИ ADR 2026 ЯКЩО Є]. Можлива затримка 24-48 год для верифікації документів. Спеціальна зона зберігання для небезпечних вантажів. [ВРАХУЙ САНКЦІЙНІ ОБМЕЖЕННЯ ЯКЩО Є]"
-
-Для ЗВИЧАЙНИХ ТОВАРІВ:
-- "Стандартний транзит через ЄС станом на квітень 2026: подання T1 декларації в системі NCTS Phase 5, рентген-сканування контейнера, випадкова вибіркова перевірка 5-10%. [ДОДАЙ АКТУАЛЬНІ ЗМІНИ В ПРОЦЕДУРАХ]. Очікуваний час проходження порту: 6-12 годин"
-
-ВАЖЛИВО: Використовуй АКТУАЛЬНУ інформацію про правила ЄС що була надана вище. Якщо є нові вимоги станом на квітень 2026 - обов'язково вкажи їх.
-
-ПЕРЕВІРКИ В УКРАЇНІ (uaChecks) - пиши детально:
-
-Для ФАРМАЦЕВТИКИ:
-- "Обов'язкова реєстрація МОЗ України як фармацевтична субстанція. Подання Certificate of Analysis (CoA) від виробника. Висновок санітарно-епідеміологічної служби (СЕС). Можлива лабораторна перевірка якості на відповідність заявленим характеристикам. Час оформлення: 3-7 днів"
-
-Для НЕБЕЗПЕЧНИХ ХІМІКАТІВ:
-- "Реєстрація в системі UA-REACH як небезпечна хімічна речовина. Подання MSDS українською мовою. Висновок СЕС про безпеку. Дозвіл на ввезення небезпечних речовин. Декларація про відповідність умов зберігання та транспортування"
-
-СТАВКИ МИТА для фармацевтики та хімії:
-- Фармацевтичні субстанції (API): 0-5%
-- Хімічні реактиви: 5-6.5%
-- МКЦ (целюлоза): 6.5%
+СТАВКИ МИТА для фармацевтики та хімії (dutyRatePercent):
+- Фармацевтичні субстанції (АФІ, HS 2933-2942): 0-5%
+- Хімічні реактиви (HS 2800-2900): 5-6.5%
+- МКЦ (мікрокристалічна целюлоза, HS 3912): 6.5%
 - Небезпечні хімікати (ADR): 6.5%
+- Косметична сировина: 5-6.5%
+- Харчові добавки: 5-10%
 
 ПРАВИЛА:
 - НЕ вигадуй товари - використовуй ТІЛЬКИ з таблиці
-- Якщо є поле "цена" або "Цена закупки" - використовуй його
-- Якщо є "Кол-ва, кг" або "Вес нетто, кг" - використовуй його  
-- Якщо є "МСДС", "НЮАНСЫ", "опасник", "ADR" - це небезпечний вантаж
-- ПДВ ЗАВЖДИ 20%
-- Митна вартість = ціна × кількість × 1.10 (фрахт)
+- Якщо є поле "цена" або "Цена закупки" - використовуй його як buyPricePerKg
+- Якщо є "Кол-ва, кг" або "Вес нетто, кг" - використовуй його як qtyKg
+- Якщо є "МСДС", "НЮАНСЫ", "опасник", "ADR" - це небезпечний вантаж (risk = "Критичний")
+- НЕ РАХУЙ customsValue/duty/vat - ти повертаєш тільки qtyKg, buyPricePerKg, dutyRatePercent
 - УСІ ТЕКСТИ УКРАЇНСЬКОЮ МОВОЮ`;
 
     const userPrompt = `Джерело даних: ${sourceUrl}
@@ -640,14 +1812,12 @@ ${allSheetsData}
 
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
       body: JSON.stringify({
         model: 'gpt-4o',
         max_tokens: 16000,
         temperature: 0.1,
+        response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -666,24 +1836,56 @@ ${allSheetsData}
 
     let parsed;
     try {
-      // Убираем markdown и очищаем JSON
       let cleanJson = raw.replace(/```json|```/g, '').trim();
-      
-      // Исправляем запятые в числах: "141,682.8" -> "141682.8"
       cleanJson = cleanJson.replace(/(\d),(\d)/g, '$1$2');
-      
       parsed = JSON.parse(cleanJson);
     } catch(e) {
       sb.classList.add('error');
       sb.textContent = 'Помилка парсингу JSON:\n' + e.message + '\n\nВідповідь AI (перші 500 символів):\n' + raw.slice(0, 500);
-      btn.disabled = false; txt.textContent = 'Розпочати аналіз'; spin.style.display = 'none';
+      btn.disabled = false; txt.textContent = 'Запустити аналіз'; spin.style.display = 'none';
       return;
     }
+
+    // ===== ТОЧНИЙ РОЗРАХУНОК МИТНИХ ПЛАТЕЖІВ НА JS =====
+    const FREIGHT_MULTIPLIER = 1.10;
+    const VAT_RATE = 0.20;
+    
+    let totalCustomsValue = 0, totalDuty = 0, totalVAT = 0;
+    
+    (parsed.items || []).forEach(item => {
+      const qty = parseNumber(item.qtyKg);
+      const price = parseNumber(item.buyPricePerKg);
+      const dutyRate = parseNumber(item.dutyRatePercent);
+      
+      const customsValue = +(price * qty * FREIGHT_MULTIPLIER).toFixed(2);
+      const duty = +(customsValue * dutyRate / 100).toFixed(2);
+      const vat = +((customsValue + duty) * VAT_RATE).toFixed(2);
+      
+      item.qtyKg = qty;
+      item.buyPricePerKg = price;
+      item.dutyRatePercent = dutyRate;
+      item.customsValue = customsValue;
+      item.duty = duty;
+      item.vat = vat;
+      item.qty = qty > 0 ? qty.toLocaleString('uk-UA') + ' кг' : '—';
+      item.buyPrice = price;
+      
+      totalCustomsValue += customsValue;
+      totalDuty += duty;
+      totalVAT += vat;
+    });
+    
+    parsed.summary = {
+      totalCustomsValue: +totalCustomsValue.toFixed(2),
+      totalDuty: +totalDuty.toFixed(2),
+      totalVAT: +totalVAT.toFixed(2),
+      totalToPay: +(totalDuty + totalVAT).toFixed(2),
+      borderDelay: parsed.borderDelay || '—'
+    };
 
     sb.style.display = 'none';
     renderResults(parsed, sourceUrl);
     
-    // Очищаем загруженный файл после анализа
     uploadedFileData = null;
     document.getElementById('fileName').style.display = 'none';
     document.getElementById('fileUpload').value = '';
@@ -692,159 +1894,289 @@ ${allSheetsData}
     sb.classList.add('error');
     sb.textContent = '> Помилка: ' + e.message;
   } finally {
-    btn.disabled = false; txt.textContent = 'Розпочати аналіз'; spin.style.display = 'none';
+    btn.disabled = false; txt.textContent = 'Запустити аналіз'; spin.style.display = 'none';
   }
 }
 
-// Извлечение ID таблицы из URL
 function extractSheetId(url) {
   const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
   return match ? match[1] : null;
 }
 
-// Извлечение GID листа из URL
 function extractGid(url) {
   const match = url.match(/[#&]gid=([0-9]+)/);
   return match ? match[1] : null;
 }
 
-// Парсинг CSV
+// Парсинг CSV - посимвольный с поддержкой многострочных ячеек
 function parseCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  return lines.map(line => {
-    const cells = [];
-    let current = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        cells.push(current.trim());
-        current = '';
-      } else {
-        current += char;
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const rows = [];
+  let currentRow = [];
+  let currentCell = '';
+  let inQuotes = false;
+  let i = 0;
+  while (i < text.length) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (inQuotes) {
+      if (char === '"' && next === '"') { currentCell += '"'; i += 2; continue; }
+      if (char === '"') { inQuotes = false; i++; continue; }
+      currentCell += char; i++;
+    } else {
+      if (char === '"') { inQuotes = true; i++; continue; }
+      if (char === ',') { currentRow.push(currentCell.trim()); currentCell = ''; i++; continue; }
+      if (char === '\n') {
+        currentRow.push(currentCell.trim());
+        if (currentRow.some(c => c && c.length > 0)) rows.push(currentRow);
+        currentRow = []; currentCell = ''; i++; continue;
       }
+      currentCell += char; i++;
     }
-    cells.push(current.trim());
-    return cells;
-  });
+  }
+  if (currentCell || currentRow.length > 0) {
+    currentRow.push(currentCell.trim());
+    if (currentRow.some(c => c && c.length > 0)) rows.push(currentRow);
+  }
+  return rows;
 }
 
-// Форматирование таблицы для AI
+function parseNumber(val) {
+  if (val == null || val === '') return 0;
+  if (typeof val === 'number') return val;
+  let s = String(val).trim();
+  if (!s || s === '—' || s === '-') return 0;
+  s = s.replace(/[$€₴£¥]/g, '').replace(/\s|\u00A0/g, '');
+  if (s.includes(',') && s.includes('.')) {
+    if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+      s = s.replace(/\./g, '').replace(',', '.');
+    } else {
+      s = s.replace(/,/g, '');
+    }
+  } else if (s.includes(',')) {
+    const parts = s.split(',');
+    if (parts.length === 2 && parts[1].length <= 2) {
+      s = parts[0] + '.' + parts[1];
+    } else {
+      s = s.replace(/,/g, '');
+    }
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
 function formatTableForAI(rows) {
-  if (rows.length === 0) return 'Таблиця порожня';
-  
-  let output = 'ЗАГОЛОВКИ:\n';
-  output += rows[0].map((h, i) => `[${i}] ${h}`).join(' | ') + '\n\n';
-  
-  output += 'ДАНІ (до 100 рядків з непорожніми даними):\n';
+  if (!rows || rows.length === 0) return 'Таблиця порожня';
+  let headerIdx = 0;
+  while (headerIdx < rows.length && !rows[headerIdx].some(c => c && c.trim())) headerIdx++;
+  if (headerIdx >= rows.length) return 'Таблиця порожня';
+  const header = rows[headerIdx];
+  let output = 'ЗАГОЛОВКИ (індекси колонок):\n';
+  output += header.map((h, i) => `[${i}] "${(h || '').substring(0, 40)}"`).join(' | ') + '\n\n';
+  output += 'ДАНІ:\n';
   let dataCount = 0;
-  const maxRows = 100;
-  
-  for (let idx = 1; idx < rows.length && dataCount < maxRows; idx++) {
+  const maxRows = 300;
+  for (let idx = headerIdx + 1; idx < rows.length && dataCount < maxRows; idx++) {
     const row = rows[idx];
-    // Пропускаем полностью пустые строки
+    if (!row) continue;
     const hasData = row.some(cell => cell && cell.trim() && cell !== '—');
     if (hasData) {
-      output += `Рядок ${dataCount + 1}: ` + row.map(c => c || '—').join(' | ') + '\n';
+      const cleanRow = row.map(c => {
+        if (!c) return '—';
+        let s = String(c).trim();
+        s = s.replace(/\n+/g, ' / ');
+        if (s.length > 200) s = s.substring(0, 200) + '…';
+        return s || '—';
+      });
+      output += `Р${dataCount + 1}: ` + cleanRow.join(' | ') + '\n';
       dataCount++;
     }
   }
-  
-  if (rows.length > maxRows + 1) {
-    output += `\n... всього ${rows.length - 1} рядків даних`;
+  if (rows.length > maxRows + headerIdx + 1) {
+    output += `\n... всього ${rows.length - headerIdx - 1} рядків, показано перші ${dataCount}\n`;
+  } else {
+    output += `\n(Всього рядків даних: ${dataCount})\n`;
   }
-  
   return output;
 }
 
-function fmt(n) { return '$' + Math.round(n).toLocaleString('uk-UA'); }
+function fmt(n) {
+  if (n == null || isNaN(n)) return '$0';
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+
+function renderChecksList(checks, fallbackText) {
+  if (typeof checks === 'string') {
+    return `<div style="font-size:12px;color:var(--ink-2);line-height:1.5">${checks}</div>`;
+  }
+  if (!Array.isArray(checks) || checks.length === 0) {
+    return `<div style="font-size:12px;color:var(--ink-3);font-style:italic">${fallbackText || '—'}</div>`;
+  }
+  const validStatuses = { green: 'green', yellow: 'yellow', red: 'red' };
+  const legend = `<div class="checks-legend">
+    <span><i style="background:#3fd18c"></i>Гуд</span>
+    <span><i style="background:#e5b53a"></i>Увага</span>
+    <span><i style="background:#ff6161"></i>Критично</span>
+  </div>`;
+  const items = checks.map(c => {
+    const status = validStatuses[c.status] || 'yellow';
+    const title = (c.item || '').replace(/</g, '&lt;');
+    const note = (c.note || '').replace(/</g, '&lt;');
+    return `<div class="check-item ${status}">
+      <div class="check-light ${status}"></div>
+      <div class="check-content">
+        <div class="check-title">${title}</div>
+        ${note ? `<div class="check-note">${note}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  return legend + `<div class="checks-list">${items}</div>`;
+}
 
 function renderResults(d, url) {
-  const s = d.summary;
+  const s = d.summary || {};
   let rows = '';
   (d.items || []).forEach(item => {
     const rc = item.risk === 'Критичний' ? 'pill-r' : item.risk === 'Середній' ? 'pill-y' : 'pill-g';
-    const hazardBadge = item.hazardAnalysis && item.hazardAnalysis.includes('Клас') ? 
-      `<div style="font-size:11px;color:#f85149;margin-top:3px;font-weight:500">⚠ ADR</div>` : '';
+    const hasAdr = item.hazardAnalysis && item.hazardAnalysis.includes('Клас');
+    const hazardBadge = hasAdr ? `<span class="adr-badge">▲ ADR</span>` : '';
+    const qtyDisplay = item.qty || (item.qtyKg ? item.qtyKg.toLocaleString('uk-UA') + ' кг' : '—');
+    const priceDisplay = item.buyPricePerKg ? fmt(item.buyPricePerKg) + '/кг' : '—';
+    const dutyRateDisplay = item.dutyRatePercent != null ? `${item.dutyRatePercent}%` : '—';
+    
+    const hazardSafe = item.hazardAnalysis && item.hazardAnalysis.includes('Не класифікується');
+    const hazardClass = hazardSafe ? 'safe' : 'danger';
+    
     rows += `<tr>
-      <td>
-        <div class="td-name">${item.name}</div>
+      <td style="min-width:220px;max-width:280px">
+        <div class="td-name">${item.name || '—'}</div>
         <div class="td-code">${item.uctzedCode || ''}</div>
-        ${item.category ? `<div style="font-size:11px;color:#8b949e;margin-top:4px;">📦 ${item.category}</div>` : ''}
-        ${item.applications ? `<div style="font-size:11px;color:#6e7681;margin-top:3px;line-height:1.4;">🔹 ${item.applications.substring(0, 100)}${item.applications.length > 100 ? '...' : ''}</div>` : ''}
+        ${item.category ? `<span class="td-category">${item.category}</span>` : ''}
+        ${item.applications ? `<div class="td-apps">${item.applications.substring(0, 120)}${item.applications.length > 120 ? '…' : ''}</div>` : ''}
       </td>
-      <td>
-        <div>${item.qty}</div>
-        <div class="td-price" style="color:#8b949e;font-size:14px;margin-top:3px">${fmt(item.buyPrice)}</div>
-        ${hazardBadge}
+      <td style="min-width:130px">
+        <div class="td-qty">${qtyDisplay}</div>
+        <div class="td-price">${priceDisplay}</div>
+        ${hazardBadge ? `<div style="margin-top:6px">${hazardBadge}</div>` : ''}
       </td>
-      <td>
-        <div class="td-price">${fmt(item.customsValue)}</div>
-        <div class="td-vat">ПДВ ${fmt(item.vat)}</div>
+      <td style="min-width:160px">
+        <div class="td-value-primary">${fmt(item.customsValue)}</div>
+        <div class="td-value-line">мито ${dutyRateDisplay} · ${fmt(item.duty)}</div>
+        <div class="td-value-vat">ПДВ · ${fmt(item.vat)}</div>
       </td>
-      <td class="check">
-        ${item.euChecks || '—'}
-        ${item.hazardAnalysis ? `<div style="margin-top:8px;padding:8px;background:var(--surface2);border-radius:6px;border-left:3px solid ${item.hazardAnalysis.includes('Не класифікується') ? '#1d9e75' : '#f85149'}"><strong style="font-size:11px;color:var(--text);">Аналіз небезпеки:</strong><br><span style="font-size:11px;color:var(--text2);line-height:1.5;">${item.hazardAnalysis}</span></div>` : ''}
-        ${item.storageRequirements ? `<div style="margin-top:8px;padding:8px;background:var(--surface2);border-radius:6px;"><strong style="font-size:11px;color:var(--text);">Зберігання:</strong><br><span style="font-size:11px;color:var(--text2);line-height:1.5;">${item.storageRequirements}</span></div>` : ''}
+      <td style="min-width:300px;max-width:380px">
+        ${renderChecksList(item.euChecks, 'Немає даних про перевірки ЄС')}
+        ${item.hazardAnalysis ? `<div class="info-card ${hazardClass}"><div class="info-card-title">Аналіз небезпеки</div><div class="info-card-body">${item.hazardAnalysis}</div></div>` : ''}
+        ${item.storageRequirements ? `<div class="info-card warn"><div class="info-card-title">Зберігання</div><div class="info-card-body">${item.storageRequirements}</div></div>` : ''}
       </td>
-      <td class="check">${item.uaChecks || '—'}</td>
-      <td><span class="pill ${rc}">${item.risk}</span><div class="pill-note">${item.riskNote || ''}</div></td>
+      <td style="min-width:300px;max-width:380px">
+        ${renderChecksList(item.uaChecks, 'Немає даних про розмитнення UA')}
+      </td>
+      <td style="min-width:120px">
+        <span class="pill ${rc}">${item.risk || '—'}</span>
+        <div class="pill-note">${item.riskNote || ''}</div>
+      </td>
     </tr>`;
   });
 
   const al = d.criticalAlert
-    ? `<div class="al al-red"><h4>⚠ Критичний фактор</h4><p>${d.criticalAlert}</p></div>`
+    ? `<div class="al al-red"><h4>Критичний фактор</h4><p>${d.criticalAlert}</p></div>`
     : '<div></div>';
-  const nc = (d.nctsList || []).map(i => `<li>› ${i}</li>`).join('');
+  const nc = (d.nctsList || []).map(i => `<li>${i}</li>`).join('');
 
   document.getElementById('resultsArea').innerHTML = `
+    <div class="sec-head">
+      <span class="sec-num">01 · OVERVIEW</span>
+      <span class="sec-title">Фінансова зведена</span>
+      <span class="sec-line"></span>
+    </div>
     <div class="metrics">
-      <div class="metric"><div class="mlabel">Митна вартість</div><div class="mval">${fmt(s.totalCustomsValue)}</div><div class="msub">CIF basis</div></div>
-      <div class="metric warn"><div class="mlabel">Мито</div><div class="mval">${fmt(s.totalDuty)}</div><div class="msub">Середня ставка</div></div>
-      <div class="metric acc"><div class="mlabel">ПДВ 20%</div><div class="mval">${fmt(s.totalVAT)}</div><div class="msub">До сплати</div></div>
-      <div class="metric danger"><div class="mlabel">Очікування кордон</div><div class="mval" style="font-size:22px;color:#f1908d">${s.borderDelay || '—'}</div><div class="msub">Прогноз</div></div>
+      <div class="metric">
+        <div class="metric-label">Митна вартість <span class="tag">CIF</span></div>
+        <div class="metric-value">${fmt(s.totalCustomsValue)}</div>
+        <div class="metric-sub">CIF = FOB × 1.10 (фрахт+страх.)</div>
+      </div>
+      <div class="metric is-duty">
+        <div class="metric-label">Мито <span class="tag">УКТЗЕД</span></div>
+        <div class="metric-value">${fmt(s.totalDuty)}</div>
+        <div class="metric-sub">За ставками по кожній позиції</div>
+      </div>
+      <div class="metric is-vat">
+        <div class="metric-label">ПДВ <span class="tag">20%</span></div>
+        <div class="metric-value">${fmt(s.totalVAT)}</div>
+        <div class="metric-sub">(CIF + Мито) × 0.20</div>
+      </div>
+      <div class="metric is-total">
+        <div class="metric-label">До сплати <span class="tag">ИТОГО</span></div>
+        <div class="metric-value">${fmt(s.totalToPay)}</div>
+        <div class="metric-sub">Мито + ПДВ · ${s.borderDelay || '—'}</div>
+      </div>
+    </div>
+    
+    <div class="sec-head">
+      <span class="sec-num">02 · MANIFEST</span>
+      <span class="sec-title">Склад та план перевірок</span>
+      <span class="sec-line"></span>
     </div>
     <div class="tbl-card">
-      <div class="tbl-hdr">Деталізований склад та план перевірок</div>
+      <div class="tbl-head-bar">
+        <span class="tbl-head-title">Manifest breakdown</span>
+        <span class="tbl-head-count">${(d.items || []).length} позицій</span>
+      </div>
       <div class="tbl-scroll">
         <table>
           <thead><tr>
-            <th>Товар / УКТЗЕД</th><th>К-сть / Ціна</th><th>Вартість / ПДВ</th>
-            <th>Перевірки ЄС</th><th>Розмитнення UA</th><th>Ризик</th>
+            <th>Товар / УКТЗЕД</th>
+            <th>К-сть · Ціна</th>
+            <th>Вартість · Платежі</th>
+            <th>🇪🇺 Перевірки в ЄС</th>
+            <th>🇺🇦 Розмитнення UA</th>
+            <th>Ризик</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
     </div>
+    
+    <div class="sec-head">
+      <span class="sec-num">03 · ADVISORY</span>
+      <span class="sec-title">Ризики та чекліст</span>
+      <span class="sec-line"></span>
+    </div>
     <div class="alerts">
       ${al}
-      <div class="al al-green"><h4>NCTS Phase 5 — Checklist</h4><ul>${nc}</ul></div>
+      <div class="al al-green"><h4>NCTS Phase 5 · Checklist</h4><ul>${nc}</ul></div>
     </div>`;
 
   const hasHigh = (d.items || []).some(i => i.risk === 'Критичний');
   const hasMed = (d.items || []).some(i => i.risk === 'Середній');
-  const total = fmt(s.totalCustomsValue + s.totalDuty + s.totalVAT);
+  const total = fmt((s.totalCustomsValue || 0) + (s.totalDuty || 0) + (s.totalVAT || 0));
   archive.unshift({ url, date: new Date().toLocaleDateString('uk-UA'), items: (d.items || []).length, total, hasHigh, hasMed, data: d });
   localStorage.setItem('lap_archive', JSON.stringify(archive.slice(0, 50)));
 }
 
 function renderArchive() {
   const list = document.getElementById('archList');
-  document.getElementById('archCount').textContent = archive.length + ' записів';
-  if (!archive.length) { list.innerHTML = '<div class="arch-empty">Архів порожній — запустіть перший аналіз</div>'; return; }
+  document.getElementById('archCount').textContent = archive.length + ' records';
+  if (!archive.length) {
+    list.innerHTML = '<div class="arch-empty">// Архів порожній — запустіть перший аналіз</div>';
+    return;
+  }
   list.innerHTML = '';
   archive.forEach((a, i) => {
-    const color = a.hasHigh ? '#f85149' : a.hasMed ? '#e3b341' : '#1d9e75';
-    const label = a.hasHigh ? 'Критичний' : a.hasMed ? 'Середній' : 'Низький';
+    const color = a.hasHigh ? 'var(--red-bright)' : a.hasMed ? 'var(--yellow)' : 'var(--green-bright)';
+    const bgColor = a.hasHigh ? 'var(--red-dim)' : a.hasMed ? 'var(--yellow-dim)' : 'var(--green-dim)';
+    const borderColor = a.hasHigh ? 'rgba(239,74,74,0.3)' : a.hasMed ? 'rgba(229,181,58,0.3)' : 'rgba(44,184,120,0.3)';
+    const label = a.hasHigh ? 'CRITICAL' : a.hasMed ? 'MEDIUM' : 'LOW';
     const el = document.createElement('div');
     el.className = 'arch-item';
-    el.innerHTML = `<div class="arch-dot" style="background:${color}"></div>
+    el.innerHTML = `
+      <div class="arch-dot" style="background:${color}; box-shadow:0 0 8px ${color}"></div>
       <div>
-        <div class="arch-url">${a.url.length > 60 ? a.url.slice(0,60)+'…' : a.url}</div>
-        <div class="arch-meta">${a.date} · ${a.items} позицій · ризик: ${label}</div>
+        <div class="arch-url">${a.url.length > 70 ? a.url.slice(0,70)+'…' : a.url}</div>
+        <div class="arch-meta">${a.date} · ${a.items} позицій</div>
       </div>
+      <div class="arch-risk" style="color:${color};background:${bgColor};border-color:${borderColor}">${label}</div>
       <div class="arch-total">${a.total}</div>`;
     el.onclick = () => {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -905,8 +2237,8 @@ function renderZed() {
 function openZed(i) {
   const t = zedTopics[i];
   let html = `<button class="zed-back" onclick="closeZed()">← Назад</button>
-    <div style="font-size:20px;font-weight:600;margin-bottom:6px">${t.ico} ${t.topic}</div>
-    <div style="font-size:16px;color:var(--text2);margin-bottom:28px">${t.short}</div>`;
+    <div class="zed-detail-title">${t.ico} ${t.topic}</div>
+    <div class="zed-detail-sub">${t.short}</div>`;
   t.sections.forEach(s => {
     html += `<div class="zed-sec"><h5>${s.title}</h5>`;
     s.rows.forEach(r => { html += `<div class="zed-row"><span class="zed-k">${r[0]}</span><span class="zed-v">${r[1]}</span></div>`; });
@@ -922,76 +2254,58 @@ function closeZed() {
   document.getElementById('zedGrid').style.display = 'grid';
 }
 
-// Обработка загруженного файла
 async function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-
   const fileNameEl = document.getElementById('fileName');
-  fileNameEl.textContent = '📄 ' + file.name;
+  fileNameEl.textContent = '▣ ' + file.name;
   fileNameEl.style.display = 'block';
-
   const reader = new FileReader();
   reader.onload = async (e) => {
     const data = new Uint8Array(e.target.result);
-    
     if (file.name.endsWith('.csv')) {
-      // CSV файл - это один лист
       const text = new TextDecoder().decode(data);
-      uploadedFileData = [{
-        name: 'Sheet1',
-        rows: parseCSV(text)
-      }];
+      uploadedFileData = [{ name: 'Sheet1', rows: parseCSV(text) }];
     } else {
-      // Excel файл - читаем ВСЕ листы
       try {
-        if (typeof XLSX === 'undefined') {
-          await loadXLSX();
-        }
-        const workbook = XLSX.read(data, { type: 'array' });
-        
+        if (typeof XLSX === 'undefined') await loadXLSX();
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true, cellNF: false, cellText: false });
         uploadedFileData = [];
         let totalRows = 0;
-        
-        // Читаем каждый лист
         workbook.SheetNames.forEach(sheetName => {
           const sheet = workbook.Sheets[sheetName];
-          const csvText = XLSX.utils.sheet_to_csv(sheet);
-          const rows = parseCSV(csvText);
+          const aoa = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false, blankrows: false });
+          const rows = aoa
+            .map(r => r.map(c => c == null ? '' : String(c).trim()))
+            .filter(r => r.some(c => c && c.length > 0));
           if (rows.length > 0) {
-            uploadedFileData.push({
-              name: sheetName,
-              rows: rows
-            });
+            uploadedFileData.push({ name: sheetName, rows });
             totalRows += rows.length;
           }
         });
-        
         if (uploadedFileData.length > 0) {
-          fileNameEl.textContent = `✅ ${file.name} (${uploadedFileData.length} листів, ${totalRows} рядків)`;
+          fileNameEl.textContent = `▣ ${file.name} · ${uploadedFileData.length} листів · ${totalRows} рядків`;
         } else {
-          fileNameEl.textContent = '❌ Файл порожній';
+          fileNameEl.textContent = '✕ Файл порожній';
+          fileNameEl.style.color = 'var(--red-bright)';
           uploadedFileData = null;
         }
-        
       } catch (err) {
         alert('Помилка читання Excel файлу: ' + err.message);
         uploadedFileData = null;
-        fileNameEl.textContent = '❌ Помилка читання файлу';
+        fileNameEl.textContent = '✕ Помилка читання файлу';
+        fileNameEl.style.color = 'var(--red-bright)';
       }
     }
-    
     if (!uploadedFileData || uploadedFileData.length === 0) {
       uploadedFileData = null;
     } else {
-      document.getElementById('driveUrl').value = ''; // Очищаем поле URL
+      document.getElementById('driveUrl').value = '';
     }
   };
-  
   reader.readAsArrayBuffer(file);
 }
 
-// Загрузка библиотеки SheetJS
 function loadXLSX() {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
@@ -1001,6 +2315,17 @@ function loadXLSX() {
     document.head.appendChild(script);
   });
 }
+
+// Live terminal clock
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getUTCHours()).padStart(2, '0');
+  const mm = String(now.getUTCMinutes()).padStart(2, '0');
+  const el = document.getElementById('termId');
+  if (el) el.textContent = `LAP-01 · ${hh}:${mm} UTC`;
+}
+setInterval(updateClock, 10000);
+updateClock();
 
 init();
 </script>
