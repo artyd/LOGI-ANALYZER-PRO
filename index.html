@@ -15,6 +15,7 @@
 
 :root {
   /* BASE */
+  --topbar-bg: rgba(10,11,13,0.85);
   --bg: #0a0b0d;
   --bg-grid: #101216;
   --surface: #111317;
@@ -58,6 +59,35 @@
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 14px;
+}
+
+html.theme-light {
+  --topbar-bg: rgba(255,255,255,0.85);
+  --bg: #f3f5f8;
+  --bg-grid: #e1e5eb;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #eff2f6;
+  --surface-raise: #ffffff;
+  
+  --line: rgba(0, 0, 0, 0.08);
+  --line-2: rgba(0, 0, 0, 0.12);
+  --line-3: rgba(0, 0, 0, 0.18);
+  
+  --ink: #111827;
+  --ink-2: #374151;
+  --ink-3: #6b7280;
+  --ink-4: #9ca3af;
+  
+  --amber: #059669;
+  --amber-bright: #10b981;
+  --amber-dim: rgba(16, 185, 129, 0.15);
+  --amber-glow: rgba(16, 185, 129, 0.4);
+}
+
+body, .topbar, .deck, .deck-head, .deck-body, .status-box, .keybar, table, thead th, tbody td,
+.tbl-card, .tbl-head-bar, .metric, .zed-card, .zed-detail {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -110,7 +140,7 @@ body::after {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10,11,13,0.85);
+  background: var(--topbar-bg);
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   border-bottom: 1px solid var(--line);
@@ -120,7 +150,7 @@ body::after {
   max-width: 1440px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 24px;
   padding: 0 32px;
@@ -134,6 +164,7 @@ body::after {
   gap: 14px;
   text-decoration: none;
   color: inherit;
+  justify-self: start;
 }
 .brand-mark {
   position: relative;
@@ -219,19 +250,54 @@ body::after {
   display: flex;
   align-items: center;
   gap: 20px;
+  justify-self: end;
 }
-.meta-block {
+.theme-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--ink-2);
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-family: var(--mono);
-  font-size: 10px;
-  line-height: 1.3;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  width: 38px;
+  height: 38px;
 }
-.meta-label { color: var(--ink-4); }
-.meta-value { color: var(--ink-2); font-weight: 500; }
+.theme-btn:hover {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+.theme-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  position: absolute;
+  transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.3s;
+}
+.theme-btn .moon {
+  transform: translateY(0) rotate(0);
+  opacity: 1;
+}
+.theme-btn .sun {
+  transform: translateY(20px) rotate(90deg);
+  opacity: 0;
+}
+html.theme-light .theme-btn .moon {
+  transform: translateY(-20px) rotate(-90deg);
+  opacity: 0;
+}
+html.theme-light .theme-btn .sun {
+  transform: translateY(0) rotate(0);
+  opacity: 1;
+}
 
 .api-chip {
   display: inline-flex;
@@ -295,9 +361,8 @@ body::after {
 /* Deck header bar — looks like equipment readout */
 .deck-head {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 20px;
+  grid-template-columns: 1fr;
+  justify-items: center;
   padding: 14px 24px;
   border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, var(--surface-2), var(--surface));
@@ -348,6 +413,7 @@ body::after {
 .deck-body {
   padding: 56px 48px 48px;
   position: relative;
+  text-align: center;
 }
 
 .deck-eyebrow {
@@ -376,7 +442,7 @@ body::after {
   line-height: 1.05;
   letter-spacing: -0.02em;
   color: var(--ink);
-  margin-bottom: 18px;
+  margin: 0 auto 18px auto;
   max-width: 820px;
 }
 .deck-title em {
@@ -388,7 +454,7 @@ body::after {
   line-height: 1.6;
   color: var(--ink-2);
   max-width: 620px;
-  margin-bottom: 36px;
+  margin: 0 auto 36px auto;
 }
 
 /* INPUT ROW */
@@ -396,27 +462,16 @@ body::after {
   display: flex;
   gap: 10px;
   max-width: 780px;
+  margin: 0 auto;
 }
 .url-wrap {
   flex: 1;
   position: relative;
 }
-.url-wrap .prefix {
-  position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--amber);
-  letter-spacing: 0.1em;
-  pointer-events: none;
-}
 .url-input {
   width: 100%;
   height: 54px;
-  padding: 0 20px 0 72px;
+  padding: 0 20px;
   background: var(--surface-2);
   border: 1px solid var(--line-2);
   border-radius: var(--radius);
@@ -477,7 +532,7 @@ body::after {
   align-items: center;
   gap: 14px;
   max-width: 780px;
-  margin: 22px 0 18px;
+  margin: 22px auto 18px auto;
   font-family: var(--mono);
   font-size: 10px;
   color: var(--ink-4);
@@ -622,9 +677,93 @@ body::after {
 }
 .key-save:hover { background: var(--amber-bright); }
 
+/* =========== LOADER OVERLAY =========== */
+.loader-overlay {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  text-align: center;
+  max-width: 600px;
+  margin: 40px auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.loader-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.loader-route .node {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s;
+}
+.loader-route .node.active {
+  border-color: var(--amber);
+  color: var(--amber);
+  box-shadow: 0 0 16px var(--amber-glow);
+}
+.loader-route .path {
+  height: 2px;
+  width: 80px;
+  background: var(--line-2);
+  position: relative;
+  overflow: hidden;
+}
+.loader-route .path-fill {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  height: 100%;
+  background: var(--amber);
+  width: 100%;
+}
+.loader-route.animating .path-fill {
+  animation: load-path 1.5s linear infinite;
+}
+@keyframes load-path {
+  0% { left: -100%; }
+  50% { left: 0%; }
+  100% { left: 100%; }
+}
+.loader-step {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+.loader-sub {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-family: var(--sans);
+}
+.loader-spinner {
+  margin: 24px auto 0;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 /* =========== STATUS BOX =========== */
 .status-box {
-  display: none;
   margin-top: 24px;
   padding: 16px 20px;
   background: var(--bg);
@@ -636,6 +775,9 @@ body::after {
   line-height: 1.7;
   color: var(--ink-2);
   max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
   white-space: pre-wrap;
 }
 .status-box.error {
@@ -793,7 +935,7 @@ thead th {
   background: var(--surface);
   color: var(--ink-3);
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -806,7 +948,7 @@ thead th {
 tbody td {
   padding: 18px;
   border-top: 1px solid var(--line);
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ink);
   vertical-align: top;
   line-height: 1.5;
@@ -816,19 +958,19 @@ tbody tr:hover td { background: rgba(245,165,36,0.025); }
 
 .td-name {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink);
   letter-spacing: -0.005em;
 }
 .td-code {
-  font-size: 11px;
+  font-size: 13px;
   font-family: var(--mono);
   color: var(--ink-3);
   margin-top: 5px;
   letter-spacing: 0.06em;
 }
 .td-category {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ink-2);
   margin-top: 8px;
   padding: 3px 8px;
@@ -838,7 +980,7 @@ tbody tr:hover td { background: rgba(245,165,36,0.025); }
   border-left: 2px solid var(--amber);
 }
 .td-apps {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--ink-3);
   margin-top: 6px;
   line-height: 1.45;
@@ -847,34 +989,34 @@ tbody tr:hover td { background: rgba(245,165,36,0.025); }
 
 .td-qty {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 .td-price {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ink-3);
   margin-top: 4px;
 }
 .td-value-primary {
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 .td-value-line {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--ink-3);
   margin-top: 4px;
   letter-spacing: 0.02em;
 }
 .td-value-vat {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--amber);
   margin-top: 3px;
   font-variant-numeric: tabular-nums;
@@ -890,7 +1032,7 @@ tbody tr:hover td { background: rgba(245,165,36,0.025); }
   border: 1px solid rgba(239,74,74,0.25);
   border-radius: 4px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--red-bright);
   letter-spacing: 0.06em;
@@ -901,7 +1043,7 @@ tbody tr:hover td { background: rgba(245,165,36,0.025); }
   display: inline-block;
   padding: 4px 11px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   font-family: var(--mono);
   letter-spacing: 0.08em;
@@ -1182,66 +1324,73 @@ tbody tr:hover td { background: rgba(245,165,36,0.025); }
 /* =========== KNOWLEDGE BASE =========== */
 .zed-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
 }
 .zed-card {
   position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 26px 24px 24px;
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .zed-card::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, var(--amber-dim), transparent 40%);
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--amber), var(--green-bright));
   opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
+  transition: opacity 0.3s;
 }
 .zed-card:hover {
-  border-color: var(--amber);
-  transform: translateY(-2px);
+  border-color: var(--line-3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+  background: var(--surface-2);
 }
 .zed-card:hover::before { opacity: 1; }
 .zed-card::after {
   content: "→";
   position: absolute;
-  top: 22px;
-  right: 22px;
-  font-size: 16px;
+  bottom: 24px;
+  right: 28px;
+  font-size: 18px;
+  font-family: var(--mono);
   color: var(--ink-4);
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
 }
 .zed-card:hover::after {
   color: var(--amber);
-  transform: translateX(4px);
+  transform: translateX(6px);
 }
 .zed-ico {
-  font-size: 30px;
-  margin-bottom: 16px;
+  font-size: 38px;
+  margin-bottom: 20px;
   display: inline-block;
-  filter: grayscale(0.2);
+  line-height: 1;
 }
 .zed-card h4 {
   font-family: var(--serif);
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 400;
   color: var(--ink);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   letter-spacing: -0.01em;
+  padding-right: 20px;
 }
 .zed-card p {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--ink-3);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
   line-height: 1.5;
+  text-transform: uppercase;
 }
 
 .zed-detail {
@@ -1371,10 +1520,10 @@ footer strong { color: var(--ink-3); font-weight: 500; }
       <button class="nav-btn" onclick="showPage('zed', this)">База знань</button>
     </nav>
     <div class="topbar-meta">
-      <div class="meta-block">
-        <span class="meta-label">Terminal</span>
-        <span class="meta-value" id="termId">LAP-01 · KYIV</span>
-      </div>
+      <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      </button>
       <div class="api-chip">
         <span class="api-dot" id="apiDot"></span>
         <span id="apiStatusTxt">API OFFLINE</span>
@@ -1407,10 +1556,6 @@ footer strong { color: var(--ink-3); font-weight: 500; }
   <section class="deck">
     <div class="deck-head">
       <div class="deck-head-left">SYSTEM READY · Ingestion Bay</div>
-      <div class="deck-head-center">PROTOCOL · NCTS PHASE 5 · ADR · REACH · UA-CUSTOMS</div>
-      <div class="deck-route">
-        <span>CN</span><span class="arrow">—→</span><span>EU</span><span class="arrow">—→</span><span>UA</span>
-      </div>
     </div>
     <div class="deck-body">
       <div class="deck-eyebrow">Freight Intelligence · v2.0</div>
@@ -1423,7 +1568,6 @@ footer strong { color: var(--ink-3); font-weight: 500; }
 
       <div class="input-row">
         <div class="url-wrap">
-          <span class="prefix">SHEET://</span>
           <input class="url-input" id="driveUrl" type="text" placeholder="docs.google.com/spreadsheets/d/...">
         </div>
         <button class="go-btn" id="goBtn" onclick="runAudit()">
@@ -1444,7 +1588,6 @@ footer strong { color: var(--ink-3); font-weight: 500; }
       <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileUpload(event)">
       <div id="fileName" class="file-name-badge"></div>
 
-      <div class="status-box" id="statusBox"></div>
     </div>
   </section>
 
@@ -1478,12 +1621,22 @@ let archive = JSON.parse(localStorage.getItem('lap_archive') || '[]');
 let uploadedFileData = null;
 
 function init() {
+  const savedTheme = localStorage.getItem('lap_theme');
+  if (savedTheme === 'light') {
+    document.documentElement.classList.add('theme-light');
+  }
+
   if (apiKey) {
     document.getElementById('keyBanner').classList.add('hidden');
     document.getElementById('apiDot').classList.add('ok');
     document.getElementById('apiStatusTxt').textContent = 'API ONLINE';
   }
   renderZed();
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('theme-light');
+  localStorage.setItem('lap_theme', isLight ? 'light' : 'dark');
 }
 
 function saveKey() {
@@ -1504,6 +1657,32 @@ function showPage(name, btn) {
   if (name === 'arch') renderArchive();
 }
 
+function showLoader() {
+  const ra = document.getElementById('resultsArea');
+  ra.innerHTML = `
+    <div class="loader-overlay" id="mainLoader">
+      <div class="loader-route">
+        <div class="node active">EU</div>
+        <div class="path"><div class="path-fill"></div></div>
+        <div class="node">UA</div>
+      </div>
+      <div class="loader-step" id="loaderStep">> Ініціалізація аналізу...</div>
+      <div class="loader-sub" id="loaderSub">Підготовка до запуску</div>
+      <div class="loader-spinner"></div>
+    </div>
+  `;
+}
+function setLoaderStep(step, sub) {
+  const st = document.getElementById('loaderStep');
+  const su = document.getElementById('loaderSub');
+  if (st && step) st.textContent = step;
+  if (su && sub !== undefined) su.textContent = sub;
+}
+function hideLoader() {
+  const l = document.getElementById('mainLoader');
+  if (l) l.remove();
+}
+
 async function runAudit() {
   if (!apiKey) { alert('Спочатку введіть API ключ!'); return; }
   
@@ -1517,21 +1696,20 @@ async function runAudit() {
   const btn = document.getElementById('goBtn');
   const txt = document.getElementById('goTxt');
   const spin = document.getElementById('goSpin');
-  const sb = document.getElementById('statusBox');
 
   btn.disabled = true; txt.textContent = 'АНАЛІЗ...'; spin.style.display = 'block';
-  sb.classList.remove('error'); sb.style.display = 'block';
   document.getElementById('resultsArea').innerHTML = '';
+  showLoader();
 
   try {
     let sheets = [];
     let sourceUrl = url || 'Завантажений файл';
 
     if (uploadedFileData) {
-      sb.textContent = '> Обробка завантаженого файлу...\n> Підготовка даних...';
+      setLoaderStep('> Обробка завантаженого файлу...', 'Підготовка даних...');
       sheets = uploadedFileData;
     } else {
-      sb.textContent = '> Підключення до Google Sheets...\n> Читання всіх листів...';
+      setLoaderStep('> Підключення до Google Sheets...', 'Читання всіх листів...');
       
       const sheetId = extractSheetId(url);
       if (!sheetId) throw new Error('Невірне посилання на Google Sheets.');
@@ -1539,14 +1717,14 @@ async function runAudit() {
       const gid = extractGid(url);
       
       if (gid) {
-        sb.textContent = '> Читання вказаного листа...';
+        setLoaderStep('> Читання вказаного листа...', '');
         const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
         const res = await fetch(csvUrl);
         if (!res.ok) throw new Error('Не вдалося прочитати лист. Перевірте доступ.');
         const csvText = await res.text();
         sheets = [{ name: 'Лист ' + gid, rows: parseCSV(csvText) }];
       } else {
-        sb.textContent = '> Читання всіх листів таблиці...';
+        setLoaderStep('> Читання всіх листів таблиці...', '');
         for (let i = 0; i < 10; i++) {
           try {
             const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${i}`;
@@ -1565,7 +1743,7 @@ async function runAudit() {
     if (sheets.length === 0) throw new Error('Не знайдено даних для аналізу');
 
     const totalRows = sheets.reduce((sum, s) => sum + s.rows.length, 0);
-    sb.textContent = `> Прочитано ${sheets.length} листів (${totalRows} рядків)\n> Пошук актуальних правил ЄС...`;
+    setLoaderStep(`> Прочитано ${sheets.length} листів (${totalRows} рядків)`, 'Пошук актуальних правил ЄС...');
 
     let euRegulations = '';
     try {
@@ -1591,7 +1769,9 @@ async function runAudit() {
       if (searchRes.ok) {
         const searchData = await searchRes.json();
         euRegulations = searchData.choices[0].message.content;
-        sb.textContent = `> Отримано актуальні правила ЄС\n> Відправка на аналіз AI...`;
+        setLoaderStep('> Отримано актуальні правила ЄС', 'Відправка на аналіз AI...');
+        const path = document.querySelector('.loader-route');
+        if (path) path.classList.add('animating');
       }
     } catch (e) { console.log('Could not fetch EU regulations:', e); }
 
@@ -1832,7 +2012,9 @@ ${allSheetsData}
 
     const data = await res.json();
     const raw = data.choices[0].message.content;
-    sb.textContent = '> Отримано відповідь AI\n> Формування звіту...';
+    setLoaderStep('> Отримано відповідь AI', 'Формування звіту...');
+    const nodes = document.querySelectorAll('.loader-route .node');
+    if (nodes.length > 1) nodes[1].classList.add('active');
 
     let parsed;
     try {
@@ -1840,8 +2022,14 @@ ${allSheetsData}
       cleanJson = cleanJson.replace(/(\d),(\d)/g, '$1$2');
       parsed = JSON.parse(cleanJson);
     } catch(e) {
-      sb.classList.add('error');
-      sb.textContent = 'Помилка парсингу JSON:\n' + e.message + '\n\nВідповідь AI (перші 500 символів):\n' + raw.slice(0, 500);
+      hideLoader();
+      document.getElementById('resultsArea').innerHTML = `
+        <div class="status-box error" style="display:block;">Помилка парсингу JSON:
+${e.message}
+
+Відповідь AI (перші 500 символів):
+${raw.slice(0, 500)}</div>
+      `;
       btn.disabled = false; txt.textContent = 'Запустити аналіз'; spin.style.display = 'none';
       return;
     }
@@ -1883,7 +2071,7 @@ ${allSheetsData}
       borderDelay: parsed.borderDelay || '—'
     };
 
-    sb.style.display = 'none';
+    hideLoader();
     renderResults(parsed, sourceUrl);
     
     uploadedFileData = null;
@@ -1891,8 +2079,8 @@ ${allSheetsData}
     document.getElementById('fileUpload').value = '';
 
   } catch(e) {
-    sb.classList.add('error');
-    sb.textContent = '> Помилка: ' + e.message;
+    hideLoader();
+    document.getElementById('resultsArea').innerHTML = `<div class="status-box error" style="display:block;">> Помилка: ${e.message}</div>`;
   } finally {
     btn.disabled = false; txt.textContent = 'Запустити аналіз'; spin.style.display = 'none';
   }
@@ -2191,35 +2379,35 @@ function renderArchive() {
 }
 
 const zedTopics = [
-  { ico: '📋', topic: 'УКТЗЕД коди', short: 'Класифікація товарів', sections: [
-    { title: 'Структура коду', rows: [['Довжина','10 цифр'],['Перші 2','Група (розділ)'],['4 цифри','Позиція HS'],['6 цифр','Підпозиція'],['8-10','Нац. підсубпозиція']] },
-    { title: 'Популярні групи', rows: [['84-85','Електроніка, машини'],['28-38','Хімічна продукція'],['72-83','Чорні метали'],['61-63','Одяг, текстиль'],['01-24','Харчові продукти']] },
-    { title: 'Ставки мита', rows: [['Електроніка','0% (IT Agreement)'],['Хімія','5–7%'],['Метал','3–5%'],['Одяг','12%'],['Продукти','10–20%']] }
+  { ico: '📑', topic: 'Рішення класифікації ЄС', short: 'BTI / Складні коди / УКТЗЕД', sections: [
+    { title: 'BTI (Binding Tariff Information)', rows: [['Термін дії','3 роки в усьому ЄС'],['Запит','Через митний портал ЄС / e-BTI'],['Обовʼязковість','Юридична сила для всіх країн'],['Аналог в UA','Рішення щодо попередньої класифікації']] },
+    { title: 'Типові помилки брокерів', rows: [['Спірні суміші','Вимагається точний % складу (CoA)'],['Частини машин','Призначення vs Матеріал (Правило 3)'],['Подвійне признач.','Потребує дозволу Держекспортконтролю']] },
+    { title: 'Нові правила (CBAM)', rows: [['CBAM','Екологічне мито на імпорт в ЄС (сталь, цемент)'],['Фарма','Обовʼязковий GMP-сертифікат для активних субст.']] }
   ]},
-  { ico: '💰', topic: 'Митні платежі', short: 'ПДВ, мито, акцизи', sections: [
-    { title: 'Формули', rows: [['Митна вартість','Ціна + фрахт + страх.'],['База ПДВ','Мит. вартість + Мито'],['ПДВ Україна','20% від бази'],['Акциз','Окрема шкала (алко/авто)']] },
-    { title: 'Методи оцінки', rows: [['Метод 1','За ціною угоди (основний)'],['Метод 2','За однаковими товарами'],['Метод 6','Резервний (КМВ)']] },
-    { title: 'Пільги', rows: [['DCFTA','0% мито ЄС→UA (більшість)'],['ГСП','Знижені ставки'],['Гуманітарна','Звільнення від мита']] }
+  { ico: '📊', topic: 'Оцінка та Інвойсинг', short: 'Митна вартість / Інкотермс', sections: [
+    { title: 'Формування вартості (Метод 1)', rows: [['CIF (УА)','Invoice Value + Freight + Insurance'],['EXW/FCA','Потребує чіткої довідки про вартість транспорту'],['DAP/DDP','Фрахт та страх. вже включено']] },
+    { title: 'Документи для підтвердження', rows: [['Основа','Комерційний інвойс, пакувальний лист'],['Транспорт','CMR, B/L (коносамент), AWB'],['Оплата','SWIFT (платіжне доручення), експортна МД']] },
+    { title: 'Ризики для методики', rows: [['Зниження ціни','Спрацювання профілю ризику (ІАС МУ)'],['Роялті','Мають включатись в митну вартість'],['Посередники','Договір комісії збільшує вартість']] }
   ]},
-  { ico: '🛂', topic: 'NCTS Phase 5', short: 'Транзитна система ЄС', sections: [
-    { title: 'Ключові документи', rows: [['MRN','Master Reference Number'],['VGM','Верифікована маса SOLAS'],['E-CMR','Електронна накладна'],['AEO','Авторизований оператор']] },
-    { title: 'Контрольні точки', rows: [['Гамбург','T1, ISPS код'],['Гданськ','PhytoSanitary, CVED'],['Варшава','TIR Carnet'],['Краківець','UA митниця, реліз']] },
-    { title: 'Затримки', rows: [['EES System','6+ год при збоях'],['Document check','2–4 год при помилках'],['Physical check','До 48 год']] }
+  { ico: '🇪🇺', topic: 'Транзит ЄС · NCTS 5', short: 'T1, E-CMR, Гарантії', sections: [
+    { title: 'Оновлення NCTS Phase 5', rows: [['MRN статус','Автоматичне відстеження по ЄС'],['Помилки ENS','Призводять до зупинки в порту (до 72 год)'],['Нові поля','Відправник/Одержувач на рівні House Consignment']] },
+    { title: 'Фінансова гарантія', rows: [['Загальна (CG)','Для регулярних перевезень (АЕО / брокери)'],['Індивідуальна','Разова транзакція (високий тариф)'],['Звільнення','Тільки для АЕО-комбінованих (AEO F)']] },
+    { title: 'Транзитні Checkpoints', rows: [['Польща-UA','Виключно через e-Cherha на кордоні'],['Румунія-UA','Посилений ваговий контроль (+ рентген)'],['Завершення','Тільки на авторизованому митному посту']] }
   ]},
-  { ico: '⚠️', topic: 'ADR Небезпечні', short: 'Перевезення небезпечних вантажів', sections: [
-    { title: 'Класи ADR', rows: [['Клас 1','Вибухові речовини'],['Клас 3','Легкозаймисті рідини'],['Клас 6.1','Токсичні речовини'],['Клас 8','Корозійні речовини'],['Клас 9','Інші небезпечні']] },
-    { title: 'Документи', rows: [['MSDS','Паспорт безпеки (обов.)'],['ADR маркування','На кожній упаковці'],['Заборона','Кл. 6.1 + харчові'],['Дозвіл транзит','Кл. 1, 6.1, 7']] },
-    { title: 'Штрафи', rows: [['Без MSDS','€500–2 000'],['Неправ. маркування','€1 000–5 000'],['Суміщення ADR','Конфіскація + €10 000+']] }
+  { ico: '☢️', topic: 'ADR Небезпечні вантажі', short: 'Хімія, Батареї, ADR', sections: [
+    { title: 'Критичні документи', rows: [['MSDS / ПБ','Тільки англ + мова країни транзиту (16 пунктів)'],['DGD','Dangerous Goods Declaration (авіа/море)'],['Tremcard','Аварійна картка водія (з вогнегасниками)'] ]},
+    { title: 'Літієві батареї (UN 3480/3481)', rows: [['Вимоги пакування','PI 965-967 (жорсткі коробки, маркування)'],['Потужність','Понад 100 Wh класифікується як Class 9'],['Транзит ЄС','Лише 50% SOC (стан заряду) під час перевезень']] },
+    { title: 'ADR несумісність', rows: [['Клас 6.1 + 8','Потребує окремих транспортних засобів / відсіків'],['Їжа + ADR','Суворо заборонено до сумісного LCL'],['Охолодження','Для деяких хім. вантажів обовʼязковий термореєстратор']] }
   ]},
-  { ico: '🧪', topic: 'REACH / Хімія', short: 'Реєстрація хімічних речовин', sections: [
-    { title: 'Вимоги REACH', rows: [['Реєстрація','>1 т/рік обов.'],['SVHC список','Речовини занепокоєння'],['Авторизація','SVHC понад пороги'],['Заборонені','Додаток XVII REACH']] },
-    { title: 'UA-REACH', rows: [['Охоплення','Імпорт >1 т/рік'],['Пре-реєстрація','До початку імпорту'],['СЕС висновок','Сан-епід служба'],['Термін','45 діб']] },
-    { title: 'Помилки', rows: [['Без MSDS','Затримка кордон'],['Не пре-реєстровано','Заборона ввезення'],['Неправ. конц.','Переклас. в SVHC']] }
+  { ico: '🏗️', topic: 'Управління LCL', short: 'Консолідація, Перевалка', sections: [
+    { title: 'Морські хаби (ЄС)', rows: [['Гдиня (PL)','Термін перевалки: 3-5 днів, затримки восени'],['Констанца (RO)','Обов’язковий сканер для збірних вантажів'],['Гамбург (DE)','Автоматичний випуск T1 за наявності ENS']] },
+    { title: 'Процес розформування CFS', rows: [['Строки','+2 дні до загального транзиту'],['Догляд','Якщо 1 вантаж в LCL на огляді – стоїть весь контейнер'],['Пошкодження','Потребує Letter of Protest в перші 24 години']] },
+    { title: 'Управління тарою', rows: [['Деревʼяна (ISPM 15)','Обовʼязкове тавро "Колосок", інакше повернення'],['Паллети','Euro паллети потрібні для крос-докінгу']] }
   ]},
-  { ico: '📦', topic: 'Збірний вантаж LCL', short: 'Консолідовані відправлення', sections: [
-    { title: 'Документи LCL', rows: [['HBL','House Bill of Lading'],['MBL','Master B/L лінії'],['Packing List','Детальний список'],['CO','Сертифікат походження'],['CMR','Дорожній лист авто']] },
-    { title: 'Порядок розмитнення', rows: [['1','Прибуття, MRN реліз'],['2','Повідомлення отримувача'],['3','Подача декларації'],['4','Сплата платежів'],['5','Видача товару']] },
-    { title: 'Ризики LCL', rows: [['Суміщення ADR','Заборонено з харчами'],['Ціна угоди','Перевірка метод 1'],['Санкції','17-й пакет ЄС']] }
+  { ico: '⚖️', topic: 'Санкції та Обмеження', short: 'Dual-Use, 17-й Пакет ЄС', sections: [
+    { title: 'Подвійне призначення', rows: [['Дозвіл Держекспорт.','Обовʼязковий при імпорті 84, 85, 90 груп'],['EUC','Сертифікат кінцевого споживача (End User)'],['Особливості','Дрони, рації, спецсплави, тепловізори']] },
+    { title: 'Походження товару', rows: [['Мікс сировини','Правило достатньої переробки (додана вартість)'],['Сертиф. EUR.1','Тільки за умови прямого транспортування'],['Антидемпінг','Посилено щодо сталі, труб, ламп з КНР']] },
+    { title: 'Актуальні ембарго (ЄС)', rows: [['РФ / РБ','Абсолютна заборона транзиту високотехн. товарів'],['Китай','Посилений контроль виробників мікроелектроніки']] }
   ]}
 ];
 
