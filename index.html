@@ -1963,11 +1963,15 @@ ${euRegulations}
 - Косметична сировина: 5-6.5%
 - Харчові добавки: 5-10%
 
-ПРАВИЛА:
-- НЕ вигадуй товари - використовуй ТІЛЬКИ з таблиці
+ПРАВИЛА РОЗРАХУНКУ РИЗИКУ (risk):
+- "Критичний": наявні слова "МСДС", "НЮАНСЫ", "опасник", "ADR", є піктограми небезпеки, або потрібен дозвіл на подвійне призначення.
+- "Середній": НЕМАЄ критичних факторів, АЛЕ потрібні специфічні сертифікати (GMP, CoA), температурний режим або додатковий контроль.
+- "Низький": стандартні товари без специфічних обмежень та вимог до транспортування.
+
+ІНШІ ПРАВИЛА:
+- НЕ вигадуй товари - використовуй ТІЛЬКИ з таблиці.
 - Якщо є поле "цена" або "Цена закупки" - використовуй його як buyPricePerKg
 - Якщо є "Кол-ва, кг" або "Вес нетто, кг" - використовуй його як qtyKg
-- Якщо є "МСДС", "НЮАНСЫ", "опасник", "ADR" - це небезпечний вантаж (risk = "Критичний")
 - НЕ РАХУЙ customsValue/duty/vat - ти повертаєш тільки qtyKg, buyPricePerKg, dutyRatePercent
 - УСІ ТЕКСТИ УКРАЇНСЬКОЮ МОВОЮ`;
 
@@ -1996,7 +2000,7 @@ ${allSheetsData}
       body: JSON.stringify({
         model: 'gpt-4o',
         max_tokens: 16000,
-        temperature: 0.1,
+        temperature: 0.0,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: systemPrompt },
@@ -2169,7 +2173,8 @@ function formatTableForAI(rows) {
     if (!row) continue;
     const hasData = row.some(cell => cell && cell.trim() && cell !== '—');
     if (hasData) {
-      const cleanRow = row.map(c => {
+      const cleanRow = header.map((_, i) => {
+        let c = row[i];
         if (!c) return '—';
         let s = String(c).trim();
         s = s.replace(/\n+/g, ' / ');
