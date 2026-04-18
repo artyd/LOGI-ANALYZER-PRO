@@ -2041,6 +2041,139 @@
   </footer>
 
   <script>
+    const BATCH_SIZE = 25;
+
+    function normalizeName(name) {
+      if (!name) return '';
+      return name.toString().toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function buildNormalizedItems(sheetsByDate) {
+      const itemMap = new Map();
+      const reversed = [...sheetsByDate].reverse();
+      
+      for (const { sheet, date, name } of reversed) {
+        const rows = sheet.rows;
+        if (!rows || rows.length === 0) continue;
+        
+        let headerIdx = 0;
+        while (headerIdx < rows.length && !rows[headerIdx].some(c => c && c.trim())) headerIdx++;
+        if (headerIdx >= rows.length) continue;
+        
+        const header = rows[headerIdx].map(h => normalizeName(h));
+        
+        const getColIndex = (aliases) => header.findIndex(h => aliases.some(a => h.includes(a)));
+        const nameIdx = getColIndex(['номенклатура', 'товар', 'наименование', 'name', 'лс', 'найменування']);
+        const qtyIdx = getColIndex(['кол-ва/вес нетто, кг', 'кол-ва, кг', 'вес нетто, кг', 'вес нетто', 'кол-во', 'qty', 'кількість', 'вага']);
+        const priceIdx = getColIndex(['цена закупки / цена', 'цена закупки', 'цена', 'price', 'ціна']);
+        const codeIdx = getColIndex(['код / код тнвэд', 'код тнвэд', 'код', 'уктзед']);
+        const prodIdx = getColIndex(['производитель', 'прозводитель', 'producer', 'виробник']);
+        const dangerIdx = getColIndex(['мсдс / нюансы', 'нюансы', 'мсдс', 'опасник', 'adr']);
+
+        for (let r = headerIdx + 1; r < rows.length; r++) {
+          const row = rows[r];
+          if (!row || !row.some(c => c && c.trim() && c !== '—')) continue;
+          
+          const rawName = nameIdx >= 0 ? row[nameIdx] : null;
+          if (!rawName || !rawName.trim() || rawName === '—') continue;
+          
+          const normName = normalizeName(rawName);
+          const qty = qtyIdx >= 0 && row[qtyIdx] !== '—' ? row[qtyIdx] : null;
+          const price = priceIdx >= 0 && row[priceIdx] !== '—' ? row[priceIdx] : null;
+          const code = codeIdx >= 0 && row[codeIdx] !== '—' ? row[codeIdx] : null;
+          const prod = prodIdx >= 0 && row[prodIdx] !== '—' ? row[prodIdx] : null;
+          const danger = dangerIdx >= 0 && row[dangerIdx] !== '—' ? row[dangerIdx] : null;
+
+          if (!itemMap.has(normName)) {
+            itemMap.set(normName, { name: rawName, qtyKg: qty, buyPricePerKg: price, uctzedCode: code, producer: prod, rawDanger: danger, sourceSheet: name, latestDate: date });
+          } else {
+            const existing = itemMap.get(normName);
+            if (qty) existing.qtyKg = qty;
+            if (price) existing.buyPricePerKg = price;
+            if (code) existing.uctzedCode = code;
+            if (prod) existing.producer = prod;
+            if (danger) existing.rawDanger = danger;
+            existing.sourceSheet = name;
+            existing.latestDate = date;
+          }
+        }
+      }
+      return Array.from(itemMap.values());
+    }
+
+    function chunkArray(arr, size) {
+      const result = [];
+      for (let i = 0; i < arr.length; i += size) {
+        result.push(arr.slice(i, i + size));
+      }
+      return result;
+    }
+
+        async function analyzeBatch(batch, apiKey, euRegulations, batchIndex, totalBatches) {
+      const systemPrompt = `Ти — професійний аналітик міжнародної логістики та митного оформлення фармацевтичних та хімічних вантажів.
+ПОТОЧНА ДАТА: КВІТЕНЬ 2026.
+
+${euRegulations ? `АКТУАЛЬНІ ПРАВИЛА ТА ВИМОГИ ЄС:\n${euRegulations}` : ''}
+
+ТВОЯ ЗАДАЧА:
+Проаналізуй БАТЧ товарів (переданий у JSON). ОБОВ'ЯЗКОВО зберігай всі позиції. Їх рівно ${batch.length}.
+1. Для кожного товару розрахуй митні платежі (dutyRatePercent, напр. 6.5 для 6.5%). Якщо ціни/кількості немає, поверни їх як 0.
+2. Сформуй euChecks (ОБОВ'ЯЗКОВО 4–7 пунктів на товар).
+3. Сформуй uaChecks (ОБОВ'ЯЗКОВО 3–6 пунктів на товар).
+4. УСЯ ІНФОРМАЦІЯ ТІЛЬКИ УКРАЇНСЬКОЮ МОВОЮ.
+
+ФОРМАТ СУВОРО JSON:
+{
+  "items": [
+    {
+      "name": "назва",
+      "uctzedCode": "код",
+      "qtyKg": число,
+      "buyPricePerKg": число,
+      "dutyRatePercent": число,
+      "category": "АФІ / Хімія...",
+      "applications": "опис",
+      "hazardAnalysis": "ADR клас або 'безпечний'",
+      "storageRequirements": "умови",
+      "euChecks": [ { "item": "...", "status": "green|yellow|red", "note": "..." } ],
+      "uaChecks": [ { "item": "...", "status": "green|yellow|red", "note": "..." } ],
+      "risk": "Критичний|Середній|Низький",
+      "riskNote": "Ризик, наявність ADR/МСДС"
+    }
+  ],
+  "criticalAlert": "якщо є небезпечні товари - детально словами, інакше null",
+  "nctsList": ["пункт", "пункт"]
+}
+
+⚠️ КРИТИЧНО ВАЖЛИВО: Ти ПОВИНЕН повернути ТОЧНО ${batch.length} об'єктів у "items". НЕ ПРОПУСКАЙ ЖОДНОГО НАДАНОГО ТОВАРУ.`;
+
+      const userPrompt = `БАТЧ ТОВАРІВ НА АНАЛІЗ (${batch.length} шт):\n${JSON.stringify(batch)}
+
+Уважно перевір щоб в items було рівно ${batch.length} об'єктів. Відповідь виключно в JSON!`;
+
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          temperature: 0.0,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ]
+        })
+      });
+
+      if (!res.ok) throw new Error('API Error ' + res.status);
+      const data = await res.json();
+      try {
+        return JSON.parse(data.choices[0].message.content.replace(/```json|```/g, '').trim());
+      } catch (e) {
+        throw new Error('Помилка парсингу JSON для батчу ' + batchIndex);
+      }
+    }
+
     let apiKey = localStorage.getItem('lap_key') || '';
     let archive = JSON.parse(localStorage.getItem('lap_archive') || '[]');
     let uploadedFileData = null;
@@ -2108,7 +2241,7 @@
       if (l) l.remove();
     }
 
-    async function runAudit() {
+        async function runAudit() {
       if (!apiKey) { alert('Спочатку введіть API ключ!'); return; }
 
       const url = document.getElementById('driveUrl').value.trim();
@@ -2181,26 +2314,20 @@
               messages: [{
                 role: 'user',
                 content: `Яка актуальна інформація станом на квітень 2026 року про:
-1. Правила транзиту фармацевтичних та хімічних вантажів через порти ЄС (Гамбург, Роттердам, Гданськ)
-2. Вимоги NCTS Phase 5 для транзитних декларацій
-3. Правила ADR для небезпечних вантажів
-4. Вимоги REACH для хімічної продукції при транзиті
-5. Санкційні обмеження ЄС щодо товарів з Китаю/Індії в Україну
-
-Дай коротку витяжку (500 слів) ТІЛЬКИ УКРАЇНСЬКОЮ про ключові вимоги що діють зараз.`
+1. Правила транзиту фармацевтичних і хімічних вантажів через ЄС.
+2. Нові вимоги у системі NCTS Phase 5, які запрацювали у 2025/2026 роках.`
               }]
             })
           });
-          if (searchRes.ok) {
-            const searchData = await searchRes.json();
-            euRegulations = searchData.choices[0].message.content;
-            setLoaderStep('> Отримано актуальні правила ЄС', 'Відправка на аналіз AI...');
-            const path = document.querySelector('.loader-route');
-            if (path) path.classList.add('animating');
+          const d = await searchRes.json();
+          if(d.choices && d.choices[0] && d.choices[0].message) {
+            euRegulations = d.choices[0].message.content;
           }
-        } catch (e) { console.log('Could not fetch EU regulations:', e); }
+          setLoaderStep('> ЄС правила оновлено', 'Підготовка промпту');
+        } catch (err) {
+          console.warn('Не вдалося завантажити правила ЄС:', err);
+        }
 
-        let allSheetsData = '';
         const sheetsByDate = sheets.map((sheet, idx) => {
           const dateMatch = sheet.name.match(/(\d{1,2})[\.\-\/](\d{1,2})[\.\-\/](\d{4})/);
           let date = null;
@@ -2218,241 +2345,61 @@
           return 0;
         });
 
-        sheetsByDate.forEach(({ sheet, idx, date, name }) => {
-          const dateInfo = date ? ` [ДАТА: ${date.toLocaleDateString('uk-UA')}]` : '';
-          const freshness = date && date >= new Date(2026, 2, 1) ? ' ⭐ НАЙСВІЖІШІ ДАНІ' : '';
-          allSheetsData += `\n\n========== ЛИСТ ${idx + 1}: "${name}"${dateInfo}${freshness} ==========\n`;
-          allSheetsData += formatTableForAI(sheet.rows);
-        });
-
-        const systemPrompt = `Ти — професійний аналітик міжнародної логістики та митного оформлення фармацевтичних та хімічних вантажів з Китаю/Індії в Україну через ЄС.
-
-ПОТОЧНА ДАТА: КВІТЕНЬ 2026
-
-${euRegulations ? `АКТУАЛЬНІ ПРАВИЛА ТА ВИМОГИ ЄС (квітень 2026):
-${euRegulations}
-
-Використовуй ЦІ актуальні правила при аналізі товарів для поля "euChecks".
-` : ''}
-
-Тобі надано таблицю з РЕАЛЬНИМИ даними про збірну партію. КРИТИЧНО ВАЖЛИВО: використовуй ТІЛЬКИ дані з таблиці.
-
-СТРУКТУРА ТАБЛИЦЬ (фармацевтика):
-- ЛС - номер лікарського засобу
-- Номенклатура - назва товару  
-- Кол-ва/Вес нетто, кг - кількість в кг
-- Цена закупки / цена - ціна за кг в USD
-- Производитель - виробник
-- МСДС / НЮАНСЫ - інформація про небезпеку товару (ADR класи, опасник тощо)
-- код / код ТНВЭД - код товару для митниці
-
-ТВОЯ ЗАДАЧА:
-1. Прочитай ВСІ рядки з УСІХ листів
-2. Листи відсортовані за датою - використовуй НАЙСВІЖІШІ дані (березень-квітень 2026)
-3. Якщо той самий товар є в декількох листах - бери ціну та кількість з НАЙНОВІШОГО листа
-4. Для КОЖНОГО товару створи запис у масиві items з найактуальнішими даними
-5. Використовуй РЕАЛЬНІ дані: назви, кількості, ціни з таблиці
-6. Якщо ціни немає в свіжому листі - шукай в попередніх
-7. Якщо є МСДС або слова "опасник", "ADR", "ОПАСНИК" - це критичний ризик
-8. Розрахуй митні платежі для кожного товару
-9. УСЯ ІНФОРМАЦІЯ ТІЛЬКИ УКРАЇНСЬКОЮ МОВОЮ
-
-ФОРМАТ ВІДПОВІДІ - ТІЛЬКИ JSON без markdown:
-{
-  "items": [
-    {
-      "name": "ТОЧНА назва з таблиці",
-      "uctzedCode": "код якщо є, інакше підібрати для категорії (10 цифр)",
-      "qtyKg": число_кількість_в_кг (тільки число, без 'кг'),
-      "buyPricePerKg": число_ціна_за_кг_USD,
-      "dutyRatePercent": число_ставка_мита_у_відсотках (напр. 6.5 для 6.5%, 0 для 0%),
-      "category": "ДЕТАЛЬНА класифікація: АФІ / Ветеринарна АФІ / Косметична сировина / Харчова добавка / Допоміжна речовина / Промислова хімія / ПОДВІЙНЕ ПРИЗНАЧЕННЯ",
-      "applications": "ДЕТАЛЬНИЙ опис застосування УКРАЇНСЬКОЮ",
-      "hazardAnalysis": "ДЕТАЛЬНИЙ аналіз небезпеки: ADR клас, CLP пиктограми, токсичність. Якщо НЕ небезпечний - чітко 'Не класифікується як небезпечний вантаж'",
-      "storageRequirements": "Вимоги до зберігання УКРАЇНСЬКОЮ",
-      "euChecks": [
-        {
-          "item": "Коротка назва документа або перевірки (напр. 'T1 транзитна декларація NCTS Phase 5')",
-          "status": "green|yellow|red",
-          "note": "Короткий коментар (1-2 речення) УКРАЇНСЬКОЮ: чому саме такий статус, що перевіряють, на що звернути увагу"
-        }
-      ],
-      "uaChecks": [
-        {
-          "item": "Коротка назва документа або перевірки (напр. 'Реєстрація МОЗ України')",
-          "status": "green|yellow|red",
-          "note": "Короткий коментар УКРАЇНСЬКОЮ"
-        }
-      ],
-      "risk": "Критичний|Середній|Низький",
-      "riskNote": "конкретна причина ризику УКРАЇНСЬКОЮ"
-    }
-  ],
-  "borderDelay": "прогноз затримки на кордоні УКРАЇНСЬКОЮ (напр. '12-24 год')",
-  "criticalAlert": "якщо є небезпечні товари - детально УКРАЇНСЬКОЮ, інакше null",
-  "nctsList": ["пункт 1 УКРАЇНСЬКОЮ", "пункт 2", "пункт 3", "пункт 4"]
-}
-
-⚠️ КРИТИЧНО ВАЖЛИВО ПРО ЧИСЛА:
-- qtyKg, buyPricePerKg, dutyRatePercent - ТІЛЬКИ числа, без одиниць виміру
-- НЕ рахуй сам митну вартість, мито, ПДВ - це зробить система на основі твоїх чисел
-- Твоя задача - правильно витягнути qtyKg, buyPricePerKg з таблиці та визначити dutyRatePercent за категорією
-- Якщо ціни чи кількості немає - ставиш 0
-
-⚠️ КРИТИЧНО ВАЖЛИВО ПРО СВІТЛОФОР СТАТУСІВ (status):
-- "green" 🟢 = документ/перевірка стандартна, проблем НЕ очікується, документи в порядку, звичайна процедура
-- "yellow" 🟡 = звернути увагу! документ потребує додаткової підготовки, можлива перевірка, є нюанси (напр. MSDS потрібен але не критичний, температурний режим потребує контролю)
-- "red" 🔴 = КРИТИЧНО! без цього документа вантаж не пройде, обов'язкова фізична перевірка, санкційні ризики, заборона на ввезення без спеціального дозволу
-
-ПРИКЛАДИ euChecks для АФІ (фармацевтична субстанція):
-[
-  {"item": "T1 транзитна декларація (NCTS Phase 5)", "status": "green", "note": "Стандартна процедура для всіх транзитних вантажів через ЄС. MRN видається автоматично."},
-  {"item": "MSDS / Safety Data Sheet (REACH)", "status": "yellow", "note": "Обов'язковий для фармсубстанцій. Має бути на англійській + мові країни транзиту. Перевірка в порту."},
-  {"item": "Certificate of Analysis (CoA)", "status": "yellow", "note": "Документ якості від виробника. Вимагається для ідентифікації субстанції."},
-  {"item": "Рентген-сканування контейнера", "status": "green", "note": "Стандартне сканування. Займає 1-2 години."},
-  {"item": "GMP сертифікат виробника", "status": "yellow", "note": "Для АФІ з Китаю/Індії обов'язкова перевірка GMP. Без нього - додаткова лабораторна перевірка."}
-]
-
-ПРИКЛАДИ euChecks для НЕБЕЗПЕЧНОГО ВАНТАЖУ (ADR клас 6.1):
-[
-  {"item": "T1 декларація + ADR позначення", "status": "yellow", "note": "Потребує додаткових полів в декларації про небезпечний характер вантажу."},
-  {"item": "ADR сертифікат перевізника", "status": "red", "note": "КРИТИЧНО: без дійсного ADR сертифіката перевізника - вантаж не пропустять через кордон ЄС."},
-  {"item": "UN номер + маркування упаковки", "status": "red", "note": "Обов'язкова перевірка маркування UN номера на кожній упаковці. Невідповідність - конфіскація."},
-  {"item": "Аварійні інструкції (Transport emergency card)", "status": "yellow", "note": "Мають бути в кабіні водія. Перевіряються вибірково."},
-  {"item": "MSDS українською + англійською", "status": "red", "note": "Обов'язковий документ для небезпечних вантажів."},
-  {"item": "Санкційна перевірка (17-й пакет ЄС)", "status": "yellow", "note": "Перевірка походження (Китай/Індія/РФ) на відповідність санкційним спискам."}
-]
-
-ПРИКЛАДИ uaChecks для АФІ:
-[
-  {"item": "Реєстрація МОЗ України як фармсубстанція", "status": "red", "note": "Без реєстрації АФІ в МОЗ - ввезення заборонено. Термін реєстрації - до 6 місяців."},
-  {"item": "Certificate of Analysis для митниці", "status": "yellow", "note": "Подається разом з ВМД. Підтверджує відповідність специфікації."},
-  {"item": "Висновок СЕС", "status": "yellow", "note": "Санітарно-епідеміологічний висновок. Термін оформлення 5-10 днів."},
-  {"item": "Ліцензія імпортера фармпродукції", "status": "red", "note": "Імпортер має мати чинну ліцензію Держлікслужби."},
-  {"item": "Код УКТЗЕД + розрахунок митних платежів", "status": "green", "note": "Стандартна процедура."}
-]
-
-ПРИКЛАДИ uaChecks для ЗВИЧАЙНОЇ ХІМІЇ:
-[
-  {"item": "ВМД (вантажна митна декларація)", "status": "green", "note": "Стандартна процедура."},
-  {"item": "Сертифікат походження", "status": "green", "note": "Для застосування преференцій."},
-  {"item": "Реєстрація в UA-REACH", "status": "yellow", "note": "Якщо ввезення >1 т/рік - обов'язкова пре-реєстрація."},
-  {"item": "Оплата мита + ПДВ 20%", "status": "green", "note": "Розрахунок автоматичний."}
-]
-
-ВАЖЛИВО: через великий обсяг даних формуй максимум 1-3 НАЙГОЛОВНІШИХ пункти в euChecks та 1-3 в uaChecks для кожного товару. Нотатки (note) мають бути супер-короткими (до 5 слів)!
-
-КРИТИЧНО ВАЖЛИВО - КЛАСИФІКАЦІЯ ТОВАРІВ:
-
-Для КОЖНОГО товару визнач:
-
-1. КАТЕГОРІЯ (category):
-   - "АФІ (активна фармацевтична субстанція)" - якщо для виробництва ліків для людей
-   - "Ветеринарна АФІ" - якщо для виробництва ветеринарних препаратів
-   - "Косметична сировина" - якщо може використовуватись в косметиці
-   - "Харчова добавка" - якщо має статус E-номера або використовується в харчах
-   - "Допоміжна речовина (excipient)" - якщо це наповнювач, розчинник, стабілізатор
-   - "Промислова хімія" - якщо тільки для промислових цілей
-   - "ПОДВІЙНЕ ПРИЗНАЧЕННЯ" - якщо може використовуватись в різних сферах
-
-2. ЗАСТОСУВАННЯ (applications):
-   МАКСИМАЛЬНО КОРОТКО (до 5 слів). Напр: "Виробництво ліків", "Косметика".
-
-3. АНАЛІЗ НЕБЕЗПЕКИ (hazardAnalysis):
-   МАКСИМАЛЬНО КОРОТКО (до 5 слів).
-   a) ЧИ Є НЕБЕЗПЕЧНИМ за ADR (класи 1-9).
-   b) ПІКТОГРАМИ CLP.
-   ЯКЩО НЕБЕЗПЕЧНИЙ - вкажи клас обережно.
-   ЯКЩО ТОВАР НЕ НЕБЕЗПЕЧНИЙ - пиши просто: "Безпечний. Не ADR."
-
-4. ВИМОГИ ДО ЗБЕРІГАННЯ (storageRequirements):
-   МАКСИМАЛЬНО КОРОТКО (до 3-5 слів). Напр: "Сухе місце, 15-25°C".
-
-СТАВКИ МИТА для фармацевтики та хімії (dutyRatePercent):
-- Фармацевтичні субстанції (АФІ, HS 2933-2942): 0-5%
-- Хімічні реактиви (HS 2800-2900): 5-6.5%
-- МКЦ (мікрокристалічна целюлоза, HS 3912): 6.5%
-- Небезпечні хімікати (ADR): 6.5%
-- Косметична сировина: 5-6.5%
-- Харчові добавки: 5-10%
-
-ПРАВИЛА РОЗРАХУНКУ РИЗИКУ (risk):
-- "Критичний": наявні слова "МСДС", "НЮАНСЫ", "опасник", "ADR", є піктограми небезпеки, або потрібен дозвіл на подвійне призначення.
-- "Середній": НЕМАЄ критичних факторів, АЛЕ потрібні специфічні сертифікати (GMP, CoA), температурний режим або додатковий контроль.
-- "Низький": стандартні товари без специфічних обмежень та вимог до транспортування.
-
-ІНШІ ПРАВИЛА:
-- ⚠️ ЕКОНОМІЯ ТОКЕНІВ: Весь текст у JSON (notes, applications, hazardAnalysis) ПОВИНЕН БУТИ ТЕЛЕГРАФНИМ СТИЛЕМ. Щоб влізли всі товари, уникай довгих речень!
-- НЕ вигадуй товари - використовуй ТІЛЬКИ з таблиці.
-- Якщо є поле "цена" або "Цена закупки" - використовуй його як buyPricePerKg
-- Якщо є "Кол-ва, кг" або "Вес нетто, кг" - використовуй його як qtyKg
-- НЕ РАХУЙ customsValue/duty/vat - ти повертаєш тільки qtyKg, buyPricePerKg, dutyRatePercent
-- УСІ ТЕКСТИ УКРАЇНСЬКОЮ МОВОЮ
-- ⚠️ АБСОЛЮТНО КРИТИЧНО: ТИ ПОВИНЕН ОПРАЦЮВАТИ УСІ 100% РЯДКІВ/ТОВАРІВ З ТАБЛИЦІ. НЕ СКОРОЧУЙ, НЕ ВИДАЛЯЙ І НЕ ГРУПУЙ ТОВАРИ. СКІЛЬКИ ТОВАРІВ У ТАБЛИЦІ (АБО ЗВЕДЕНОМУ СПИСКУ), СТІЛЬКИ МАЄ БУТИ ОБ'ЄКТІВ В МАСИВІ "items".`;
-
-        const userPrompt = `Джерело даних: ${sourceUrl}
-Кількість листів: ${sheets.length}
-Поточна дата: квітень 2026
-
-ВАЖЛИВО: Листи відсортовані за датою - НАЙСВІЖІШІ ДАНІ ВГОРІ (позначені ⭐).
-
-ПРАВИЛА ВИКОРИСТАННЯ ДАНИХ:
-1. ПРИОРИТЕТ СВІЖИМ ДАНИМ: Якщо товар є в кількох листах - використовуй дані з НАЙНОВІШОГО листа (березень-квітень 2026)
-2. Для ціни бери ОСТАННЮ актуальну (з найсвіжішого листа де вона є)
-3. Для кількості бери дані з ФІНАЛЬНОГО/останнього листа
-4. Якщо є лист "ФИНАЛЬНІЙ СОСТАВ" або "ФІНАЛЬНИЙ" - він має НАЙВИЩИЙ пріоритет
-
-ДАНІ З УСІХ ЛИСТІВ ТАБЛИЦІ:
-${allSheetsData}
-
-Проаналізуй дані та поверни JSON з аналізом товарів використовуючи НАЙСВІЖІШУ інформацію (квітень 2026). 
-⚠️ КРИТИЧНА ВИМОГА: ОБРОБИ АБСОЛЮТНО ВСІ ПОЗИЦІЇ З ТАБЛИЦІ. НЕ СКОРОЧУЙ І НЕ ОБМЕЖУЙ ВИДАЧУ ДЕКІЛЬКОМА ТОВАРАМИ. МАСИВ items ПОВИНЕН МІСТИТИ ВСІ БЕЗ ВИНЯТКУ ТОВАРИ, ЩО Є В ДАНИХ.
-НЕ використовуй застарілі дані з грудня 2025 чи січня 2026 якщо є свіжіші.
-НЕ вигадуй товари - використовуй тільки те що є в таблиці.`;
-
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-          body: JSON.stringify({
-            model: 'gpt-4o',
-            max_tokens: 16000,
-            temperature: 0.0,
-            response_format: { type: 'json_object' },
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt }
-            ]
-          })
-        });
-
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error?.message || 'API Error ' + res.status);
+        // Нормалізація товарів
+        setLoaderStep('> Нормалізація даних...', 'Об’єднання та дедуплікація товарів');
+        const normalizedItems = buildNormalizedItems(sheetsByDate);
+        if (normalizedItems.length === 0) {
+            throw new Error('Не вдалося розпізнати жодного товару в таблицях.');
         }
 
-        const data = await res.json();
-        const raw = data.choices[0].message.content;
-        setLoaderStep('> Отримано відповідь AI', 'Формування звіту...');
-        const nodes = document.querySelectorAll('.loader-route .node');
-        if (nodes.length > 1) nodes[1].classList.add('active');
+        // Розбивка на батчі
+        const batches = chunkArray(normalizedItems, BATCH_SIZE);
+        setLoaderStep(`> Підготовлено ${batches.length} батчів для аналізу`, `Загалом ${normalizedItems.length} унікальних позицій`);
 
-        let parsed;
-        try {
-          let cleanJson = raw.replace(/```json|```/g, '').trim();
-          cleanJson = cleanJson.replace(/(\d),(\d)/g, '$1$2');
-          parsed = JSON.parse(cleanJson);
-        } catch (e) {
-          hideLoader();
-          document.getElementById('resultsArea').innerHTML = `
-        <div class="status-box error" style="display:block;">Помилка парсингу JSON:
-${e.message}
+        let finalItems = [];
+        let globalCriticalAlerts = [];
+        let globalNctsList = [];
+        let failedBatches = 0;
 
-Відповідь AI (перші 500 символів):
-${raw.slice(0, 500)}</div>
-      `;
-          btn.disabled = false; txt.textContent = 'Запустити аналіз'; spin.style.display = 'none';
-          return;
+        for (let i = 0; i < batches.length; i++) {
+            setLoaderStep(`> Аналіз батча ${i + 1} / ${batches.length}`, `Обробка ${batches[i].length} позицій...`);
+            try {
+                const batchResult = await analyzeBatch(batches[i], apiKey, euRegulations, i + 1, batches.length);
+                if (batchResult.items && Array.isArray(batchResult.items)) {
+                    finalItems.push(...batchResult.items);
+                }
+                if (batchResult.criticalAlert) globalCriticalAlerts.push(batchResult.criticalAlert);
+                if (batchResult.nctsList && Array.isArray(batchResult.nctsList)) {
+                    globalNctsList.push(...batchResult.nctsList);
+                }
+                
+                const path = document.querySelector('.loader-route');
+                if (path && i === 0) path.classList.add('animating');
+                const nodes = document.querySelectorAll('.loader-route .node');
+                if (nodes.length > 1 && i === batches.length - 1) nodes[1].classList.add('active');
+            } catch (err) {
+                console.error(`Помилка батча ${i + 1}:`, err);
+                failedBatches++;
+                document.getElementById('resultsArea').insertAdjacentHTML('beforeend', 
+                    `<div class="status-box error" style="display:block; margin-top:20px; text-align: left;">
+                      ⚠️ Помилка обробки батча ${i + 1}: ${err.message}
+                     </div>`);
+            }
         }
+
+        if (finalItems.length === 0) {
+            throw new Error('Жоден батч не був успішно оброблений. Аналіз неможливий.');
+        }
+
+        setLoaderStep('> Завершення...', 'Оформлення результатів');
+
+        const parsed = {
+             items: finalItems,
+             criticalAlert: globalCriticalAlerts.length > 0 ? globalCriticalAlerts.join(' | ') : null,
+             nctsList: [...new Set(globalNctsList)].slice(0, 10),
+             summary: {},
+             borderDelay: '12-24 год'
+        };
 
         // ===== ТОЧНИЙ РОЗРАХУНОК МИТНИХ ПЛАТЕЖІВ НА JS =====
         const FREIGHT_MULTIPLIER = 1.10;
@@ -2492,6 +2439,11 @@ ${raw.slice(0, 500)}</div>
         };
 
         hideLoader();
+        
+        if (failedBatches > 0) {
+            document.getElementById('resultsArea').innerHTML += `<div class="status-box error" style="display:block; margin-bottom:20px;">Аналіз завершено, але ${failedBatches} батчів не вдалося обробити. Результати можуть бути неповними.</div>`;
+        }
+        
         renderResults(parsed, sourceUrl);
 
         uploadedFileData = null;
@@ -2573,41 +2525,7 @@ ${raw.slice(0, 500)}</div>
       return isNaN(n) ? 0 : n;
     }
 
-    function formatTableForAI(rows) {
-      if (!rows || rows.length === 0) return 'Таблиця порожня';
-      let headerIdx = 0;
-      while (headerIdx < rows.length && !rows[headerIdx].some(c => c && c.trim())) headerIdx++;
-      if (headerIdx >= rows.length) return 'Таблиця порожня';
-      const header = rows[headerIdx];
-      let output = 'ЗАГОЛОВКИ (індекси колонок):\n';
-      output += header.map((h, i) => `[${i}] "${(h || '').substring(0, 40)}"`).join(' | ') + '\n\n';
-      output += 'ДАНІ:\n';
-      let dataCount = 0;
-      const maxRows = 300;
-      for (let idx = headerIdx + 1; idx < rows.length && dataCount < maxRows; idx++) {
-        const row = rows[idx];
-        if (!row) continue;
-        const hasData = row.some(cell => cell && cell.trim() && cell !== '—');
-        if (hasData) {
-          const cleanRow = header.map((_, i) => {
-            let c = row[i];
-            if (!c) return '—';
-            let s = String(c).trim();
-            s = s.replace(/\n+/g, ' / ');
-            if (s.length > 200) s = s.substring(0, 200) + '…';
-            return s || '—';
-          });
-          output += `Р${dataCount + 1}: ` + cleanRow.join(' | ') + '\n';
-          dataCount++;
-        }
-      }
-      if (rows.length > maxRows + headerIdx + 1) {
-        output += `\n... всього ${rows.length - headerIdx - 1} рядків, показано перші ${dataCount}\n`;
-      } else {
-        output += `\n(Всього рядків даних: ${dataCount})\n`;
-      }
-      return output;
-    }
+
 
     function fmt(n) {
       if (n == null || isNaN(n)) return '$0';
