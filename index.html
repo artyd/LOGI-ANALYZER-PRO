@@ -2915,7 +2915,7 @@ ${euRegulations}
     }
 
     async function analyzeItemsInBatches(allDataRows, systemPrompt, sourceUrl) {
-      const BATCH_SIZE = 10;
+      const BATCH_SIZE = 5;
       const batches = [];
       for (let i = 0; i < allDataRows.length; i += BATCH_SIZE) {
         batches.push(allDataRows.slice(i, i + BATCH_SIZE));
@@ -2942,9 +2942,9 @@ ${euRegulations}
 Партія ${bi + 1} з ${batches.length} (позиції ${start}–${end} з ${allDataRows.length})
 
 ${isLast
-  ? 'ОСТАННЯ ПАРТІЯ. Заповни items для цих позицій, а також borderDelay, criticalAlert, nctsList для всього вантажу.'
-  : `Заповни ТІЛЬКИ масив items для цих ${batch.length} позицій. borderDelay = null, criticalAlert = null, nctsList = [].`
-}
+            ? 'ОСТАННЯ ПАРТІЯ. Заповни items для цих позицій, а також borderDelay, criticalAlert, nctsList для всього вантажу.'
+            : `Заповни ТІЛЬКИ масив items для цих ${batch.length} позицій. borderDelay = null, criticalAlert = null, nctsList = [].`
+          }
 
 ПРАВИЛА:
 1. Якщо товар зустрічається в кількох листах — бери дані з найновішого.
@@ -2959,7 +2959,7 @@ ${batchData}`;
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
           body: JSON.stringify({
             model: 'gpt-4o',
-            max_tokens: 6000,
+            max_tokens: 8000,
             temperature: 0.0,
             response_format: { type: 'json_object' },
             messages: [
