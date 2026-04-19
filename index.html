@@ -2139,30 +2139,27 @@
           const sheetId = extractSheetId(url);
           if (!sheetId) throw new Error('Невірне посилання на Google Sheets.');
 
-          const gid = extractGid(url);
-
-          if (gid) {
-            setLoaderStep('> Читання вказаного листа...', '');
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-            const res = await fetch(csvUrl);
-            if (!res.ok) throw new Error('Не вдалося прочитати лист. Перевірте доступ.');
-            const csvText = await res.text();
-            sheets = [{ name: 'Лист ' + gid, rows: parseCSV(csvText) }];
-          } else {
-            setLoaderStep('> Читання всіх листів таблиці...', '');
-            for (let i = 0; i < 10; i++) {
-              try {
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${i}`;
-                const res = await fetch(csvUrl);
-                if (res.ok) {
-                  const csvText = await res.text();
-                  const rows = parseCSV(csvText);
-                  if (rows.length > 0) sheets.push({ name: `Лист ${i + 1}`, rows });
-                }
-              } catch (e) { break; }
-            }
-            if (sheets.length === 0) throw new Error('Не вдалося прочитати жодного листа. Перевірте доступ.');
+          // Завантажуємо Google Sheets як XLSX — так само як при завантаженні файлу,
+          // отримуємо ВСІ листи з правильними назвами і без дублювання
+          setLoaderStep('> Завантаження Google Sheets...', 'Читання всіх листів...');
+          if (typeof XLSX === 'undefined') await loadXLSX();
+          const xlsxUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
+          const xlsxRes = await fetch(xlsxUrl);
+          if (!xlsxRes.ok) {
+            throw new Error('Не вдалося завантажити таблицю. Перевірте що таблиця публічна (Файл → Поширити → Всі з посиланням).');
           }
+          const buffer = await xlsxRes.arrayBuffer();
+          const xlsxData = new Uint8Array(buffer);
+          const workbook = XLSX.read(xlsxData, { type: 'array', cellDates: true, cellNF: false, cellText: false });
+          workbook.SheetNames.forEach(sheetName => {
+            const ws = workbook.Sheets[sheetName];
+            const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false, blankrows: false });
+            const rows = aoa
+              .map(r => r.map(c => c == null ? '' : String(c).trim()))
+              .filter(r => r.some(c => c && c.length > 0));
+            if (rows.length > 0) sheets.push({ name: sheetName, rows });
+          });
+          if (sheets.length === 0) throw new Error('Таблиця порожня або немає доступу.');
         }
 
         if (sheets.length === 0) throw new Error('Не знайдено даних для аналізу');
@@ -2235,21 +2232,27 @@
         });
 
         // Дедублікація: зберігаємо тільки першу появу кожної субстанції
-        // (оскільки sheetsByDate відсортовано найновіші-перші, перша поява = найактуальніші дані)
+        // (sheetsByDate відсортовано найновіші-перші → перша поява = найактуальніші дані)
         const seenNames = new Set();
         const allDataRows = [];
         for (const dataRow of rawDataRows) {
           const { header, row } = dataRow;
-          // Шукаємо колонку з назвою субстанції
+          // Шукаємо колонку з назвою субстанції по заголовку
           const nameIdx = header.findIndex(h =>
-            /номенкл|назва|наимен|найменув|name|substance|субстан|товар/i.test(h || '')
+            /номенкл|назва|наимен|найменув|name|substance|субстан|товар|продукт/i.test(h || '')
           );
-          let key;
+          let key = '';
           if (nameIdx >= 0 && row[nameIdx] && String(row[nameIdx]).trim()) {
             key = String(row[nameIdx]).trim().toLowerCase().replace(/\s+/g, ' ');
           } else {
-            // Резервний ключ — перші 3 непорожні клітинки
-            key = row.filter(c => c && String(c).trim()).slice(0, 3).join('|').toLowerCase();
+            // Резервний ключ — найдовша текстова клітинка (не число, не код, не дата)
+            for (const cell of row) {
+              const s = String(cell || '').trim();
+              if (!s || s.length < 3) continue;
+              if (/^[\d\s.,\-\/\(\)]+$/.test(s)) continue; // пропускаємо числа/дати
+              if (s.length > key.length) key = s;
+            }
+            key = key.toLowerCase().replace(/\s+/g, ' ');
           }
           if (!key || seenNames.has(key)) continue;
           seenNames.add(key);
