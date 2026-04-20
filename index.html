@@ -2572,6 +2572,7 @@
     let keyHistory = JSON.parse(localStorage.getItem('lap_key_history') || '[]');
     let archive = JSON.parse(localStorage.getItem('lap_archive') || '[]');
     let uploadedFileData = null;
+    let uploadedFileName = null;
 
     // Selected provider in the banner (before first save)
     let bannerProvider = currentProvider;
@@ -2843,7 +2844,7 @@
 
       try {
         let sheets = [];
-        let sourceUrl = url || 'Завантажений файл';
+        let sourceUrl = url || (uploadedFileName || 'Завантажений файл');
 
         if (uploadedFileData) {
           setLoaderStep('> Обробка завантаженого файлу...', 'Підготовка даних...');
@@ -2875,6 +2876,22 @@
             if (rows.length > 0) sheets.push({ name: sheetName, rows });
           });
           if (sheets.length === 0) throw new Error('Таблиця порожня або немає доступу.');
+
+          // Спробуємо отримати назву таблиці
+          try {
+            const metaUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+            const metaRes = await fetch(metaUrl, { redirect: 'follow' });
+            if (metaRes.ok) {
+              const html = await metaRes.text();
+              const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
+              if (titleMatch) {
+                let title = titleMatch[1].replace(/\s*[-–—]\s*Google\s+(Sheets|Таблиці|Таблицы).*/i, '').trim();
+                if (title && title.length > 2 && title.length < 120) {
+                  sourceUrl = title;
+                }
+              }
+            }
+          } catch (e) { /* не критично */ }
         }
 
         if (sheets.length === 0) throw new Error('Не знайдено даних для аналізу');
@@ -3369,6 +3386,7 @@ ${euRegulations}
         renderResults(parsed, sourceUrl);
 
         uploadedFileData = null;
+        uploadedFileName = null;
         document.getElementById('fileName').style.display = 'none';
         document.getElementById('fileUpload').value = '';
 
@@ -3849,13 +3867,22 @@ ${euRegulations}
         const bgColor = a.hasHigh ? 'var(--red-dim)' : a.hasMed ? 'var(--yellow-dim)' : 'var(--green-dim)';
         const borderColor = a.hasHigh ? 'rgba(239,74,74,0.3)' : a.hasMed ? 'rgba(229,181,58,0.3)' : 'rgba(44,184,120,0.3)';
         const label = a.hasHigh ? 'CRITICAL' : a.hasMed ? 'MEDIUM' : 'LOW';
+
+        // Визначаємо тип джерела та іконку
+        const src = a.url || '';
+        const isFile = /\.(xlsx|xls|csv|tsv)$/i.test(src) || (!src.startsWith('http') && !src.includes('google.com'));
+        const isLink = src.startsWith('http') || src.includes('google.com');
+        const srcIcon = isFile ? '📄' : isLink ? '🔗' : '📊';
+        const srcLabel = isFile ? 'Файл' : isLink ? 'Google Sheets' : 'Аналіз';
+        const displayName = src.length > 65 ? src.slice(0, 65) + '…' : src;
+
         const el = document.createElement('div');
         el.className = 'arch-item';
         el.innerHTML = `
       <div class="arch-dot" style="background:${color}; box-shadow:0 0 8px ${color}"></div>
-      <div>
-        <div class="arch-url">${a.url.length > 70 ? a.url.slice(0, 70) + '…' : a.url}</div>
-        <div class="arch-meta">${a.date} · ${a.items} позицій</div>
+      <div style="flex:1;min-width:0">
+        <div class="arch-url">${srcIcon} ${displayName}</div>
+        <div class="arch-meta"><span style="color:var(--ink-4)">${srcLabel}</span> · ${a.date} · ${a.items} позицій</div>
       </div>
       <div class="arch-risk" style="color:${color};background:${bgColor};border-color:${borderColor}">${label}</div>
       <div class="arch-total">${a.total}</div>`;
@@ -4307,6 +4334,7 @@ ${euRegulations}
     async function handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
+      uploadedFileName = file.name;
       const fileNameEl = document.getElementById('fileName');
       fileNameEl.textContent = '▣ ' + file.name;
       fileNameEl.style.display = 'block';
