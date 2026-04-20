@@ -1792,6 +1792,159 @@
       line-height: 1.55;
     }
 
+    /* =========== DOWNLOAD BUTTON =========== */
+    .download-wrap {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 18px;
+    }
+
+    .download-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 28px;
+      background: linear-gradient(135deg, var(--amber), var(--amber-bright));
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--sans);
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 6px 20px -6px var(--amber-glow);
+      z-index: 1;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px -6px var(--amber-glow);
+    }
+
+    .download-btn:active {
+      transform: translateY(0);
+    }
+
+    .download-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.3s;
+    }
+
+    .download-btn:hover svg {
+      animation: dl-bounce 0.6s ease;
+    }
+
+    @keyframes dl-bounce {
+      0%, 100% { transform: translateY(0); }
+      30% { transform: translateY(4px); }
+      60% { transform: translateY(-2px); }
+    }
+
+    /* Shine sweep effect */
+    .download-btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: skewX(-20deg);
+      transition: none;
+      z-index: 2;
+    }
+
+    .download-btn:hover::before {
+      animation: dl-shine 0.8s ease;
+    }
+
+    @keyframes dl-shine {
+      0% { left: -100%; }
+      100% { left: 150%; }
+    }
+
+    /* Downloading state */
+    .download-btn.downloading {
+      pointer-events: none;
+      background: linear-gradient(135deg, var(--surface-3), var(--surface-raise));
+      color: var(--ink-2);
+      box-shadow: none;
+    }
+
+    .download-btn.downloading svg {
+      animation: none;
+    }
+
+    .download-btn .dl-spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .download-btn.downloading .dl-spinner {
+      display: block;
+    }
+
+    .download-btn.downloading .dl-icon {
+      display: none;
+    }
+
+    /* Success state */
+    .download-btn.dl-success {
+      background: linear-gradient(135deg, var(--green), var(--green-bright));
+      pointer-events: none;
+    }
+
+    .download-btn.dl-success .dl-spinner {
+      display: none;
+    }
+
+    .download-btn.dl-success .dl-icon {
+      display: block;
+    }
+
+    .download-btn.dl-success svg {
+      animation: dl-check 0.4s ease;
+    }
+
+    @keyframes dl-check {
+      0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+      50% { transform: scale(1.2) rotate(5deg); }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    /* Ripple effect on click */
+    .download-btn .dl-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      transform: scale(0);
+      animation: dl-ripple-anim 0.6s ease-out;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    @keyframes dl-ripple-anim {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
     /* =========== ALERTS =========== */
     .alerts {
       display: grid;
@@ -3186,7 +3339,198 @@ ${euRegulations}
       return legend + `<div class="checks-list">${items}</div>`;
     }
 
+    // ===== DOWNLOAD XLSX REPORT =====
+    let lastAnalysisData = null;
+
+    function createRipple(event, btn) {
+      const ripple = document.createElement('span');
+      ripple.className = 'dl-ripple';
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    }
+
+    async function downloadReport(event) {
+      const btn = document.getElementById('dlBtn');
+      if (!lastAnalysisData || btn.classList.contains('downloading')) return;
+
+      createRipple(event, btn);
+
+      const d = lastAnalysisData;
+      const s = d.summary || {};
+      const label = btn.querySelector('.dl-label');
+      const origText = label.textContent;
+
+      btn.classList.add('downloading');
+      label.textContent = 'Генерація...';
+
+      try {
+        if (typeof XLSX === 'undefined') await loadXLSX();
+
+        const wb = XLSX.utils.book_new();
+
+        // ===== SHEET 1: ЗВЕДЕНА =====
+        const summaryData = [
+          ['LOGI-ANALYZER PRO · ЗВІТ АНАЛІЗУ'],
+          ['Дата звіту', new Date().toLocaleString('uk-UA')],
+          [''],
+          ['ФІНАНСОВА ЗВЕДЕНА'],
+          ['Митна вартість (CIF)', s.totalCustomsValue || 0],
+          ['Мито', s.totalDuty || 0],
+          ['ПДВ (20%)', s.totalVAT || 0],
+          ['До сплати (Разом)', s.totalToPay || 0],
+          ['Прогноз затримки на кордоні', s.borderDelay || '—'],
+          [''],
+          ['Кількість позицій', (d.items || []).length],
+          ['Критичних ризиків', (d.items || []).filter(i => i.risk === 'Критичний').length],
+          ['Середніх ризиків', (d.items || []).filter(i => i.risk === 'Середній').length],
+          ['Низьких ризиків', (d.items || []).filter(i => i.risk === 'Низький').length],
+        ];
+
+        if (d.criticalAlert) {
+          summaryData.push([''], ['⚠️ КРИТИЧНИЙ ФАКТОР', d.criticalAlert]);
+        }
+
+        if (d.nctsList && d.nctsList.length > 0) {
+          summaryData.push([''], ['NCTS ЧЕКЛІСТ']);
+          d.nctsList.forEach((item, i) => summaryData.push([`${i + 1}.`, item]));
+        }
+
+        const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+        ws1['!cols'] = [{ wch: 35 }, { wch: 50 }];
+
+        // Style header row
+        if (ws1['A1']) ws1['A1'].s = { font: { bold: true, sz: 16 } };
+
+        XLSX.utils.book_append_sheet(wb, ws1, 'Зведена');
+
+        // ===== SHEET 2: ДЕТАЛЬНИЙ АНАЛІЗ =====
+        const headers = [
+          '№', 'Назва товару', 'Код УКТЗЕД', 'Категорія', 'Застосування',
+          'Кількість (кг)', 'Ціна за кг ($)', 'Митна вартість ($)',
+          'Ставка мита (%)', 'Мито ($)', 'ПДВ ($)',
+          'Аналіз небезпеки', 'Зберігання', 'Ризик', 'Причина ризику'
+        ];
+
+        const rows = [headers];
+        (d.items || []).forEach((item, idx) => {
+          rows.push([
+            idx + 1,
+            item.name || '—',
+            item.uctzedCode || '—',
+            item.category || '—',
+            item.applications || '—',
+            item.qtyKg || 0,
+            item.buyPricePerKg || 0,
+            item.customsValue || 0,
+            item.dutyRatePercent || 0,
+            item.duty || 0,
+            item.vat || 0,
+            item.hazardAnalysis || '—',
+            item.storageRequirements || '—',
+            item.risk || '—',
+            item.riskNote || '—'
+          ]);
+        });
+
+        // Totals row
+        rows.push([]);
+        rows.push([
+          '', 'РАЗОМ', '', '', '',
+          (d.items || []).reduce((a, i) => a + (i.qtyKg || 0), 0), '',
+          s.totalCustomsValue || 0, '',
+          s.totalDuty || 0,
+          s.totalVAT || 0,
+          '', '', '', ''
+        ]);
+
+        const ws2 = XLSX.utils.aoa_to_sheet(rows);
+        ws2['!cols'] = [
+          { wch: 4 }, { wch: 30 }, { wch: 14 }, { wch: 22 }, { wch: 28 },
+          { wch: 14 }, { wch: 14 }, { wch: 16 },
+          { wch: 14 }, { wch: 12 }, { wch: 12 },
+          { wch: 40 }, { wch: 25 }, { wch: 12 }, { wch: 35 }
+        ];
+        ws2['!autofilter'] = { ref: `A1:O${rows.length}` };
+
+        XLSX.utils.book_append_sheet(wb, ws2, 'Детальний аналіз');
+
+        // ===== SHEET 3: ПЕРЕВІРКИ ЄС =====
+        const euHeaders = ['Товар', 'Перевірка', 'Статус', 'Коментар'];
+        const euRows = [euHeaders];
+        (d.items || []).forEach(item => {
+          const checks = Array.isArray(item.euChecks) ? item.euChecks : [];
+          checks.forEach((c, ci) => {
+            euRows.push([
+              ci === 0 ? (item.name || '—') : '',
+              c.item || '—',
+              c.status === 'green' ? '🟢 Ок' : c.status === 'red' ? '🔴 Критично' : '🟡 Увага',
+              c.note || '—'
+            ]);
+          });
+          if (checks.length > 0) euRows.push(['', '', '', '']); // separator
+        });
+
+        const ws3 = XLSX.utils.aoa_to_sheet(euRows);
+        ws3['!cols'] = [{ wch: 30 }, { wch: 40 }, { wch: 14 }, { wch: 60 }];
+        XLSX.utils.book_append_sheet(wb, ws3, 'Перевірки ЄС');
+
+        // ===== SHEET 4: РОЗМИТНЕННЯ UA =====
+        const uaHeaders = ['Товар', 'Перевірка', 'Статус', 'Коментар'];
+        const uaRows = [uaHeaders];
+        (d.items || []).forEach(item => {
+          const checks = Array.isArray(item.uaChecks) ? item.uaChecks : [];
+          checks.forEach((c, ci) => {
+            uaRows.push([
+              ci === 0 ? (item.name || '—') : '',
+              c.item || '—',
+              c.status === 'green' ? '🟢 Ок' : c.status === 'red' ? '🔴 Критично' : '🟡 Увага',
+              c.note || '—'
+            ]);
+          });
+          if (checks.length > 0) uaRows.push(['', '', '', '']);
+        });
+
+        const ws4 = XLSX.utils.aoa_to_sheet(uaRows);
+        ws4['!cols'] = [{ wch: 30 }, { wch: 40 }, { wch: 14 }, { wch: 60 }];
+        XLSX.utils.book_append_sheet(wb, ws4, 'Розмитнення UA');
+
+        // Generate file
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.download = `LOGI-ANALYZER_Report_${dateStr}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Success animation
+        btn.classList.remove('downloading');
+        btn.classList.add('dl-success');
+        label.textContent = 'Завантажено!';
+
+        setTimeout(() => {
+          btn.classList.remove('dl-success');
+          label.textContent = origText;
+        }, 2500);
+
+      } catch (err) {
+        btn.classList.remove('downloading');
+        label.textContent = origText;
+        alert('Помилка генерації звіту: ' + err.message);
+      }
+    }
+
     function renderResults(d, url) {
+      lastAnalysisData = d;
       const s = d.summary || {};
       let rows = '';
       (d.items || []).forEach(item => {
@@ -3270,6 +3614,13 @@ ${euRegulations}
       <span class="sec-num">02 · MANIFEST</span>
       <span class="sec-title">Склад та план перевірок</span>
       <span class="sec-line"></span>
+    </div>
+    <div class="download-wrap">
+      <button class="download-btn" id="dlBtn" onclick="downloadReport(event)">
+        <svg class="dl-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span class="dl-spinner"></span>
+        <span class="dl-label">Завантажити звіт (.xlsx)</span>
+      </button>
     </div>
     <div class="tbl-card">
       <div class="tbl-head-bar">
