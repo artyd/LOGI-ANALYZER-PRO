@@ -721,111 +721,209 @@
       border-top: none;
     }
 
-    /* =========== API KEY BANNER =========== */
-    .keybar {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      padding: 18px 24px;
-      background: var(--surface);
-      border: 1px solid var(--line-2);
-      border-left: 3px solid var(--amber);
-      border-radius: var(--radius);
+    /* =========== API KEY CARD (flip) =========== */
+    .akc-scene {
+      perspective: 1000px;
       margin-bottom: 24px;
+      display: flex;
+      justify-content: center;
     }
 
-    .keybar.hidden {
+    .akc-scene.hidden {
       display: none;
     }
 
-    .keybar-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      background: var(--amber-dim);
+    .akc-card {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 158px;
+      transform-style: preserve-3d;
+      transition: transform 0.52s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .akc-card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .akc-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--line-2);
+      background: var(--surface);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 22px 28px;
+      gap: 14px;
+    }
+
+    /* ── front face ── */
+    .akc-eyebrow {
+      font-size: 10px;
+      font-family: var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    .akc-providers {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .akc-prov {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 20px;
+      border-radius: 10px;
+      border: 1.5px solid var(--line-2);
+      background: var(--bg);
+      color: var(--ink-2);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, color 0.18s, transform 0.18s;
+      letter-spacing: 0.01em;
+      user-select: none;
+    }
+
+    .akc-prov:hover {
+      border-color: var(--amber);
+      background: var(--amber-dim);
+      color: var(--ink);
+      transform: translateY(-2px);
+    }
+
+    .akc-prov:active {
+      transform: translateY(0);
+    }
+
+    .akc-prov-icon {
+      width: 18px;
+      height: 18px;
       flex-shrink: 0;
     }
 
-    .keybar-icon svg {
-      width: 18px;
-      height: 18px;
-      stroke: var(--amber);
-      fill: none;
-      stroke-width: 1.8;
+    /* ── back face ── */
+    .akc-back {
+      transform: rotateY(180deg);
+      align-items: flex-start;
+      justify-content: center;
+      gap: 10px;
     }
 
-    .keybar-content {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr auto;
+    .akc-back-top {
+      display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 10px;
+      width: 100%;
     }
 
-    .keybar-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 3px;
-    }
-
-    .keybar-sub {
-      font-size: 12px;
-      color: var(--ink-3);
+    .akc-back-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
       font-family: var(--mono);
+      color: var(--ink-3);
+      background: none;
+      border: 1px solid var(--line-2);
+      border-radius: 7px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      flex-shrink: 0;
     }
 
-    .keybar-sub a {
+    .akc-back-btn:hover {
+      border-color: var(--amber);
+      color: var(--ink);
+      background: var(--amber-dim);
+    }
+
+    .akc-back-provname {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    .akc-back-heading {
+      font-size: 10px;
+      font-family: var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
       color: var(--amber);
-      text-decoration: none;
+      margin-bottom: 2px;
     }
 
-    .keybar-sub a:hover {
-      text-decoration: underline;
-    }
-
-    .keybar-input-row {
+    .akc-input-row {
       display: flex;
       gap: 8px;
+      width: 100%;
     }
 
-    .key-input {
-      width: 260px;
-      height: 36px;
-      padding: 0 12px;
+    .akc-input {
+      flex: 1;
+      height: 38px;
+      padding: 0 13px;
       background: var(--bg);
-      border: 1px solid var(--line-2);
-      border-radius: 6px;
+      border: 1.5px solid var(--line-2);
+      border-radius: 9px;
       color: var(--ink);
       font-size: 12px;
       font-family: var(--mono);
       outline: none;
+      transition: border-color 0.2s;
+      min-width: 0;
     }
 
-    .key-input:focus {
+    .akc-input:focus {
       border-color: var(--amber);
     }
 
-    .key-save {
-      height: 36px;
-      padding: 0 16px;
+    .akc-confirm {
+      height: 38px;
+      padding: 0 20px;
       background: var(--amber);
       color: var(--bg);
       border: none;
-      border-radius: 6px;
+      border-radius: 9px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       font-family: var(--mono);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      letter-spacing: 0.05em;
       cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    .key-save:hover {
+    .akc-confirm:hover {
       background: var(--amber-bright);
+    }
+
+    .akc-confirm:active {
+      transform: scale(0.97);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .akc-card {
+        transition: none;
+      }
+
+      .akc-prov {
+        transition: none;
+      }
     }
 
     /* =========== KEY MANAGEMENT =========== */
@@ -2179,38 +2277,63 @@
   <!-- ============ NEW ANALYSIS ============ -->
   <main class="page active" id="page-new">
 
-    <!-- API KEY BANNER -->
-    <div class="keybar" id="keyBanner">
-      <div class="keybar-icon">
-        <svg viewBox="0 0 24 24">
-          <circle cx="8" cy="15" r="4" />
-          <path d="M12 15h9M17 19v-4M21 19v-4" />
-        </svg>
-      </div>
-      <div class="keybar-content" style="display:block">
-        <div style="margin-bottom:12px">
-          <div class="keybar-title">API ключ не налаштовано</div>
-          <div class="keybar-sub">Оберіть провайдера та вставте ключ</div>
+    <!-- API KEY CARD -->
+    <div class="akc-scene" id="keyBanner">
+      <div class="akc-card" id="akcCard">
+
+        <!-- FRONT: provider selection -->
+        <div class="akc-face">
+          <div class="akc-eyebrow">Оберіть провайдера AI</div>
+          <div class="akc-providers">
+            <button class="akc-prov" onclick="akcSelectProv('openai')">
+              <svg class="akc-prov-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+              </svg>
+              OpenAI
+            </button>
+            <button class="akc-prov" onclick="akcSelectProv('gemini')">
+              <svg class="akc-prov-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2L9 9H2l6 4.5L5.5 21 12 16.5 18.5 21 16 13.5 22 9h-7z" />
+              </svg>
+              Gemini
+            </button>
+            <button class="akc-prov" onclick="akcSelectProv('claude')">
+              <svg class="akc-prov-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" />
+                <path d="M8 12h8M12 8v8" />
+              </svg>
+              Claude
+            </button>
+            <button class="akc-prov" onclick="akcSelectProv('openrouter')">
+              <svg class="akc-prov-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M4 6h16M4 12h10M4 18h13" />
+                <path d="M18 9l4 3-4 3" />
+              </svg>
+              OpenRouter
+            </button>
+          </div>
         </div>
-        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-          <button class="km-prov-btn active" id="bannerProv-openai" onclick="bannerSelectProvider('openai')">
-            <span class="km-prov-logo">⚡</span>OpenAI
-          </button>
-          <button class="km-prov-btn" id="bannerProv-gemini" onclick="bannerSelectProvider('gemini')">
-            <span class="km-prov-logo">✦</span>Gemini
-          </button>
-          <button class="km-prov-btn" id="bannerProv-claude" onclick="bannerSelectProvider('claude')">
-            <span class="km-prov-logo">◈</span>Claude
-          </button>
-          <button class="km-prov-btn" id="bannerProv-openrouter" onclick="bannerSelectProvider('openrouter')">
-            <span class="km-prov-logo">⟁</span>OpenRouter
-          </button>
+
+        <!-- BACK: key input -->
+        <div class="akc-face akc-back">
+          <div class="akc-back-top">
+            <button class="akc-back-btn" onclick="akcFlipBack()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M19 12H5M12 5l-7 7 7 7" />
+              </svg>
+              Назад
+            </button>
+            <span id="akcBackProvName" class="akc-back-provname"></span>
+          </div>
+          <div class="akc-back-heading">Введіть API-ключ</div>
+          <div class="akc-input-row">
+            <input class="akc-input" id="keyInput" type="password" placeholder="sk-proj-..." autocomplete="off">
+            <button class="akc-confirm" onclick="saveKey()">Підтвердити</button>
+          </div>
         </div>
-        <div class="keybar-input-row">
-          <input class="key-input" id="keyInput" type="password" placeholder="sk-proj-..."
-            style="width:100%;max-width:320px">
-          <button class="key-save" onclick="saveKey()">SAVE</button>
-        </div>
+
       </div>
     </div>
 
@@ -2316,6 +2439,20 @@
       document.getElementById('apiChipChange').style.display = 'inline';
     }
 
+    function akcSelectProv(p) {
+      bannerProvider = p;
+      const meta = PROVIDER_META[p];
+      document.getElementById('akcBackProvName').textContent = meta.label;
+      document.getElementById('keyInput').placeholder = meta.placeholder || 'API ключ...';
+      document.getElementById('keyInput').value = '';
+      document.getElementById('akcCard').classList.add('flipped');
+      setTimeout(() => document.getElementById('keyInput').focus(), 300);
+    }
+
+    function akcFlipBack() {
+      document.getElementById('akcCard').classList.remove('flipped');
+    }
+
     function init() {
       const savedTheme = localStorage.getItem('lap_theme');
       if (savedTheme === 'light') document.documentElement.classList.add('theme-light');
@@ -2328,14 +2465,7 @@
       localStorage.setItem('lap_theme', isLight ? 'light' : 'dark');
     }
 
-    // Banner provider selection (before first key saved)
-    function bannerSelectProvider(p) {
-      bannerProvider = p;
-      document.querySelectorAll('[id^="bannerProv-"]').forEach(b => b.classList.remove('active'));
-      document.getElementById('bannerProv-' + p).classList.add('active');
-      document.getElementById('keyInput').placeholder = PROVIDER_META[p].placeholder;
-      document.getElementById('keyInput').value = '';
-    }
+    // Banner provider selection handled by akcSelectProv / akcFlipBack
 
     function saveKey() {
       const v = document.getElementById('keyInput').value.trim();
