@@ -828,6 +828,233 @@
       background: var(--amber-bright);
     }
 
+    /* =========== KEY MANAGEMENT =========== */
+    .api-chip {
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .api-chip:hover {
+      border-color: var(--amber);
+      background: var(--surface-3);
+    }
+
+    .api-chip-change {
+      font-size: 10px;
+      color: var(--amber);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-left: 2px;
+      opacity: 0.8;
+    }
+
+    /* Modal overlay */
+    .km-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .km-overlay.open {
+      display: flex;
+    }
+
+    .km-modal {
+      background: var(--surface);
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius-lg);
+      width: 560px;
+      max-width: 96vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+    }
+
+    .km-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .km-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .km-close {
+      width: 28px;
+      height: 28px;
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      border-radius: 6px;
+      color: var(--ink-3);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .km-close:hover {
+      background: var(--surface-raise);
+      color: var(--ink);
+    }
+
+    .km-body {
+      padding: 20px 24px;
+    }
+
+    /* Provider tabs */
+    .km-providers {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .km-prov-btn {
+      padding: 10px 6px;
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--ink-2);
+      font-size: 11px;
+      font-family: var(--mono);
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1.3;
+    }
+
+    .km-prov-btn:hover {
+      border-color: var(--line-3);
+      color: var(--ink);
+    }
+
+    .km-prov-btn.active {
+      border-color: var(--amber);
+      background: var(--amber-dim);
+      color: var(--amber);
+    }
+
+    .km-prov-logo {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .km-current-key {
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-bottom: 14px;
+    }
+
+    .km-current-key span {
+      color: var(--amber);
+    }
+
+    .km-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .km-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .km-input-row .key-input {
+      flex: 1;
+      width: auto;
+    }
+
+    .km-link {
+      font-size: 11px;
+      color: var(--ink-3);
+      margin-bottom: 20px;
+    }
+
+    .km-link a {
+      color: var(--amber);
+      text-decoration: none;
+    }
+
+    .km-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* History */
+    .km-hist-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .km-hist-empty {
+      font-size: 12px;
+      color: var(--ink-4);
+      font-style: italic;
+    }
+
+    .km-hist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      margin-bottom: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .km-hist-badge {
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      background: var(--amber-dim);
+      color: var(--amber);
+      white-space: nowrap;
+    }
+
+    .km-hist-key {
+      color: var(--ink-2);
+      flex: 1;
+    }
+
+    .km-hist-time {
+      color: var(--ink-4);
+      white-space: nowrap;
+    }
+
     /* =========== LOADER OVERLAY =========== */
     .loader-overlay {
       background: var(--surface);
@@ -1940,9 +2167,10 @@
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
         </button>
-        <div class="api-chip">
+        <div class="api-chip" id="apiChip" onclick="openKeyModal()" title="Керування API ключами">
           <span class="api-dot" id="apiDot"></span>
           <span id="apiStatusTxt">API OFFLINE</span>
+          <span class="api-chip-change" id="apiChipChange" style="display:none">· змінити</span>
         </div>
       </div>
     </div>
@@ -1959,14 +2187,28 @@
           <path d="M12 15h9M17 19v-4M21 19v-4" />
         </svg>
       </div>
-      <div class="keybar-content">
-        <div>
-          <div class="keybar-title">OpenAI API ключ не налаштовано</div>
-          <div class="keybar-sub">Отримайте ключ на <a href="https://platform.openai.com/api-keys"
-              target="_blank">platform.openai.com</a> → API Keys</div>
+      <div class="keybar-content" style="display:block">
+        <div style="margin-bottom:12px">
+          <div class="keybar-title">API ключ не налаштовано</div>
+          <div class="keybar-sub">Оберіть провайдера та вставте ключ</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+          <button class="km-prov-btn active" id="bannerProv-openai" onclick="bannerSelectProvider('openai')">
+            <span class="km-prov-logo">⚡</span>OpenAI
+          </button>
+          <button class="km-prov-btn" id="bannerProv-gemini" onclick="bannerSelectProvider('gemini')">
+            <span class="km-prov-logo">✦</span>Gemini
+          </button>
+          <button class="km-prov-btn" id="bannerProv-claude" onclick="bannerSelectProvider('claude')">
+            <span class="km-prov-logo">◈</span>Claude
+          </button>
+          <button class="km-prov-btn" id="bannerProv-openrouter" onclick="bannerSelectProvider('openrouter')">
+            <span class="km-prov-logo">⟁</span>OpenRouter
+          </button>
         </div>
         <div class="keybar-input-row">
-          <input class="key-input" id="keyInput" type="password" placeholder="sk-proj-...">
+          <input class="key-input" id="keyInput" type="password" placeholder="sk-proj-..."
+            style="width:100%;max-width:320px">
           <button class="key-save" onclick="saveKey()">SAVE</button>
         </div>
       </div>
@@ -2041,21 +2283,43 @@
   </footer>
 
   <script>
-    let apiKey = localStorage.getItem('lap_key') || '';
+    // ===== MULTI-PROVIDER KEY MANAGEMENT =====
+    const PROVIDER_META = {
+      openai: { label: 'OpenAI', model: 'gpt-4o', placeholder: 'sk-proj-...', url: 'https://platform.openai.com/api-keys', urlLabel: 'platform.openai.com → API Keys' },
+      gemini: { label: 'Gemini', model: 'gemini-1.5-pro', placeholder: 'AIzaSy...', url: 'https://aistudio.google.com/app/apikey', urlLabel: 'aistudio.google.com → API Key' },
+      claude: { label: 'Claude', model: 'claude-opus-4-7', placeholder: 'sk-ant-...', url: 'https://console.anthropic.com/settings/keys', urlLabel: 'console.anthropic.com → API Keys' },
+      openrouter: { label: 'OpenRouter', model: 'openai/gpt-4o', placeholder: 'sk-or-...', url: 'https://openrouter.ai/keys', urlLabel: 'openrouter.ai → Keys' }
+    };
+
+    let currentProvider = localStorage.getItem('lap_provider') || 'openai';
+    let providerKeys = JSON.parse(localStorage.getItem('lap_provider_keys') || '{}');
+    let keyHistory = JSON.parse(localStorage.getItem('lap_key_history') || '[]');
     let archive = JSON.parse(localStorage.getItem('lap_archive') || '[]');
     let uploadedFileData = null;
 
+    // Selected provider in the banner (before first save)
+    let bannerProvider = currentProvider;
+
+    function getActiveKey() {
+      return providerKeys[currentProvider] || '';
+    }
+
+    function maskKey(k) {
+      if (!k || k.length < 8) return '—';
+      return k.slice(0, 6) + '••••••••' + k.slice(-4);
+    }
+
+    function setApiOnline(provider) {
+      document.getElementById('keyBanner').classList.add('hidden');
+      document.getElementById('apiDot').classList.add('ok');
+      document.getElementById('apiStatusTxt').textContent = PROVIDER_META[provider].label + ' ONLINE';
+      document.getElementById('apiChipChange').style.display = 'inline';
+    }
+
     function init() {
       const savedTheme = localStorage.getItem('lap_theme');
-      if (savedTheme === 'light') {
-        document.documentElement.classList.add('theme-light');
-      }
-
-      if (apiKey) {
-        document.getElementById('keyBanner').classList.add('hidden');
-        document.getElementById('apiDot').classList.add('ok');
-        document.getElementById('apiStatusTxt').textContent = 'API ONLINE';
-      }
+      if (savedTheme === 'light') document.documentElement.classList.add('theme-light');
+      if (getActiveKey()) setApiOnline(currentProvider);
       renderZed();
     }
 
@@ -2064,14 +2328,182 @@
       localStorage.setItem('lap_theme', isLight ? 'light' : 'dark');
     }
 
+    // Banner provider selection (before first key saved)
+    function bannerSelectProvider(p) {
+      bannerProvider = p;
+      document.querySelectorAll('[id^="bannerProv-"]').forEach(b => b.classList.remove('active'));
+      document.getElementById('bannerProv-' + p).classList.add('active');
+      document.getElementById('keyInput').placeholder = PROVIDER_META[p].placeholder;
+      document.getElementById('keyInput').value = '';
+    }
+
     function saveKey() {
       const v = document.getElementById('keyInput').value.trim();
-      if (!v.startsWith('sk-')) { alert('Невірний формат ключа. Має починатись з sk-...'); return; }
-      apiKey = v;
-      localStorage.setItem('lap_key', v);
-      document.getElementById('keyBanner').classList.add('hidden');
-      document.getElementById('apiDot').classList.add('ok');
-      document.getElementById('apiStatusTxt').textContent = 'API ONLINE';
+      if (!v) { alert('Вставте API ключ'); return; }
+      _persistKey(bannerProvider, v);
+      currentProvider = bannerProvider;
+      localStorage.setItem('lap_provider', currentProvider);
+      setApiOnline(currentProvider);
+    }
+
+    function _persistKey(provider, key) {
+      providerKeys[provider] = key;
+      localStorage.setItem('lap_provider_keys', JSON.stringify(providerKeys));
+      // Save to history
+      keyHistory.unshift({
+        provider,
+        key: maskKey(key),
+        savedAt: new Date().toLocaleString('uk-UA')
+      });
+      localStorage.setItem('lap_key_history', JSON.stringify(keyHistory.slice(0, 30)));
+    }
+
+    // ===== KEY MANAGEMENT MODAL =====
+    let kmSelectedProvider = currentProvider;
+
+    function openKeyModal() {
+      kmSelectedProvider = currentProvider;
+      _kmRenderProviders();
+      _kmRenderCurrentKey();
+      _kmRenderProvLink();
+      document.getElementById('kmKeyInput').value = '';
+      document.getElementById('kmKeyInput').placeholder = PROVIDER_META[kmSelectedProvider].placeholder;
+      _kmRenderHistory();
+      document.getElementById('kmOverlay').classList.add('open');
+    }
+
+    function closeKeyModal() {
+      document.getElementById('kmOverlay').classList.remove('open');
+    }
+
+    function kmOverlayClick(e) {
+      if (e.target === document.getElementById('kmOverlay')) closeKeyModal();
+    }
+
+    function kmSelectProvider(p) {
+      kmSelectedProvider = p;
+      _kmRenderProviders();
+      _kmRenderCurrentKey();
+      _kmRenderProvLink();
+      document.getElementById('kmKeyInput').placeholder = PROVIDER_META[p].placeholder;
+      document.getElementById('kmKeyInput').value = '';
+    }
+
+    function _kmRenderProviders() {
+      Object.keys(PROVIDER_META).forEach(p => {
+        const btn = document.getElementById('kmProv-' + p);
+        if (btn) btn.classList.toggle('active', p === kmSelectedProvider);
+      });
+    }
+
+    function _kmRenderCurrentKey() {
+      const key = providerKeys[kmSelectedProvider] || '';
+      const isActive = kmSelectedProvider === currentProvider;
+      document.getElementById('kmCurrentKey').innerHTML =
+        `Збережений ключ: <span>${maskKey(key) || '—'}</span>` +
+        (isActive ? ' <span style="color:var(--green);font-size:10px">● АКТИВНИЙ</span>' : '');
+    }
+
+    function _kmRenderProvLink() {
+      const m = PROVIDER_META[kmSelectedProvider];
+      document.getElementById('kmProvLink').innerHTML =
+        `Отримати ключ: <a href="${m.url}" target="_blank">${m.urlLabel}</a>`;
+    }
+
+    function _kmRenderHistory() {
+      const list = document.getElementById('kmHistList');
+      if (!keyHistory.length) {
+        list.innerHTML = '<div class="km-hist-empty">Історія порожня</div>';
+        return;
+      }
+      list.innerHTML = keyHistory.slice(0, 20).map(h => `
+        <div class="km-hist-item">
+          <span class="km-hist-badge">${PROVIDER_META[h.provider]?.label || h.provider}</span>
+          <span class="km-hist-key">${h.key}</span>
+          <span class="km-hist-time">${h.savedAt}</span>
+        </div>`).join('');
+    }
+
+    function kmSaveKey() {
+      const v = document.getElementById('kmKeyInput').value.trim();
+      if (!v) { alert('Вставте API ключ'); return; }
+      _persistKey(kmSelectedProvider, v);
+      currentProvider = kmSelectedProvider;
+      localStorage.setItem('lap_provider', currentProvider);
+      setApiOnline(currentProvider);
+      _kmRenderCurrentKey();
+      _kmRenderHistory();
+      document.getElementById('kmKeyInput').value = '';
+      // Update banner provider buttons
+      document.querySelectorAll('[id^="bannerProv-"]').forEach(b => b.classList.remove('active'));
+      const bp = document.getElementById('bannerProv-' + currentProvider);
+      if (bp) bp.classList.add('active');
+    }
+
+    // ===== UNIVERSAL AI CALLER =====
+    async function callAI(systemMsg, userMsg, maxTokens, jsonMode = true) {
+      const key = getActiveKey();
+      if (!key) throw new Error('API ключ не налаштовано. Натисніть на API chip щоб додати ключ.');
+
+      if (currentProvider === 'openai' || currentProvider === 'openrouter') {
+        const endpoint = currentProvider === 'openai'
+          ? 'https://api.openai.com/v1/chat/completions'
+          : 'https://openrouter.ai/api/v1/chat/completions';
+        const model = PROVIDER_META[currentProvider].model;
+        const body = {
+          model, max_tokens: maxTokens, temperature: 0.0,
+          messages: [{ role: 'system', content: systemMsg }, { role: 'user', content: userMsg }]
+        };
+        if (jsonMode) body.response_format = { type: 'json_object' };
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API Error ' + res.status); }
+        const data = await res.json();
+        return data.choices[0].message.content;
+
+      } else if (currentProvider === 'gemini') {
+        const model = PROVIDER_META.gemini.model;
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+        const body = {
+          system_instruction: { parts: [{ text: systemMsg }] },
+          contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+          generationConfig: {
+            maxOutputTokens: maxTokens, temperature: 0.0,
+            ...(jsonMode ? { responseMimeType: 'application/json' } : {})
+          }
+        };
+        const res = await fetch(endpoint, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'Gemini Error ' + res.status); }
+        const data = await res.json();
+        return data.candidates[0].content.parts[0].text;
+
+      } else if (currentProvider === 'claude') {
+        const endpoint = 'https://api.anthropic.com/v1/messages';
+        const model = PROVIDER_META.claude.model;
+        const finalUserMsg = jsonMode ? userMsg + '\n\nПоверни ТІЛЬКИ валідний JSON, без markdown.' : userMsg;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model, max_tokens: maxTokens, system: systemMsg,
+            messages: [{ role: 'user', content: finalUserMsg }]
+          })
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'Claude Error ' + res.status); }
+        const data = await res.json();
+        return data.content[0].text;
+      }
+      throw new Error('Невідомий провайдер: ' + currentProvider);
     }
 
     function showPage(name, btn) {
@@ -2109,7 +2541,7 @@
     }
 
     async function runAudit() {
-      if (!apiKey) { alert('Спочатку введіть API ключ!'); return; }
+      if (!getActiveKey()) { alert('Спочатку введіть API ключ!'); return; }
 
       const url = document.getElementById('driveUrl').value.trim();
 
@@ -2169,32 +2601,21 @@
 
         let euRegulations = '';
         try {
-          const searchRes = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-            body: JSON.stringify({
-              model: 'gpt-4o',
-              max_tokens: 2000,
-              messages: [{
-                role: 'user',
-                content: `Яка актуальна інформація станом на квітень 2026 року про:
+          euRegulations = await callAI(
+            'Ти — експерт з митного законодавства ЄС та міжнародної логістики.',
+            `Яка актуальна інформація станом на квітень 2026 року про:
 1. Правила транзиту фармацевтичних та хімічних вантажів через порти ЄС (Гамбург, Роттердам, Гданськ)
 2. Вимоги NCTS Phase 5 для транзитних декларацій
 3. Правила ADR для небезпечних вантажів
 4. Вимоги REACH для хімічної продукції при транзиті
 5. Санкційні обмеження ЄС щодо товарів з Китаю/Індії в Україну
 
-Дай коротку витяжку (500 слів) ТІЛЬКИ УКРАЇНСЬКОЮ про ключові вимоги що діють зараз.`
-              }]
-            })
-          });
-          if (searchRes.ok) {
-            const searchData = await searchRes.json();
-            euRegulations = searchData.choices[0].message.content;
-            setLoaderStep('> Отримано актуальні правила ЄС', 'Відправка на аналіз AI...');
-            const path = document.querySelector('.loader-route');
-            if (path) path.classList.add('animating');
-          }
+Дай коротку витяжку (500 слів) ТІЛЬКИ УКРАЇНСЬКОЮ про ключові вимоги що діють зараз.`,
+            2000, false
+          );
+          setLoaderStep('> Отримано актуальні правила ЄС', 'Відправка на аналіз AI...');
+          const path = document.querySelector('.loader-route');
+          if (path) path.classList.add('animating');
         } catch (e) { console.log('Could not fetch EU regulations:', e); }
 
         const sheetsByDate = sheets.map((sheet, idx) => {
@@ -2793,46 +3214,403 @@ ${euRegulations}
     }
 
     const zedTopics = [
+      // ─── 1 ───
       {
-        ico: '📑', topic: 'Рішення класифікації ЄС', short: 'BTI / Складні коди / УКТЗЕД', sections: [
-          { title: 'BTI (Binding Tariff Information)', rows: [['Термін дії', '3 роки в усьому ЄС'], ['Запит', 'Через митний портал ЄС / e-BTI'], ['Обовʼязковість', 'Юридична сила для всіх країн'], ['Аналог в UA', 'Рішення щодо попередньої класифікації']] },
-          { title: 'Типові помилки брокерів', rows: [['Спірні суміші', 'Вимагається точний % складу (CoA)'], ['Частини машин', 'Призначення vs Матеріал (Правило 3)'], ['Подвійне признач.', 'Потребує дозволу Держекспортконтролю']] },
-          { title: 'Нові правила (CBAM)', rows: [['CBAM', 'Екологічне мито на імпорт в ЄС (сталь, цемент)'], ['Фарма', 'Обовʼязковий GMP-сертифікат для активних субст.']] }
+        ico: "💊", topic: "Фармацевтика · АФІ · Імпорт", short: "API, GMP, МОЗ, Держлікслужба · Китай/Індія → ЄС → Україна",
+        sections: [
+          {
+            title: "Реєстрація в Україні (Держлікслужба)", rows: [
+              ["АФІ для ліків", "Обовязкова реєстрація в МОЗ Ukraine до ввезення. Термін: 3–6 міс."],
+              ["Ліцензія імпортера", "Наказ МОЗ №349: ліцензія на виробн./оптову торгівлю фармпродукцією"],
+              ["GMP-сертифікат", "Виробник із КНР/Індії повинен мати чинний GMP від ЄС, PIC/S або WHO"],
+              ["Дозвіл на ввезення", "Разовий дозвіл Держлікслужби (форма ЛЗ-2) для кожної партії АФІ"],
+              ["CoA / специфікація", "Certificate of Analysis + специфікація підприємства — обовязково на митниці"],
+              ["Психотропи / прекурсори", "Ліцензія ДСКН + дозвіл МОЗ. Список IV (прекурсори) контролюється ДФС"],
+              ["Термін дії серії", "Залишковий термін придатності: мінімум 75% від загального при ввезенні"]]
+          },
+          {
+            title: "Транзит через ЄС для АФІ", rows: [
+              ["GMP ЄС (Dir. 2001/83)", "АФІ з 3-х країн: відповідність EU GMP підтверджується письмово (письмова заява)"],
+              ["EDMF (Drug Master File)", "Захищає технологію виробника. Не обовязково для транзиту, але пришвидшує реєстр."],
+              ["Precursor Control", "Reg. 111/2005 + Reg. 1258/2013: прекурсори нарко/психотропів — ліцензія в країні призначення"],
+              ["Фальшиві ліки (FMD)", "Directive 2011/62/EU: серіалізація упаковки, QR-код для ввезення в ЄС (транзит — звільнений)"],
+              ["Carton labeling", "Маркування: INN назва, CAS номер, partia/lot, виробник, термін придатності, умови зберігання"],
+              ["SDS при транзиті", "MSDS / SDS (16 розділів, англ. + мова транзитної країни) — обовязково для хімічних АФІ"]]
+          },
+          {
+            title: "GDP · Холодовий ланцюг", rows: [
+              ["EU GDP Guidelines", "Commission Guideline 2013/C 68/01: зберігання, транспортування, документація"],
+              ["Температурні зони", "2–8°C (холодовий), 15–25°C (кімнатний), <-15°C (заморожений)"],
+              ["Моніторинг", "Температурний реєстратор (data logger) обовязковий. Звіт — частина документації партії"],
+              ["MKT (Mean Kinetic Temp)", "Розрахунок за формулою ICH Q1A для оцінки впливу відхилень температури"],
+              ["Рефрижератор", "Reefer контейнер: pre-cooling за 2 год до завантаження, температура ±0.5°C"],
+              ["Excursion protocol", "Будь-яке відхилення від норми: QA-оцінка до випуску партії"]]
+          }
         ]
       },
+      // ─── 2 ───
       {
-        ico: '📊', topic: 'Оцінка та Інвойсинг', short: 'Митна вартість / Інкотермс', sections: [
-          { title: 'Формування вартості (Метод 1)', rows: [['CIF (УА)', 'Invoice Value + Freight + Insurance'], ['EXW/FCA', 'Потребує чіткої довідки про вартість транспорту'], ['DAP/DDP', 'Фрахт та страх. вже включено']] },
-          { title: 'Документи для підтвердження', rows: [['Основа', 'Комерційний інвойс, пакувальний лист'], ['Транспорт', 'CMR, B/L (коносамент), AWB'], ['Оплата', 'SWIFT (платіжне доручення), експортна МД']] },
-          { title: 'Ризики для методики', rows: [['Зниження ціни', 'Спрацювання профілю ризику (ІАС МУ)'], ['Роялті', 'Мають включатись в митну вартість'], ['Посередники', 'Договір комісії збільшує вартість']] }
+        ico: "🧪", topic: "REACH · CLP · SDS · 2025", short: "Хімічна безпека ЄС · Реєстрація · Класифікація · MSDS",
+        sections: [
+          {
+            title: "REACH (Reg. EC 1907/2006)", rows: [
+              ["Реєстрація", "Виробники / імпортери >1 т/рік реєструють речовину в ECHA (Гельсінкі)"],
+              ["SVHC список", "240+ речовин «дуже високого занепокоєння» (Annex XIV): потреб. авторизація"],
+              ["Annex XVII", "Обмеження 73 речовин/груп: заборони або умовне застосування"],
+              ["Транзит", "REACH не застосовується для чистого транзиту (Article 2.1), але SDS потрібен"],
+              ["UA-REACH", "Україна впроваджує аналогічну систему з 2024 (Закон 2189-IX). Реєстр ДСНС"],
+              ["Pre-SIEF / SIEF", "Обмін даними між виробниками одного субстрату. Спільна реєстрація обовязкова"]]
+          },
+          {
+            title: "CLP (Reg. EC 1272/2008) · GHS", rows: [
+              ["Класи небезпеки", "16 фізичних + 10 здоровя + 2 навкол. середовища = 28 класів"],
+              ["Пікт. GHS01", "💣 Вибухонебезпечний (Expl., SelfReact., Org.Perox.)"],
+              ["Пікт. GHS02", "🔥 Легкозаймистий (Fl.Liq., Fl.Sol., Pyr., SelfHeat., WaterReact.)"],
+              ["Пікт. GHS06", "☠️ Гостра токсичність (кат.1–3): Acute Tox. 1/2/3"],
+              ["Пікт. GHS07", "⚠️ Подразнення (кат.4), Skin Irrit., Eye Irrit., Resp. Irrit."],
+              ["Пікт. GHS08", "💀 Канцероген, мутаген, репротоксикант, STOT RE, Resp. Sens."],
+              ["Пікт. GHS09", "🌿 Небезпека для вод. середовища: Aquatic Acute/Chronic"]]
+          },
+          {
+            title: "SDS / MSDS · 16 розділів", rows: [
+              ["Розд. 1–3", "Ідентифікація речовини, небезпеки, склад / інформація про компоненти"],
+              ["Розд. 4–6", "Перша допомога, Пожежогасіння, Дії при аварійному викиді"],
+              ["Розд. 7–10", "Поводження/Зберігання, ЗІЗ/Контроль впливу, Фіз.-хім. властивості, Стабільність"],
+              ["Розд. 11–14", "Токсикологія, Екологія, Утилізація, Транспортні вимоги (UN, ADR/IMDG/IATA)"],
+              ["Розд. 15–16", "Регуляторна інформація, Інші відомості"],
+              ["Мова", "Англійська + мова кожної країни ЄС транзиту/призначення (обовязково з 2015)"],
+              ["Оновлення", "Переглядати мінімум кожні 5 років або після суттєвих змін"]]
+          }
         ]
       },
+      // ─── 3 ───
       {
-        ico: '🇪🇺', topic: 'Транзит ЄС · NCTS 5', short: 'T1, E-CMR, Гарантії', sections: [
-          { title: 'Оновлення NCTS Phase 5', rows: [['MRN статус', 'Автоматичне відстеження по ЄС'], ['Помилки ENS', 'Призводять до зупинки в порту (до 72 год)'], ['Нові поля', 'Відправник/Одержувач на рівні House Consignment']] },
-          { title: 'Фінансова гарантія', rows: [['Загальна (CG)', 'Для регулярних перевезень (АЕО / брокери)'], ['Індивідуальна', 'Разова транзакція (високий тариф)'], ['Звільнення', 'Тільки для АЕО-комбінованих (AEO F)']] },
-          { title: 'Транзитні Checkpoints', rows: [['Польща-UA', 'Виключно через e-Cherha на кордоні'], ['Румунія-UA', 'Посилений ваговий контроль (+ рентген)'], ['Завершення', 'Тільки на авторизованому митному посту']] }
+        ico: "🏭", topic: "GMP · EudraLex · ICH Q7", short: "Стандарти якості виробництва АФІ · EU / WHO / PIC/S",
+        sections: [
+          {
+            title: "EU GMP (EudraLex Volume 4)", rows: [
+              ["Part I", "Виробництво готових лікарських засобів: базові вимоги (QMS, персонал, приміщення)"],
+              ["Part II", "АФІ (Active Substances): базується на ICH Q7. Обовязковий для АФІ в ЄС-продукції"],
+              ["Annex 1 (2022)", "Стерильне виробництво: новий текст 2022, класифікація чистих кімнат A/B/C/D"],
+              ["Annex 11", "Компютеризовані системи: валідація ПЗ, цілісність даних (data integrity)"],
+              ["Annex 13", "Дослідницькі ліки (IMP): спрощені вимоги для клінічних досліджень"],
+              ["GDP vs GMP", "GMP = виробництво, GDP = розподіл. Обидва обовязкові для дистриб. АФІ"]]
+          },
+          {
+            title: "GMP-сертифікація для Китаю / Індії", rows: [
+              ["EU GMP Certificate", "Видається регулятором країни ЄС після інспекції. Строк: 3 роки. База: EudraGMDP"],
+              ["PIC/S членство", "Індія (CDSCO): член PIC/S з 2012. Китай (NMPA): спостерігач. Визнання обмежене"],
+              ["WHO GMP", "Нижчий стандарт ніж EU GMP. Може не прийматись деякими регуляторами ЄС"],
+              ["Дефіцит GMP", "Відсутність EU GMP → додаткова лаб. верифікація в ЄС (коштовно, +4–8 тижнів)"],
+              ["NMPA (КНР)", "Нова редакція 2023 GMP China наближена до ICH Q7, але ЄС ще не визнає автоматично"],
+              ["Сертифікат партії", "Batch Certificate (CoA) + Batch Analysis Report: обовязкові з підписом QP"]]
+          },
+          {
+            title: "ICH Guidelines (актуальні 2025)", rows: [
+              ["ICH Q7", "GMP для АФІ: «золотий стандарт» для хімічного синтезу, ферментації, екстракції"],
+              ["ICH Q9 (rev.1)", "Quality Risk Management: FMEA, HAZOP, Ishikawa. Оновлено 2023"],
+              ["ICH Q10", "Pharmaceutical Quality System (PQS): CAPA, change control, product review"],
+              ["ICH Q11", "Development and Manufacture of Drug Substances: initial API manufacturing"],
+              ["ICH Q12", "Technical and Regulatory Considerations для lifecycle management"],
+              ["ICH Q14 (новий)", "Analytical Procedure Development: оновлений підхід до валідації методів аналізу"]]
+          }
         ]
       },
+      // ─── 4 ───
       {
-        ico: '☢️', topic: 'ADR Небезпечні вантажі', short: 'Хімія, Батареї, ADR', sections: [
-          { title: 'Критичні документи', rows: [['MSDS / ПБ', 'Тільки англ + мова країни транзиту (16 пунктів)'], ['DGD', 'Dangerous Goods Declaration (авіа/море)'], ['Tremcard', 'Аварійна картка водія (з вогнегасниками)']] },
-          { title: 'Літієві батареї (UN 3480/3481)', rows: [['Вимоги пакування', 'PI 965-967 (жорсткі коробки, маркування)'], ['Потужність', 'Понад 100 Wh класифікується як Class 9'], ['Транзит ЄС', 'Лише 50% SOC (стан заряду) під час перевезень']] },
-          { title: 'ADR несумісність', rows: [['Клас 6.1 + 8', 'Потребує окремих транспортних засобів / відсіків'], ['Їжа + ADR', 'Суворо заборонено до сумісного LCL'], ['Охолодження', 'Для деяких хім. вантажів обовʼязковий термореєстратор']] }
+        ico: "🇪🇺", topic: "Транзит ЄС · NCTS Phase 5", short: "T1, ICS2, ENS, Гарантії, КПП Польща/Румунія",
+        sections: [
+          {
+            title: "NCTS Phase 5 (з лют. 2023)", rows: [
+              ["MRN", "Movement Reference Number: 18-значний, генерується автоматично. Контроль онлайн"],
+              ["ICS2 Release 3", "З квітня 2024: ENS обовязковий для всіх морських+автомобільних вантажів до ЄС"],
+              ["ENS помилки", "Неповна ENS → «Do Not Load» / затримка 24–72 год у порту відправлення"],
+              ["House Consignment", "NCTS P5: дані відправника/одержувача на рівні кожного вантажомісця (не тільки master)"],
+              ["TIR + NCTS", "Паралельні системи. З 2024 TIR через TIRETS онлайн. Гарантія: IRU + нац. асоціація"],
+              ["e-CMR", "Електронний CMR (eCMR) за Женевською конвенцією 2008. Польща, Румунія активно використовують"]]
+          },
+          {
+            title: "Фінансова гарантія", rows: [
+              ["Comprehensive (CG)", "Загальна гарантія: для АЕО та регулярних перевізників. Знижка до 30% від тарифу"],
+              ["Individual Guarantee", "Разова: 100% від митних зборів + ПДВ. Видає митний брокер або банк"],
+              ["AEO F (Customs+Safety)", "Спрощені перевірки, пріоритетне оформлення, знижені гарантії. Мінімум 3 роки діяльності"],
+              ["Заборона руху", "Гарантія недостатня → вантаж заблоковано в транзитному митному офісі"],
+              ["UA AEO", "Статус АЕО в Україні (Митний кодекс ст.16): аналогічні привілеї. ~300 операторів станом на 2025"]]
+          },
+          {
+            title: "КПП Польща–Україна / Румунія–Україна (2025–2026)", rows: [
+              ["Медика / Шегині (PL)", "Навантаження авто до 40т. Середній час: 24–72 год (черга \"е-Черга UA\")"],
+              ["Дорогуськ / Ягодин (PL)", "Вантажний КПП. Посилена радіаційна перевірка. Черга: 12–36 год"],
+              ["Тересполь / Брест", "Залізничний КПП: зміна колії (РФ стандарт). +6–12 год на перевантаження"],
+              ["Сірет / Порубне (RO)", "Румунія: рентген 100% вантажівок, ваговий контроль. Середня черга: 8–24 год"],
+              ["Констанца (RO)", "Морський порт → поромна лінія Констанца–Чорноморськ: 14–16 год, менша черга"],
+              ["Рекомендація", "Для фарм/хімвантажів: попереднє повідомлення UA митниці за 24 год (Single Window)"]]
+          }
         ]
       },
+      // ─── 5 ───
       {
-        ico: '🏗️', topic: 'Управління LCL', short: 'Консолідація, Перевалка', sections: [
-          { title: 'Морські хаби (ЄС)', rows: [['Гдиня (PL)', 'Термін перевалки: 3-5 днів, затримки восени'], ['Констанца (RO)', 'Обов’язковий сканер для збірних вантажів'], ['Гамбург (DE)', 'Автоматичний випуск T1 за наявності ENS']] },
-          { title: 'Процес розформування CFS', rows: [['Строки', '+2 дні до загального транзиту'], ['Догляд', 'Якщо 1 вантаж в LCL на огляді – стоїть весь контейнер'], ['Пошкодження', 'Потребує Letter of Protest в перші 24 години']] },
-          { title: 'Управління тарою', rows: [['Деревʼяна (ISPM 15)', 'Обовʼязкове тавро "Колосок", інакше повернення'], ['Паллети', 'Euro паллети потрібні для крос-докінгу']] }
+        ico: "☢️", topic: "ADR 2025 · Небезпечні вантажі", short: "Класи 1–9 · Документи · Пакування · Несумісність",
+        sections: [
+          {
+            title: "ADR 2025 (нова редакція)", rows: [
+              ["Набрав чинності", "1 січня 2025. Перехідний період до 30 червня 2025"],
+              ["Клас 2", "Гази: нові вимоги до мультимодальних контейнерів для кріогенних рідин"],
+              ["Клас 3", "Легкозаймисті рідини: уточнення fp ≤60°C. Розчинники АФІ часто кл. 3"],
+              ["Клас 6.1", "Токсичні речовини: PG I/II/III за LD50. Більшість хімічних АФІ входять"],
+              ["Клас 8", "Корозійні: кислоти, луги. Оцтова к-та >80%: Кл.8. Аміак: Кл.2+8"],
+              ["Клас 9", "Різне: Li-батареї UN3480/3481, сухий лід UN1845, підвищена темп. UN3257"],
+              ["500кг правило", "LQ (Limited Quantity): до 1–30 л/кг на упаковку — без ADR-вимог до водія/авто"]]
+          },
+          {
+            title: "Обовязкові документи для ADR", rows: [
+              ["SDS / MSDS", "16 розд., оновлений, мова країни транзиту. Без нього — зупинка на кордоні"],
+              ["Tremcard", "Transport Emergency Card: у кабіні водія. Відповідає UN-номеру вантажу"],
+              ["DGD (авіа/море)", "IATA DGR 66th Ed. / IMDG Code Amend.41-22: для авіа та морських перевезень"],
+              ["ADR-сертифікат водія", "Дійсний 5 років. Потрібен для кл. 1, 2, 3, 4.1, 4.2, 4.3, 5.1, 5.2, 6.1, 6.2, 8, 9"],
+              ["Сертифікат авто", "Свідоцтво про допуск ТЗ для вибухових та токсичних речовин (кл.1, 2, 7, цистерни)"],
+              ["UN-маркування", "Кожна упаковка: UN No., назва IUPAC, пікт. GHS, кількість, PG (I/II/III)"]]
+          },
+          {
+            title: "Несумісні комбінації (LCL заборони)", rows: [
+              ["Кл.1 + Кл.3", "Вибухові + легкозаймисті: абсолютна заборона суміщення"],
+              ["Кл.6.1 + Кл.4.1", "Токсичні + пірофорні: окремий відсік або окремий ТЗ"],
+              ["Кл.5.1 + Кл.3/4", "Оксидатори + легкозаймисті: пожежонебезпечна реакція"],
+              ["ADR + харчові", "Суворо заборонено будь-яке суміщення ADR з продуктами харчування в LCL"],
+              ["Охолодження", "Деякі АФІ Кл.4.2: потребують охолодження + термореєстратор у ТЗ"],
+              ["Дозвіл Мінінфрастр.", "Для небезп. вантажів > 3 т у контейнері: дозвіл UA Мінінфраструктури через маршрут"]]
+          }
         ]
       },
+      // ─── 6 ───
       {
-        ico: '⚖️', topic: 'Санкції та Обмеження', short: 'Dual-Use, 17-й Пакет ЄС', sections: [
-          { title: 'Подвійне призначення', rows: [['Дозвіл Держекспорт.', 'Обовʼязковий при імпорті 84, 85, 90 груп'], ['EUC', 'Сертифікат кінцевого споживача (End User)'], ['Особливості', 'Дрони, рації, спецсплави, тепловізори']] },
-          { title: 'Походження товару', rows: [['Мікс сировини', 'Правило достатньої переробки (додана вартість)'], ['Сертиф. EUR.1', 'Тільки за умови прямого транспортування'], ['Антидемпінг', 'Посилено щодо сталі, труб, ламп з КНР']] },
-          { title: 'Актуальні ембарго (ЄС)', rows: [['РФ / РБ', 'Абсолютна заборона транзиту високотехн. товарів'], ['Китай', 'Посилений контроль виробників мікроелектроніки']] }
+        ico: "📑", topic: "УКТЗЕД · HS Codes · BTI", short: "Класифікація товарів · Фарма · Хімія · CBAM 2026",
+        sections: [
+          {
+            title: "Ключові товарні групи (фарма/хімія)", rows: [
+              ["Гл. 29", "Органічні хімічні сполуки: більшість синтетичних АФІ. Ставки 0–6.5% (UA)"],
+              ["Гл. 30", "Фармацевтична продукція: готові ЛЗ, антибіотики, вакцини. Ставка 0% (UA)"],
+              ["Гл. 38", "Хімічні продукти різні: біотехнологічні АФІ, допоміжні речовини, гормони"],
+              ["3912", "Мікрокристалічна целюлоза (МКЦ): 6.5% (UA). Часто plead as Гл.3912"],
+              ["2936", "Вітаміни: ставка 0–5%. Аскорбінова кислота (Vit C): 2937 11 00"],
+              ["2941", "Антибіотики: 0% мито ЄС для Гл.2941 (для транзиту без значення)"],
+              ["3003/3004", "Готові ліки (mix): 0% мито ЄС і UA. Потребує реєстрації МОЗ"]]
+          },
+          {
+            title: "BTI (Binding Tariff Information)", rows: [
+              ["Термін дії", "3 роки на всій митній території ЄС. Обовязковий до використання"],
+              ["Запит", "Через e-Customs / EUCTP (EU Customs Trader Portal). Безкоштовно"],
+              ["Відповідь", "До 120 днів. Юридично обовязковий для митниці та декларанта"],
+              ["Аналог UA", "Попереднє рішення з класифікації (ст.20 МКУ). Термін: 30 днів, дій 3 роки"],
+              ["Спірні субстанції", "Суміш речовин: потрібен точний % склад CoA. Рішення за правилом 3(b) HS"]]
+          },
+          {
+            title: "CBAM · Нові регуляторні вимоги 2025–2026", rows: [
+              ["CBAM (повний)", "З 1 січня 2026: Carbon Border Adjustment Mechanism повністю операційний"],
+              ["Охоплені сектори", "Сталь, цемент, алюміній, добрива, водень, електроенергія, хімікати (2027+)"],
+              ["Звітність", "Щоквартальний звіт про вбудовані викиди CO₂. Реєстрація в CBAM Registry"],
+              ["EUDR", "EU Deforestation Regulation: з 2025 — декларація на бездеревну продукцію"],
+              ["EUCS (AI Act)", "З 2026: AI Act — нові вимоги до автоматизованих митних систем аналізу ризиків"],
+              ["UCC Delegated Acts", "Нові ДА до UCC з 2025: зміни в гарантійних вимогах та АЕО-умовах"]]
+          }
+        ]
+      },
+      // ─── 7 ───
+      {
+        ico: "📊", topic: "Митна вартість · Інкотермс 2020", short: "Методи оцінки · CIF/FOB · UA розрахунок · Ризики",
+        sections: [
+          {
+            title: "Методи митної оцінки (WTO Art.VII)", rows: [
+              ["Метод 1 (осн.)", "Transaction Value: ціна угоди між неповязаними особами. Застосовується у 95% випадків"],
+              ["Метод 2", "Transaction Value identical goods: однакові товари за той самий період"],
+              ["Метод 3", "Transaction Value similar goods: аналогічні товари (±20% складу)"],
+              ["Метод 4", "Deductive Value: на основі ціни перепродажу в країні імпорту мінус витрати"],
+              ["Метод 5", "Computed Value: витрати на виробництво + прибуток. Складно довести"],
+              ["Метод 6 (резерв.)", "Fall-back: гнучкий. Використовується коли всі попередні не застосовуються"]]
+          },
+          {
+            title: "Формування CIF для України", rows: [
+              ["Формула UA", "Митна вартість = FOB + Freight + Insurance (до кордону Ukraine)"],
+              ["EXW → CIF", "Потрібен прайм-фрахт провайдера + страхування. Декларант зобовязаний документувати"],
+              ["Курс НБУ", "Перерахунок USD→UAH за курсом НБУ на дату подачі МД (не дату угоди)"],
+              ["Роялті", "Якщо включені в ціну або обовязкові для продажу — додаються до митної вартості"],
+              ["Знижки", "Знижки дійсні якщо: безумовні, в інвойсі, обґрунтовані комерційно"],
+              ["Профіль ризику", "АСМО автоматично порівнює заявлену ціну з базою «Мінімальні індикатори» ДФС"]]
+          },
+          {
+            title: "Інкотермс 2020 · Ключові зміни", rows: [
+              ["FCA (оновлено)", "FCA + B/L clause: продавець може вимагати коносамент з on-board відміткою"],
+              ["DPU (новий)", "Delivered at Place Unloaded: замінив DAT. Продавець несе ризик до розвантаження"],
+              ["CIF/CIP", "CIP тепер вимагає страхування Institute Cargo Clauses (A) — повне покриття"],
+              ["FOB для моря", "Підходить тільки для навалювальних/генеральних вантажів. Для контейнерів — FCA"],
+              ["DAP Харків/Київ", "Популярний для поставок в Україну: продавець несе витрати до місця призначення"],
+              ["Документація", "Обовязково: комерційний інвойс, пакувальний лист, CMR/B/L, сертифікат походження"]]
+          }
+        ]
+      },
+      // ─── 8 ───
+      {
+        ico: "🛃", topic: "Митниця України · 2025–2026", short: "ВМД, Single Window, АЕО UA, Платежі, Контроль",
+        sections: [
+          {
+            title: "Електронне декларування (АСМО)", rows: [
+              ["Система", "АСМО \"Інспектор\" + ЕКС (єдине вікно). Подача МД: електронно через ПКМО або брокера"],
+              ["Single Window", "Інтегровано 12 відомств (СЕС, Держлікслужба, ДСНС, Прикордонна). Зменшення часу з 4 до 1 дня"],
+              ["Класи ризику", "Зелений (авто-випуск ~40%), Жовтий (документ. контроль ~40%), Червоний (огляд ~20%)"],
+              ["Час оформлення", "Зелений: 2–4 год. Жовтий: 4–8 год. Червоний: 1–3 дні. Критичні: до 10 днів"],
+              ["Відстеження", "Кабінет платника: customs.gov.ua. Статус МД в реальному часі"],
+              ["E-Transit UA", "Підключення до ЄС NCTS: тестується. Повний запуск очікується 2026 (угода UA–ЄС)"]]
+          },
+          {
+            title: "Ставки митних платежів (2025)", rows: [
+              ["Мито АФІ (Гл.29)", "0–6.5% CIF залежно від коду. Більшість синтетичних: 0–5%"],
+              ["МКЦ / допоміж.", "6.5% CIF (Гл.3912, 3903). Допоміжні речовини фарма: 6.5%"],
+              ["ПДВ", "20% від (CIF + мито). Для зареєстрованих ЛЗ: 7% пільговий ПДВ (перелік КМУ)"],
+              ["Акциз", "Не застосовується до фармацевтичних / хімічних АФІ"],
+              ["Антидемпінг", "Сталь, деякі хімікати з КНР: 31–43%. Перевіряти EU SAD + МЕРТ UA"],
+              ["Штраф заниж.", "Заниження вартості: донарахування + штраф 100% від недоплачених платежів"]]
+          },
+          {
+            title: "Спеціальні режими та пільги", rows: [
+              ["АЕО UA", "Статус Авторизованого Економічного Оператора: пріоритет, знижені перевірки, ст.16 МКУ"],
+              ["Тимчасове ввезення", "До 12 місяців без сплати мита. Потребує гарантії 100% суми потенц. мита"],
+              ["Митний склад", "Зберігання до 3 років без сплати. Часто використовується для великих партій АФІ"],
+              ["Процесинг (ВМП)", "Внутрішня переробка: сировина ввозиться → готовий продукт вивозиться (мито 0%)"],
+              ["Пільги для фарми", "Медичні вироби / ЛЗ в реєстрі МОЗ: звільнення від мита (ПКМ №224 із змінами)"],
+              ["Воєнний час", "Постанова КМУ №153: спрощений режим для критичних медичних та хімічних товарів"]]
+          }
+        ]
+      },
+      // ─── 9 ───
+      {
+        ico: "⚖️", topic: "Санкції 2025–2026 · Dual-Use · Export Control", short: "17+ Пакетів ЄС · Reg.2021/821 · Circumvention · Товари подвійного призначення",
+        sections: [
+          {
+            title: "Санкційні пакети ЄС (актуально 2025–2026)", rows: [
+              ["14-й пакет (2024)", "Посилення проти обходу санкцій: відповідальність посередників, 3-тіх країн"],
+              ["15-й пакет (лют.2025)", "Нові обмеження на хімічні прекурсори та електроніку подвійного призначення"],
+              ["CPU List (50 items)", "Common High Priority Items: мікросхеми, підшипники, інструменти ЧПУ. Посилений контроль"],
+              ["Circumvention", "Перевірка кінцевого споживача через 3-ті країни (ОАЕ, Туреччина, Казахстан): due diligence"],
+              ["OFAC (USA)", "Вторинні санкції США екстратериторіально. SDN список: щоденне оновлення"],
+              ["Скринінг", "Обовязкова перевірка: EU Sanctions Map, OpenSanctions.org, World-Check перед відправкою"]]
+          },
+          {
+            title: "Dual-Use (Reg. EU 2021/821)", rows: [
+              ["Визначення", "Товари, ПЗ, технології цивільного використання, але з військовим потенціалом"],
+              ["Annexes I–VII", "Annex I: контрольний список. Annex IV: товари з посиленим контролем всередині ЄС"],
+              ["Дозвіл EU", "Від регулятора країни-експортера ЄС. Типи: Individual, Global, National General"],
+              ["End-User Cert.", "EUC + End-User Statement: письмова гарантія кінцевого споживача не-перепрод."],
+              ["Хімікати", "CWC Schedule 1/2/3 хімікати (ОЗХЗ): абсолютний контроль. Schedule 3 → дозвіл UA"],
+              ["UA Держекспорт.", "Держекспортконтроль Ukraine (ДСЕКК): дозвіл на ввезення ДП-товарів. Термін 15 днів"]]
+          },
+          {
+            title: "Антидемпінг та Захисні заходи", rows: [
+              ["КНР → ЄС", "Сталь, нержав. труби, деякі органічні речовини: AD мито 9–66%"],
+              ["Індія → ЄС", "Окремі продукти хімії (стирен, деякі добрива): AD мито 7–25%"],
+              ["КНР → UA", "Сталеві труби, феросплави: AD мито МЕРТ UA. Реєстр на mof.gov.ua"],
+              ["Safe-guard", "Захисне мито ЄС на сонячні панелі, E-велосипеди (скасовано 2024 для деяких)"],
+              ["Правила походж.", "Достатня переробка: зміна тарифного розряду (4-цифр HS) або додана вартість >40%"],
+              ["GSP / DCFTA", "UA: DCFTA з ЄС (0% мито на більшість пром. товарів). Довідка Form A / EUR.1"]]
+          }
+        ]
+      },
+      // ─── 10 ───
+      {
+        ico: "🏗️", topic: "LCL · FCL · Морські хаби · CFS", short: "Консолідація · Порти ЄС · Перевалка · ISPM-15",
+        sections: [
+          {
+            title: "Морські хаби для маршруту КНР/Індія → Україна", rows: [
+              ["Гданськ (PL) ★", "Найпопулярніший для UA: пряме залізничне сполучення Гданськ–Варшава–Рава-Руська"],
+              ["Гамбург (DE)", "Найбільший контейнерний порт ЄС. Авто-видача T1 при коректному ENS. Congestion восени"],
+              ["Роттердам (NL)", "Найбільший порт Євр. Обробка LCL: CFS Waalhaven/Botlek. Затримки 5–7 днів пік сезон"],
+              ["Констанца (RO)", "100% сканування вантажівок. Поромна лінія Констанца → Чорноморськ: 14–16 год"],
+              ["Кіль (DE)", "Використовується для LCL з хімікатами: менша черга, спеціалізований термінал"],
+              ["Трієст (IT)", "Альтернативний маршрут через Балкани. Зростає популярність після 2022"]]
+          },
+          {
+            title: "CFS / LCL Процедури", rows: [
+              ["CFS розформув.", "Container Freight Station: розвантаження, зважування, сканування, переклейка"],
+              ["Час обробки", "LCL: +2–4 дні до загального транзиту. FCL: +0.5–1 день (тільки оформлення)"],
+              ["1 вантаж на огляді", "Якщо 1 відправлення в LCL взяте на огляд → ВЕСЬ контейнер простоює"],
+              ["Пошкодження", "Letter of Protest в перші 24 год в порту. Без нього — претензія страховику неможлива"],
+              ["Letter of Credit", "L/C: документи подаються до банку в строго визначеному порядку. CAD — простіше"],
+              ["Вага / VGM", "Verified Gross Mass (SOLAS): обовязкова для FCL. Точність ±5%. Без VGM — відмова у завантаженні"]]
+          },
+          {
+            title: "Упаковка · ISPM-15 · Маркування", rows: [
+              ["ISPM-15", "Деревяна упаковка: знак IPPC (колосок) + HT (heat treat. 56°C/30min) або DB (Dielectric)"],
+              ["Без знаку", "Митники повернуть вантаж або знищать упаковку. КНР ISPM-15 загалом коректна"],
+              ["EPAL палети", "Euro-pallet 800×1200: маркування EPAL з обох боків. Для крос-докінгу UA — обовязково"],
+              ["UN-упаковка ADR", "UN-сертифікована тара: UN з цифрою типу, клас, PG, рік вироб., код орг. Перевірка в порту"],
+              ["GS1 / EAN барко.", "Для фармацевтики: GS1-128 barcode на кожній упаковці (партія, термін, серійний номер)"],
+              ["Температурні марк.", "Термочутливі індикатори (ColdMark, SpotSee) для холодового ланцюга — візуальний контроль"]]
+          }
+        ]
+      },
+      // ─── 11 ───
+      {
+        ico: "🌡️", topic: "Холодовий ланцюг · Температурний контроль", short: "GDP · Reefer · MKT · Валідація · Документація",
+        sections: [
+          {
+            title: "Температурні зони зберігання", rows: [
+              ["CRT (Controlled)", "15–25°C (до 30°C короткостр.): більшість твердих АФІ, таблетки, капсули"],
+              ["Refrigerated", "2–8°C: білкові АФІ, пептиди, частина вакцин, інсулін, живі культури"],
+              ["Frozen", "-15°C або -20°C: деякі біопрепарати, РНК-вакцини, клітинні продукти"],
+              ["Deep Frozen", "-60°C або -80°C: mRNA вакцини (Pfizer тип), аденовірусні вектори"],
+              ["Ambient", "<30°C (не контрол.): більшість промислових хімікатів, деякі excipients"],
+              ["Light Sensitive", "Захист від UV: темна або amber упаковка + алюмінієва фольга. Зберігання в темряві"]]
+          },
+          {
+            title: "GDP Документація (EU Guideline 2013)", rows: [
+              ["Transportation Plan", "Валідований маршрут: температурне картування, кваліфікація транспортного засобу"],
+              ["Temperature Log", "Data logger: запис кожні 5–15 хв. Завантаження + розвантаження. Зберігати 5 років"],
+              ["Excursion Report", "Будь-яке відхилення: дата, тривалість, максимум, вплив. QA-рішення перед випуском"],
+              ["Packing List GDP", "Валідована упаковка: тип (Active/Passive), кількість coolant, час автономності"],
+              ["Carrier GDP cert.", "Перевізник повинен мати GDP-сертифікат або відповідну кваліфікацію (QA аудит)"],
+              ["Chain of Custody", "Безперервний ланцюг документів від виробника до отримувача (з підписами)"]]
+          },
+          {
+            title: "MKT · Валідація · Відхилення", rows: [
+              ["MKT розрахунок", "Mean Kinetic Temperature: формула Haynes. ICH Q1A. Інструмент: WHO MKT calculator"],
+              ["Thermal mapping", "Картування складу/контейнера: 9+ точок вимірювання, 3 сезони (літо/зима/демісезон)"],
+              ["Cold Pack validation", "Пасивні контейнери: 3 прогони при min/max/середній темп. Відповідно ISTA 7D/7E"],
+              ["Reefer кваліфікація", "IQ/OQ/PQ для рефрижераторів. Мінімум 1 раз на рік. Документ у файлі перевізника"],
+              ["Відхилення <15 хв", "Короткострокові (до 15 хв): як правило некритичні. MKT не змінюється суттєво"],
+              ["Вплив на серію", "Якщо MKT перевищує допустимий ліміт → або відхилення серії, або продовженні стабільність"]]
+          }
+        ]
+      },
+      // ─── 12 ───
+      {
+        ico: "📦", topic: "Ключові документи · Чек-лист відвантаження", short: "Повний перелік документів для фарм/хімвантажів КНР/Індія → UA",
+        sections: [
+          {
+            title: "Обовязкові комерційні документи", rows: [
+              ["Commercial Invoice", "Інвойс: ціна, кількість, умови Інкотермс, країна походження, УКТЗЕД/HS код"],
+              ["Packing List", "Пакувальний лист: кількість місць, вага брутто/нетто, маркування кожного місця"],
+              ["CMR / B/L / AWB", "CMR (авто), коносамент B/L (море), AWB (авіа). Клеани без застережень"],
+              ["Certificate of Origin", "Form A (GSP) або EUR.1 (DCFTA). Для преференційного мита. Видає ТПП або митниця"],
+              ["Certificate of Analysis", "CoA: партія, дата вироб., термін придатності, специфікація, підпис QC. Обовязковий"],
+              ["Контракт + специфіка.", "Зовнішньоекономічний контракт: зареєстрований або надісланий до ДФС якщо >50k USD"]]
+          },
+          {
+            title: "Регуляторні документи (фарма/хімія)", rows: [
+              ["GMP Certificate", "Виробника АФІ: EU GMP або WHO GMP або PIC/S. Дійсний на дату ввезення"],
+              ["MSDS (SDS)", "16 розд., акт. версія, мова транзитної країни + укр/рос. Для всіх хімічних речовин"],
+              ["Free Sale Cert.", "Certificate of Free Sale (CFS): підтверджує законний продаж в країні-виробнику"],
+              ["Phyto / Sanit. Cert.", "Фітосанітарний (рослинна сировина) або санітарний (харчові добавки) сертифікат"],
+              ["Дозвіл МОЗ / ДСКН", "Для наркотичних / психотропних прекурсорів: обовязковий дозвіл + список ДСКН"],
+              ["Radiation Cert.", "Для всіх імпортованих товарів в Україну: Радіаційний сертифікат (ДСНС або МОЗ)"]]
+          },
+          {
+            title: "Транспортні та митні документи", rows: [
+              ["T1 (NCTS5)", "Транзитна декларація ЄС: генерується автоматично в NCTS. MRN відстежується онлайн"],
+              ["TIR Carnet", "Альтернатива T1. Страхова гарантія IRU. Для UA: IRU Київ. Зручно для маршрутів не-ЄС"],
+              ["ВМД (MД)", "Вантажна митна декларація UA: форма МД-2. Подається електронно через АСМО"],
+              ["CMR Waybill", "Автомобільна накладна: CIM (залізн.), AWB (авіа). Повинна відображати всі вантажі"],
+              ["Carnet ATA", "Тимчасове ввезення виставкових зразків: до 1 року. Гарантія ТПП"],
+              ["Insurance Policy", "Страховий поліс: Institute Cargo Clauses (A) для CIP/CIF. Мінімум 110% від вартості"]]
+          }
         ]
       }
     ];
@@ -2996,28 +3774,12 @@ ${isLast
 ДАНІ ПАРТІЇ:
 ${batchData}`;
 
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-          body: JSON.stringify({
-            model: 'gpt-4o',
-            max_tokens: 10000,
-            temperature: 0.0,
-            response_format: { type: 'json_object' },
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt }
-            ]
-          })
-        });
-
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(`Партія ${bi + 1}: ${err.error?.message || 'API Error ' + res.status}`);
+        let raw;
+        try {
+          raw = await callAI(systemPrompt, userPrompt, 10000, true);
+        } catch (e) {
+          throw new Error(`Партія ${bi + 1}: ${e.message}`);
         }
-
-        const data = await res.json();
-        const raw = data.choices[0].message.content;
         let batchParsed;
         try {
           let clean = raw.replace(/```json|```/g, '').trim();
@@ -3053,6 +3815,49 @@ ${batchData}`;
 
     init();
   </script>
+
+  <!-- ============ KEY MANAGEMENT MODAL ============ -->
+  <div class="km-overlay" id="kmOverlay" onclick="kmOverlayClick(event)">
+    <div class="km-modal">
+      <div class="km-head">
+        <div class="km-title">🔑 Керування API ключами</div>
+        <button class="km-close" onclick="closeKeyModal()">✕</button>
+      </div>
+      <div class="km-body">
+        <!-- Provider selector -->
+        <div class="km-label">Провайдер</div>
+        <div class="km-providers">
+          <button class="km-prov-btn" id="kmProv-openai" onclick="kmSelectProvider('openai')">
+            <span class="km-prov-logo">⚡</span>OpenAI
+          </button>
+          <button class="km-prov-btn" id="kmProv-gemini" onclick="kmSelectProvider('gemini')">
+            <span class="km-prov-logo">✦</span>Gemini
+          </button>
+          <button class="km-prov-btn" id="kmProv-claude" onclick="kmSelectProvider('claude')">
+            <span class="km-prov-logo">◈</span>Claude
+          </button>
+          <button class="km-prov-btn" id="kmProv-openrouter" onclick="kmSelectProvider('openrouter')">
+            <span class="km-prov-logo">⟁</span>OpenRouter
+          </button>
+        </div>
+
+        <!-- Current key -->
+        <div class="km-current-key" id="kmCurrentKey">Активний ключ: <span>—</span></div>
+
+        <!-- New key input -->
+        <div class="km-label">Новий ключ</div>
+        <div class="km-input-row">
+          <input class="key-input" id="kmKeyInput" type="password" placeholder="Вставте ключ...">
+          <button class="key-save" onclick="kmSaveKey()">SAVE</button>
+        </div>
+        <div class="km-link" id="kmProvLink"></div>
+
+        <!-- History -->
+        <div class="km-hist-title">Історія змін ключів</div>
+        <div id="kmHistList"></div>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
