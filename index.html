@@ -2901,8 +2901,12 @@
           if (path) path.classList.add('animating');
         } catch (e) { console.log('Could not fetch EU regulations:', e); }
 
-        const sheetsByDate = sheets.map((sheet, idx) => {
-          const dateMatch = sheet.name.match(/(\d{1,2})[\.\-\/](\d{1,2})[\.\-\/](\d{4})/);
+        // ===== РОЗУМНА ОБРОБКА ЛИСТІВ =====
+
+        // 1. Парсимо дати з назв листів
+        const sheetsMeta = sheets.map((sheet, idx) => {
+          // Підтримуємо формати: dd.mm.yyyy, dd-mm-yyyy, dd,mm,yyyy
+          const dateMatch = sheet.name.match(/(\d{1,2})[\.\-\,\/](\d{1,2})[\.\-\,\/](\d{4})/);
           let date = null;
           if (dateMatch) {
             const day = parseInt(dateMatch[1]);
@@ -2911,20 +2915,73 @@
             date = new Date(year, month - 1, day);
           }
           return { sheet, idx, date, name: sheet.name };
-        }).sort((a, b) => {
-          if (a.date && b.date) return b.date - a.date;
-          if (a.date) return -1;
-          if (b.date) return 1;
-          return 0;
         });
 
-        // Витягуємо всі рядки з усіх листів (sheetsByDate вже відсортовані: найновіші перші)
+        // 2. Визначаємо які листи мають повноцінну табличну структуру (заголовок + дані)
+        function sheetHasTableStructure(rows) {
+          if (!rows || rows.length < 2) return false;
+          // Шукаємо рядок-заголовок з характерними словами
+          for (let i = 0; i < Math.min(5, rows.length); i++) {
+            const rowText = (rows[i] || []).join(' ').toLowerCase();
+            if (/номенкл|кол[\-\s]*ва|цена|вес|кг|поставщик|производитель|закупк/i.test(rowText)) {
+              // Після заголовка має бути хоча б 1 рядок даних
+              return rows.length > i + 1;
+            }
+          }
+          return false;
+        }
+
+        // 3. Розділяємо листи на "табличні з датами" та "інші"
+        const datedDataSheets = sheetsMeta
+          .filter(m => m.date && sheetHasTableStructure(m.sheet.rows))
+          .sort((a, b) => b.date - a.date); // найновіші перші
+
+        const undatedDataSheets = sheetsMeta
+          .filter(m => !m.date && sheetHasTableStructure(m.sheet.rows));
+
+        // Нетабличні листи (списки, нотатки тощо) — ігноруємо
+        const skippedSheets = sheetsMeta.filter(m =>
+          !datedDataSheets.includes(m) && !undatedDataSheets.includes(m)
+        );
+
+        if (skippedSheets.length > 0) {
+          console.log('Пропущені листи (без табличної структури):', skippedSheets.map(s => s.name));
+        }
+
+        // 4. Порядок пріоритету: спочатку найновіший датований лист, потім старші, потім без дати
+        // Це гарантує що при дедублікації перший знайдений = найсвіжіші дані
+        const orderedSheets = [...datedDataSheets, ...undatedDataSheets];
+
+        if (orderedSheets.length === 0) {
+          throw new Error('Не знайдено листів з табличними даними. Перевірте структуру файлу.');
+        }
+
+        setLoaderStep(
+          `> Знайдено ${orderedSheets.length} табличних листів`,
+          datedDataSheets.length > 0
+            ? `Найсвіжіший: "${datedDataSheets[0].name}" · буде основним`
+            : 'Дати не знайдені — використовуються всі листи'
+        );
+
+        // 5. Витягуємо рядки з усіх табличних листів
         const rawDataRows = [];
-        sheetsByDate.forEach(({ sheet, date, name }) => {
+        orderedSheets.forEach(({ sheet, date, name }) => {
           const rows = sheet.rows;
           if (!rows || rows.length === 0) return;
-          let headerIdx = 0;
-          while (headerIdx < rows.length && !rows[headerIdx].some(c => c && c.trim())) headerIdx++;
+          // Знаходимо заголовок
+          let headerIdx = -1;
+          for (let i = 0; i < Math.min(5, rows.length); i++) {
+            const rowText = (rows[i] || []).join(' ').toLowerCase();
+            if (/номенкл|кол[\-\s]*ва|цена|вес|кг|поставщик|производитель|закупк/i.test(rowText)) {
+              headerIdx = i;
+              break;
+            }
+          }
+          if (headerIdx < 0) {
+            // Якщо не знайшли за ключовими словами, беремо перший непустий рядок
+            headerIdx = 0;
+            while (headerIdx < rows.length && !rows[headerIdx].some(c => c && c.trim())) headerIdx++;
+          }
           if (headerIdx >= rows.length) return;
           const header = rows[headerIdx];
           for (let ri = headerIdx + 1; ri < rows.length; ri++) {
@@ -2935,9 +2992,24 @@
           }
         });
 
-        // Дедублікація: зберігаємо тільки першу появу кожної субстанції
-        // (sheetsByDate відсортовано найновіші-перші → перша поява = найактуальніші дані)
-        const seenNames = new Set();
+        // 6. РОЗУМНА ДЕДУБЛІКАЦІЯ
+        // Нормалізуємо назву для порівняння: видаляємо суфікси типу "ЗАКАЗАН", дужки, зайві пробіли
+        function normalizeItemName(raw) {
+          let s = String(raw || '').trim().toLowerCase();
+          // Видаляємо типові суфікси/мітки що не є частиною назви товару
+          s = s.replace(/\s*(заказан|заказано|заказ|одобрен[оа]?\s*(клиентом)?|замена\s*(брака)?|склад)\s*/gi, ' ');
+          // Видаляємо інформацію в дужках на кінці (виробник, клієнт, примітки)
+          s = s.replace(/\s*\([^)]*\)\s*$/g, '');
+          // Прибираємо кількість та одиниці на кінці
+          s = s.replace(/\s*\d+\s*(кг|kg|шт|pcs)\s*$/gi, '');
+          // Зводимо пробіли
+          s = s.replace(/\s+/g, ' ').trim();
+          // Видаляємо кінцеві артефакти
+          s = s.replace(/[\s\.\,\-]+$/, '');
+          return s;
+        }
+
+        const seenNames = new Map(); // normalizedKey → index in allDataRows
         const allDataRows = [];
         for (const dataRow of rawDataRows) {
           const { header, row } = dataRow;
@@ -2945,23 +3017,36 @@
           const nameIdx = header.findIndex(h =>
             /номенкл|назва|наимен|найменув|name|substance|субстан|товар|продукт/i.test(h || '')
           );
-          let key = '';
+          let rawName = '';
           if (nameIdx >= 0 && row[nameIdx] && String(row[nameIdx]).trim()) {
-            key = String(row[nameIdx]).trim().toLowerCase().replace(/\s+/g, ' ');
+            rawName = String(row[nameIdx]).trim();
           } else {
             // Резервний ключ — найдовша текстова клітинка (не число, не код, не дата)
             for (const cell of row) {
               const s = String(cell || '').trim();
               if (!s || s.length < 3) continue;
-              if (/^[\d\s.,\-\/\(\)]+$/.test(s)) continue; // пропускаємо числа/дати
-              if (s.length > key.length) key = s;
+              if (/^[\d\s.,\-\/\(\)]+$/.test(s)) continue;
+              if (s.length > rawName.length) rawName = s;
             }
-            key = key.toLowerCase().replace(/\s+/g, ' ');
           }
-          if (!key || seenNames.has(key)) continue;
-          seenNames.add(key);
+          if (!rawName) continue;
+          const key = normalizeItemName(rawName);
+          if (!key || key.length < 2) continue;
+
+          // Якщо вже бачили цю субстанцію — пропускаємо (перша поява = найсвіжіший лист)
+          if (seenNames.has(key)) continue;
+          seenNames.set(key, allDataRows.length);
           allDataRows.push(dataRow);
         }
+
+        if (allDataRows.length === 0) {
+          throw new Error('Не знайдено товарних позицій у даних. Перевірте структуру таблиці.');
+        }
+
+        setLoaderStep(
+          `> Знайдено ${allDataRows.length} унікальних позицій (з ${rawDataRows.length} рядків)`,
+          `Дедублікація завершена · Відправка на аналіз AI...`
+        );
 
         const systemPrompt = `Ти — професійний аналітик міжнародної логістики та митного оформлення фармацевтичних та хімічних вантажів з Китаю/Індії в Україну через ЄС.
 
