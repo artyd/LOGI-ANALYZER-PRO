@@ -2905,7 +2905,6 @@
 
         // 1. Парсимо дати з назв листів
         const sheetsMeta = sheets.map((sheet, idx) => {
-          // Підтримуємо формати: dd.mm.yyyy, dd-mm-yyyy, dd,mm,yyyy
           const dateMatch = sheet.name.match(/(\d{1,2})[\.\-\,\/](\d{1,2})[\.\-\,\/](\d{4})/);
           let date = null;
           if (dateMatch) {
@@ -2917,43 +2916,42 @@
           return { sheet, idx, date, name: sheet.name };
         });
 
-        // 2. Визначаємо які листи мають повноцінну табличну структуру (заголовок + дані)
-        function sheetHasTableStructure(rows) {
-          if (!rows || rows.length < 2) return false;
-          // Шукаємо рядок-заголовок з характерними словами
-          for (let i = 0; i < Math.min(5, rows.length); i++) {
-            const rowText = (rows[i] || []).join(' ').toLowerCase();
-            if (/номенкл|кол[\-\s]*ва|цена|вес|кг|поставщик|производитель|закупк/i.test(rowText)) {
-              // Після заголовка має бути хоча б 1 рядок даних
-              return rows.length > i + 1;
+        // 2. Визначаємо які листи — повноцінні таблиці з даними
+        // Лист повинен мати заголовок з "Номенклатура" + стовпці кількості/ціни
+        function findDataHeader(rows) {
+          if (!rows || rows.length < 2) return -1;
+          for (let i = 0; i < Math.min(8, rows.length); i++) {
+            const rowText = (rows[i] || []).map(c => String(c || '').toLowerCase()).join('\t');
+            // Має бути ОБОВ'ЯЗКОВО "номенклатур" + хоча б одне з "кол-ва/вес/цена/кг/закупк"
+            if (/номенкл/i.test(rowText) &&
+                /кол[\-\s]*ва|вес|цена|кг|закупк|нетто/i.test(rowText)) {
+              return i;
             }
           }
-          return false;
+          return -1;
         }
 
-        // 3. Розділяємо листи на "табличні з датами" та "інші"
+        // 3. Відбираємо тільки табличні листи з даними, пріоритет найновішим
         const datedDataSheets = sheetsMeta
-          .filter(m => m.date && sheetHasTableStructure(m.sheet.rows))
-          .sort((a, b) => b.date - a.date); // найновіші перші
+          .filter(m => m.date && findDataHeader(m.sheet.rows) >= 0)
+          .sort((a, b) => b.date - a.date);
 
+        // Недатовані табличні листи — тільки якщо мають повну структуру
         const undatedDataSheets = sheetsMeta
-          .filter(m => !m.date && sheetHasTableStructure(m.sheet.rows));
+          .filter(m => !m.date && findDataHeader(m.sheet.rows) >= 0);
 
-        // Нетабличні листи (списки, нотатки тощо) — ігноруємо
         const skippedSheets = sheetsMeta.filter(m =>
           !datedDataSheets.includes(m) && !undatedDataSheets.includes(m)
         );
-
         if (skippedSheets.length > 0) {
-          console.log('Пропущені листи (без табличної структури):', skippedSheets.map(s => s.name));
+          console.log('Пропущені листи:', skippedSheets.map(s => s.name));
         }
 
-        // 4. Порядок пріоритету: спочатку найновіший датований лист, потім старші, потім без дати
-        // Це гарантує що при дедублікації перший знайдений = найсвіжіші дані
+        // Порядок: найновіший датований лист перший → старіші → без дати
         const orderedSheets = [...datedDataSheets, ...undatedDataSheets];
 
         if (orderedSheets.length === 0) {
-          throw new Error('Не знайдено листів з табличними даними. Перевірте структуру файлу.');
+          throw new Error('Не знайдено листів з табличними даними (потрібен заголовок з "Номенклатура" + "Кол-ва/Вес/Ціна"). Перевірте файл.');
         }
 
         setLoaderStep(
@@ -2963,88 +2961,182 @@
             : 'Дати не знайдені — використовуються всі листи'
         );
 
-        // 5. Витягуємо рядки з усіх табличних листів
+        // 4. ====== ФІЛЬТР СМІТТЯ ======
+        // Рядки які є коментарями/нотатками, а не товарами
+        function isJunkRow(nomValue, row, header) {
+          const s = String(nomValue || '').trim();
+          if (!s) return true;
+
+          // Занадто короткі назви (1-2 символи) — не товар
+          if (s.length < 3) return true;
+
+          // Чисто числові значення — це не назва товару
+          if (/^[\d\s.,\-\/\(\)%#]+$/.test(s)) return true;
+
+          // Повторний заголовок (Номенклатура)
+          if (/^номенклатур/i.test(s)) return true;
+
+          // Коментарі / нотатки / логістичні замітки
+          const junkPatterns = [
+            /^!!!/, /^>>>/, /^---/,                             // маркери заміток
+            /доставк[аіу]/i,                                   // про доставку
+            /всего\s+\d/i,                                     // "всего 18т"
+            /считаем/i,                                        // "считаем из расчета"
+            /по факту/i,                                       // "у нас по факту"
+            /^не\s+опасн/i,                                    // "не опасных грузов"
+            /^больше\s+опасн/i,                                // "больше опасных нельзя"
+            /нельзя/i,                                         // "нельзя соединить"
+            /^если\s+\+/i,                                     // "если + диклофенак"
+            /можно\s+ли/i,                                     // "можно ли соединить"
+            /^сколько/i,                                       // "сколько еще добавить"
+            /^или\s+/i,                                        // "или МКЦ или масла"
+            /^и\s+(лсл|лсе)/i,                                 // "и ЛСЛ нимесулид"
+            /^просчитать/i,                                    // "просчитать разницу"
+            /^мор[еє]$/i,                                      // "море"
+            /^надо\s+\d/i,                                     // "надо 18т"
+            /основной\s+лист/i,                                // "основной лист"
+            /цена.*доставк|доставк.*цена/i,                    // "цена/доставка"
+            /меняем\s+\d/i,                                    // "меняем 3т МКЦ на"
+            /^\d+\s*фут/i,                                     // "20фут с МКЦ", "40фут"
+            /^у нас/i,                                         // "у нас по факту"
+            /^инди[ия]\s+\d/i,                                 // "индия 7 -доставка"
+            /распределить/i,                                   // "распределить доставку"
+            /стоимость$/i,                                     // "...и стоимость"
+            /будет\s+космос/i,                                 // "будет космос"
+            /^разница/i,                                       // "разница"
+            /^опасн/i,                                         // "опасных грузов"
+            /делаем\s+\d/i,                                    // "делаем 7% ндс"
+            /тоже\s+для/i,                                     // "тоже для Звезды"
+            /^добавить/i,                                      // "добавить товар"
+            /^выяснить/i,                                      // "выяснить по сроку"
+            /^проработать/i,                                   // "проработать"
+            /^\d+\s*[-–]\s*основн/i,                           // "46462 -основной лист"
+          ];
+
+          if (junkPatterns.some(p => p.test(s))) return true;
+
+          // Перевіряємо чи є хоча б одне числове значення в рядку
+          // (кількість, ціна, вага) — справжній товар має хоча б щось
+          // Знаходимо колонки з кількістю / ціною
+          const numericColPatterns = /кол[\-\s]*ва|вес|нетто|цена|закупк|кг|qty|price|weight/i;
+          let hasNumericData = false;
+          for (let ci = 0; ci < header.length; ci++) {
+            if (numericColPatterns.test(header[ci] || '')) {
+              const val = row[ci];
+              if (val != null) {
+                const num = parseFloat(String(val).replace(/[,\s]/g, ''));
+                if (!isNaN(num) && num > 0) {
+                  hasNumericData = true;
+                  break;
+                }
+              }
+            }
+          }
+
+          // Якщо немає жодних числових даних (кількість, ціна) — це не товар
+          if (!hasNumericData) return true;
+
+          return false;
+        }
+
+        // 5. Витягуємо чисті рядки з усіх табличних листів
         const rawDataRows = [];
         orderedSheets.forEach(({ sheet, date, name }) => {
           const rows = sheet.rows;
-          if (!rows || rows.length === 0) return;
-          // Знаходимо заголовок
-          let headerIdx = -1;
-          for (let i = 0; i < Math.min(5, rows.length); i++) {
-            const rowText = (rows[i] || []).join(' ').toLowerCase();
-            if (/номенкл|кол[\-\s]*ва|цена|вес|кг|поставщик|производитель|закупк/i.test(rowText)) {
-              headerIdx = i;
-              break;
-            }
-          }
-          if (headerIdx < 0) {
-            // Якщо не знайшли за ключовими словами, беремо перший непустий рядок
-            headerIdx = 0;
-            while (headerIdx < rows.length && !rows[headerIdx].some(c => c && c.trim())) headerIdx++;
-          }
-          if (headerIdx >= rows.length) return;
+          const headerIdx = findDataHeader(rows);
+          if (headerIdx < 0) return;
           const header = rows[headerIdx];
+
+          // Знаходимо індекс колонки "Номенклатура"
+          const nomIdx = header.findIndex(h =>
+            /номенкл/i.test(h || '')
+          );
+
           for (let ri = headerIdx + 1; ri < rows.length; ri++) {
             const row = rows[ri];
-            if (row && row.some(cell => cell && cell.trim() && cell !== '—')) {
-              rawDataRows.push({ sheetName: name, date, header, row });
-            }
+            if (!row || !row.some(c => c && String(c).trim())) continue;
+
+            // Беремо назву з колонки Номенклатура
+            const nomValue = nomIdx >= 0 ? String(row[nomIdx] || '').trim() : '';
+
+            // Фільтруємо сміття
+            if (isJunkRow(nomValue, row, header)) continue;
+
+            rawDataRows.push({ sheetName: name, date, header, row });
           }
         });
 
-        // 6. РОЗУМНА ДЕДУБЛІКАЦІЯ
-        // Нормалізуємо назву для порівняння: видаляємо суфікси типу "ЗАКАЗАН", дужки, зайві пробіли
+        // 6. ДЕДУБЛІКАЦІЯ
         function normalizeItemName(raw) {
           let s = String(raw || '').trim().toLowerCase();
-          // Видаляємо типові суфікси/мітки що не є частиною назви товару
-          s = s.replace(/\s*(заказан|заказано|заказ|одобрен[оа]?\s*(клиентом)?|замена\s*(брака)?|склад)\s*/gi, ' ');
-          // Видаляємо інформацію в дужках на кінці (виробник, клієнт, примітки)
+          // Видаляємо статуси / мітки
+          s = s.replace(/\s*(заказан[оа]?|заказ|одобрен[оа]?\s*(клиентом)?|замена\s*(брака)?|склад)\b/gi, '');
+          // Видаляємо "делаем", "тоже для", інші дієслівні мітки
+          s = s.replace(/\s*(делаем|тоже\s+для\s+\S+)\s*/gi, ' ');
+          // Видаляємо примітки в дужках (растамаживает, конкурент, покупали, СПТ, ДДП)
+          s = s.replace(/\s*\(растамажива[её]т\s+[^)]*\)/gi, '');
+          s = s.replace(/\s*\(ддп\s+для\s+[^)]*\)/gi, '');
+          s = s.replace(/\s*\(конкурент\s+[^)]*\)/gi, '');
+          s = s.replace(/\s*\(покупали\s+[^)]*\)/gi, '');
+          s = s.replace(/\s*\(сп[тр]\s+[^)]*\)/gi, '');
+          // Видаляємо "для <будь-що>" до кінця рядка
+          s = s.replace(/\s+для\s+.+$/gi, '');
+          // Видаляємо клієнтів/виробників
+          s = s.replace(/\s+(звезда|прачи|сильвер|арора[\s\/]*сильвер|арора|джихенг|food)\s*/gi, ' ');
+          // Видаляємо "альтернатива" та "- В СЛЕД СБОРКЕ" тощо
+          s = s.replace(/\s+(альтернатива|замена)\b.*/gi, '');
+          s = s.replace(/\s*[-–]\s*(в след|в следующ|основной).*/gi, '');
+          // Видаляємо "30 МЕШ КАК БЫЛ ОБРАЗЕЦ" та подібні примітки
+          s = s.replace(/\s+\d+\s*(меш|mesh)\b.*/gi, '');
+          // Видаляємо "???"
+          s = s.replace(/\s*\?\?\?/g, '');
+          // Видаляємо дужки на кінці
           s = s.replace(/\s*\([^)]*\)\s*$/g, '');
-          // Прибираємо кількість та одиниці на кінці
-          s = s.replace(/\s*\d+\s*(кг|kg|шт|pcs)\s*$/gi, '');
+          // Видаляємо "ндс X%" та "X% ндс"
+          s = s.replace(/\s*\d+\s*%?\s*ндс\s*/gi, ' ');
+          s = s.replace(/\s*ндс\s*\d+\s*%?\s*/gi, ' ');
+          // Видаляємо кількість: "500 кг", "100 кг"
+          s = s.replace(/\s+\d+\s*(кг|kg|шт|pcs)\s*/gi, ' ');
+          // Видаляємо відсотки
+          s = s.replace(/\s+\d+\s*%\s*/g, ' ');
           // Зводимо пробіли
           s = s.replace(/\s+/g, ' ').trim();
           // Видаляємо кінцеві артефакти
-          s = s.replace(/[\s\.\,\-]+$/, '');
+          s = s.replace(/[\s\.\,\-_]+$/, '');
           return s;
         }
 
-        const seenNames = new Map(); // normalizedKey → index in allDataRows
+        const seenNames = new Map();
         const allDataRows = [];
         for (const dataRow of rawDataRows) {
           const { header, row } = dataRow;
-          // Шукаємо колонку з назвою субстанції по заголовку
-          const nameIdx = header.findIndex(h =>
-            /номенкл|назва|наимен|найменув|name|substance|субстан|товар|продукт/i.test(h || '')
-          );
-          let rawName = '';
-          if (nameIdx >= 0 && row[nameIdx] && String(row[nameIdx]).trim()) {
-            rawName = String(row[nameIdx]).trim();
-          } else {
-            // Резервний ключ — найдовша текстова клітинка (не число, не код, не дата)
+          const nomIdx = header.findIndex(h => /номенкл/i.test(h || ''));
+          let rawName = nomIdx >= 0 ? String(row[nomIdx] || '').trim() : '';
+
+          if (!rawName) {
+            // Резервний ключ (якщо немає колонки Номенклатура)
             for (const cell of row) {
-              const s = String(cell || '').trim();
-              if (!s || s.length < 3) continue;
-              if (/^[\d\s.,\-\/\(\)]+$/.test(s)) continue;
-              if (s.length > rawName.length) rawName = s;
+              const cs = String(cell || '').trim();
+              if (!cs || cs.length < 3 || /^[\d\s.,\-\/\(\)]+$/.test(cs)) continue;
+              if (cs.length > rawName.length) rawName = cs;
             }
           }
-          if (!rawName) continue;
+          if (!rawName || rawName.length < 3) continue;
+
           const key = normalizeItemName(rawName);
           if (!key || key.length < 2) continue;
 
-          // Якщо вже бачили цю субстанцію — пропускаємо (перша поява = найсвіжіший лист)
           if (seenNames.has(key)) continue;
           seenNames.set(key, allDataRows.length);
           allDataRows.push(dataRow);
         }
 
         if (allDataRows.length === 0) {
-          throw new Error('Не знайдено товарних позицій у даних. Перевірте структуру таблиці.');
+          throw new Error('Не знайдено товарних позицій. Перевірте що файл містить таблицю з колонкою "Номенклатура" і числовими даними.');
         }
 
         setLoaderStep(
-          `> Знайдено ${allDataRows.length} унікальних позицій (з ${rawDataRows.length} рядків)`,
+          `> Знайдено ${allDataRows.length} унікальних позицій (відфільтровано з ${rawDataRows.length})`,
           `Дедублікація завершена · Відправка на аналіз AI...`
         );
 
