@@ -2918,65 +2918,127 @@
           if (path) path.classList.add('animating');
         } catch (e) { console.log('Could not fetch EU regulations:', e); }
 
-        // ===== РОЗУМНА ОБРОБКА ЛИСТІВ =====
+        // ===== РОЗУМНА ОБРОБКА ЛИСТІВ — ОДИН АКТУАЛЬНИЙ ЛИСТ =====
 
-        // 1. Парсимо дати з назв листів
-        const sheetsMeta = sheets.map((sheet, idx) => {
-          const dateMatch = sheet.name.match(/(\d{1,2})[\.\-\,\/](\d{1,2})[\.\-\,\/](\d{4})/);
-          let date = null;
-          if (dateMatch) {
-            const day = parseInt(dateMatch[1]);
-            const month = parseInt(dateMatch[2]);
-            const year = parseInt(dateMatch[3]);
-            date = new Date(year, month - 1, day);
+        // 1. Парсимо дату з назви листа (підтримуються всі формати)
+        function parseSheetDate(sheetName, currentDate) {
+          if (!sheetName) return null;
+          const s = sheetName.trim();
+          const refYear = currentDate.getFullYear();
+
+          // DD.MM.YYYY / DD-MM-YYYY / DD/MM/YYYY
+          let m = s.match(/(\d{1,2})[.\-\/,](\d{1,2})[.\-\/,](\d{4})/);
+          if (m) {
+            const d = new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+            if (!isNaN(d) && d <= currentDate) return d;
+            return null;
           }
-          return { sheet, idx, date, name: sheet.name };
-        });
+          // DD.MM / DD-MM / DD/MM / DD,MM  (без року)
+          m = s.match(/(\d{1,2})[.\-\/,](\d{1,2})(?!\d)/);
+          if (m) {
+            const day = parseInt(m[1]);
+            const mon = parseInt(m[2]);
+            if (day >= 1 && day <= 31 && mon >= 1 && mon <= 12) {
+              let d = new Date(refYear, mon - 1, day);
+              // якщо дата в майбутньому — спробуємо минулий рік
+              if (d > currentDate) d = new Date(refYear - 1, mon - 1, day);
+              return d;
+            }
+          }
+          return null;
+        }
 
-        // 2. Визначаємо які листи — повноцінні таблиці з даними
-        // Лист повинен мати заголовок з "Номенклатура" + стовпці кількості/ціни
+        // 2. Знаходимо заголовок товарної таблиці
         function findDataHeader(rows) {
           if (!rows || rows.length < 2) return -1;
-          for (let i = 0; i < Math.min(8, rows.length); i++) {
+          for (let i = 0; i < Math.min(10, rows.length); i++) {
             const rowText = (rows[i] || []).map(c => String(c || '').toLowerCase()).join('\t');
-            // Має бути ОБОВ'ЯЗКОВО "номенклатур" + хоча б одне з "кол-ва/вес/цена/кг/закупк"
-            if (/номенкл/i.test(rowText) &&
-                /кол[\-\s]*ва|вес|цена|кг|закупк|нетто/i.test(rowText)) {
-              return i;
-            }
+            const hasNameCol = /номенкл|наименован|назван|product\b|item\b/i.test(rowText);
+            const hasNumCol  = /кол[\-\s]*ва|вес|цена|кг\b|kg\b|закупк|нетто|price\b|qty\b|тнвэд|уктзед/i.test(rowText);
+            if (hasNameCol && hasNumCol) return i;
+            // fallback: тільки колонка назви (без числових)
+            if (hasNameCol) return i;
           }
           return -1;
         }
 
-        // 3. Відбираємо тільки табличні листи з даними, пріоритет найновішим
-        const datedDataSheets = sheetsMeta
-          .filter(m => m.date && findDataHeader(m.sheet.rows) >= 0)
-          .sort((a, b) => b.date - a.date);
+        // 3. Вибираємо ОДИН актуальний лист
+        function selectActualSheet(sheetsArr, currentDate) {
+          const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
 
-        // Недатовані табличні листи — тільки якщо мають повну структуру
-        const undatedDataSheets = sheetsMeta
-          .filter(m => !m.date && findDataHeader(m.sheet.rows) >= 0);
+          const meta = sheetsArr.map(sheet => {
+            const parsedDate = parseSheetDate(sheet.name, today);
+            const headerIdx  = findDataHeader(sheet.rows);
+            const hasTable   = headerIdx >= 0;
+            return { sheet, name: sheet.name, parsedDate, hasTable, headerIdx };
+          });
 
-        const skippedSheets = sheetsMeta.filter(m =>
-          !datedDataSheets.includes(m) && !undatedDataSheets.includes(m)
-        );
-        if (skippedSheets.length > 0) {
-          console.log('Пропущені листи:', skippedSheets.map(s => s.name));
+          // Листи з товарною таблицею
+          const withTable = meta.filter(m => m.hasTable);
+          const pool = withTable.length > 0 ? withTable : meta;
+
+          // Розбиваємо на датовані і без дати
+          const dated   = pool.filter(m => m.parsedDate !== null);
+          const undated = pool.filter(m => m.parsedDate === null);
+
+          let selected = null;
+          let reason   = '';
+
+          if (dated.length > 0) {
+            // Сортуємо: найновіший спочатку
+            dated.sort((a, b) => b.parsedDate - a.parsedDate);
+            // Шукаємо лист з датою == сьогодні
+            const todayMs = today.getTime();
+            const exact = dated.find(m => m.parsedDate.getTime() === todayMs);
+            if (exact) {
+              selected = exact;
+              reason = `Дата листа "${exact.name}" збігається з поточною датою аналізу`;
+            } else {
+              // Найсвіжіший лист дата якого <= сьогодні
+              const best = dated.find(m => m.parsedDate <= today);
+              if (best) {
+                selected = best;
+                reason = `Лист "${best.name}" — найновіший з датою не пізніше поточної (${best.parsedDate.toLocaleDateString('uk-UA')})`;
+              }
+            }
+          }
+
+          if (!selected && undated.length > 0) {
+            selected = undated[0];
+            reason = `Листів із датою не знайдено; обраний лист "${selected.name}" як найкраща таблиця`;
+          }
+
+          if (!selected) {
+            selected = meta[0] || null;
+            reason = 'Аварійний fallback — обрано перший лист';
+          }
+
+          const ignored = meta.filter(m => m !== selected).map(m => m.name);
+          return { selected, reason, ignored };
         }
 
-        // Порядок: найновіший датований лист перший → старіші → без дати
-        const orderedSheets = [...datedDataSheets, ...undatedDataSheets];
+        // --- Запускаємо вибір ---
+        const currentDate = new Date();
+        const { selected: selectedMeta, reason: sheetReason, ignored: ignoredSheets } = selectActualSheet(sheets, currentDate);
 
-        if (orderedSheets.length === 0) {
+        if (!selectedMeta) {
           throw new Error('Не знайдено листів з табличними даними (потрібен заголовок з "Номенклатура" + "Кол-ва/Вес/Ціна"). Перевірте файл.');
         }
 
+        const selectedSheetName = selectedMeta.name;
+        const selectedSheetDate = selectedMeta.parsedDate
+          ? selectedMeta.parsedDate.toLocaleDateString('uk-UA')
+          : 'без дати';
+
+        // Для сумісності з подальшим кодом — масив лише з одного листа
+        const orderedSheets = [selectedMeta];
+
         setLoaderStep(
-          `> Знайдено ${orderedSheets.length} табличних листів`,
-          datedDataSheets.length > 0
-            ? `Найсвіжіший: "${datedDataSheets[0].name}" · буде основним`
-            : 'Дати не знайдені — використовуються всі листи'
+          `> Знайдено листів: ${sheets.length} · Обрано: "${selectedSheetName}"`,
+          `${sheetReason}. Ігнорується: ${ignoredSheets.length} листів.`
         );
+        console.log('[SHEET SELECT]', sheetReason);
+        console.log('[IGNORED SHEETS]', ignoredSheets);
 
         // 4. ====== ФІЛЬТР СМІТТЯ ======
         // Рядки які є коментарями/нотатками, а не товарами
@@ -3058,30 +3120,24 @@
 
         // 5. Витягуємо чисті рядки з усіх табличних листів
         const rawDataRows = [];
-        orderedSheets.forEach(({ sheet, date, name }) => {
+        // Обробляємо ТІЛЬКИ один вибраний лист
+        {
+          const { sheet, name, parsedDate: date } = selectedMeta;
           const rows = sheet.rows;
           const headerIdx = findDataHeader(rows);
-          if (headerIdx < 0) return;
-          const header = rows[headerIdx];
+          if (headerIdx >= 0) {
+            const header = rows[headerIdx];
+            const nomIdx = header.findIndex(h => /номенкл|наименован|назван|product\b|item\b/i.test(h || ''));
 
-          // Знаходимо індекс колонки "Номенклатура"
-          const nomIdx = header.findIndex(h =>
-            /номенкл/i.test(h || '')
-          );
-
-          for (let ri = headerIdx + 1; ri < rows.length; ri++) {
-            const row = rows[ri];
-            if (!row || !row.some(c => c && String(c).trim())) continue;
-
-            // Беремо назву з колонки Номенклатура
-            const nomValue = nomIdx >= 0 ? String(row[nomIdx] || '').trim() : '';
-
-            // Фільтруємо сміття
-            if (isJunkRow(nomValue, row, header)) continue;
-
-            rawDataRows.push({ sheetName: name, date, header, row });
+            for (let ri = headerIdx + 1; ri < rows.length; ri++) {
+              const row = rows[ri];
+              if (!row || !row.some(c => c && String(c).trim())) continue;
+              const nomValue = nomIdx >= 0 ? String(row[nomIdx] || '').trim() : '';
+              if (isJunkRow(nomValue, row, header)) continue;
+              rawDataRows.push({ sheetName: name, date, header, row });
+            }
           }
-        });
+        }
 
         // 6. ДЕДУБЛІКАЦІЯ
         function normalizeItemName(raw) {
@@ -3153,7 +3209,7 @@
         }
 
         setLoaderStep(
-          `> Знайдено ${allDataRows.length} унікальних позицій (відфільтровано з ${rawDataRows.length})`,
+          `> Знайдено ${allDataRows.length} унікальних позицій (лист: "${selectedSheetName}")`,
           `Дедублікація завершена · Відправка на аналіз AI...`
         );
 
@@ -3178,16 +3234,28 @@ ${euRegulations}
 - МСДС / НЮАНСЫ - інформація про небезпеку товару (ADR класи, опасник тощо)
 - код / код ТНВЭД - код товару для митниці
 
+КРИТИЧНЕ ПРАВИЛО ДЖЕРЕЛА ДАНИХ:
+
+Ти отримуєш дані ЛИШЕ з одного заздалегідь відібраного актуального листа поточного збору контейнера.
+
+ЗАБОРОНЕНО:
+- припускати наявність інших листів;
+- додавати товари зі старих збірок;
+- використовувати довідники, архіви або бази субстанцій;
+- об'єднувати дані з кількох листів;
+- відновлювати відсутні товари по пам'яті або контексту;
+- додавати товар, якщо його немає в переданому актуальному листі.
+
+Назву товару бери ЛИШЕ з колонки "Номенклатура" або найближчої за змістом колонки вибраного листа.
+Якщо у вибраному листі немає ціни, ваги, виробника або коду — залиш поле порожнім/null/0, але не шукай дані в інших листах.
+Аналізуй ЛИШЕ передані рядки.
+
 ТВОЯ ЗАДАЧА:
-1. Прочитай ВСІ рядки з УСІХ листів
-2. Листи відсортовані за датою - використовуй НАЙСВІЖІШІ дані (березень-квітень 2026)
-3. Якщо той самий товар є в декількох листах - бери ціну та кількість з НАЙНОВІШОГО листа
-4. Для КОЖНОГО товару створи запис у масиві items з найактуальнішими даними
-5. Використовуй РЕАЛЬНІ дані: назви, кількості, ціни з таблиці
-6. Якщо ціни немає в свіжому листі - шукай в попередніх
-7. Якщо є МСДС або слова "опасник", "ADR", "ОПАСНИК" - це критичний ризик
-8. Розрахуй митні платежі для кожного товару
-9. УСЯ ІНФОРМАЦІЯ ТІЛЬКИ УКРАЇНСЬКОЮ МОВОЮ
+1. Для КОЖНОГО товару зі списку нижче створи запис у масиві items
+2. Використовуй РЕАЛЬНІ дані: назви, кількості, ціни з переданої таблиці
+3. Якщо є МСДС або слова "опасник", "ADR", "ОПАСНИК" - це критичний ризик
+4. Розрахуй митні платежі для кожного товару
+5. УСЯ ІНФОРМАЦІЯ ТІЛЬКИ УКРАЇНСЬКОЮ МОВОЮ
 
 ФОРМАТ ВІДПОВІДІ - ТІЛЬКИ JSON без markdown:
 {
@@ -3340,10 +3408,46 @@ ${euRegulations}
 - ⚠️ АБСОЛЮТНО КРИТИЧНО: ТИ ПОВИНЕН ОПРАЦЮВАТИ УСІ 100% РЯДКІВ/ТОВАРІВ З ТАБЛИЦІ. НЕ СКОРОЧУЙ, НЕ ВИДАЛЯЙ І НЕ ГРУПУЙ ТОВАРИ. СКІЛЬКИ ТОВАРІВ У ТАБЛИЦІ (АБО ЗВЕДЕНОМУ СПИСКУ), СТІЛЬКИ МАЄ БУТИ ОБ'ЄКТІВ В МАСИВІ "items".`;
 
         setLoaderStep(`> Батч-аналіз: ${allDataRows.length} позицій...`, 'Розбивка на партії...');
-        const parsed = await analyzeItemsInBatches(allDataRows, systemPrompt, sourceUrl);
+        const parsed = await analyzeItemsInBatches(allDataRows, systemPrompt, sourceUrl, selectedSheetName, selectedSheetDate, currentDate);
         setLoaderStep('> Усі партії оброблено', 'Формування звіту...');
         const nodes = document.querySelectorAll('.loader-route .node');
         if (nodes.length > 1) nodes[1].classList.add('active');
+
+        // ===== SAFETY FILTER: видаляємо товари не з вибраного листа =====
+        const allowedNames = new Set(allDataRows.map(dr => {
+          const nomIdx = dr.header.findIndex(h => /номенкл|наименован|назван|product\b|item\b/i.test(h || ''));
+          const raw = nomIdx >= 0 ? String(dr.row[nomIdx] || '').trim() : '';
+          return normalizeItemName(raw);
+        }).filter(Boolean));
+
+        const beforeFilter = (parsed.items || []).length;
+        parsed.items = (parsed.items || []).filter(item => {
+          if (!item.name) return false;
+          const norm = normalizeItemName(item.name);
+          // Дозволяємо якщо хоча б одне слово збігається або повний ключ є в списку
+          if (allowedNames.has(norm)) return true;
+          // М'яке зіставлення: перевіряємо чи є часткове збіг
+          for (const allowed of allowedNames) {
+            const words = norm.split(/\s+/).filter(w => w.length > 3);
+            if (words.length > 0 && words.every(w => allowed.includes(w))) return true;
+            if (norm.length > 5 && allowed.includes(norm.slice(0, Math.floor(norm.length * 0.7)))) return true;
+          }
+          return false;
+        });
+        const removedCount = beforeFilter - parsed.items.length;
+        if (removedCount > 0) {
+          console.warn(`[SAFETY FILTER] Видалено ${removedCount} товарів не з листа "${selectedSheetName}"`);
+        }
+
+        // Додаємо метадані аналізу
+        parsed._meta = {
+          selectedSheetName,
+          selectedSheetDate,
+          analysisDate: currentDate.toLocaleDateString('uk-UA'),
+          ignoredSheetsCount: ignoredSheets.length,
+          ignoredSheetNames: ignoredSheets,
+          sheetReason
+        };
 
         // ===== ТОЧНИЙ РОЗРАХУНОК МИТНИХ ПЛАТЕЖІВ НА JS =====
         const FREIGHT_MULTIPLIER = 1.10;
@@ -3379,7 +3483,11 @@ ${euRegulations}
           totalDuty: +totalDuty.toFixed(2),
           totalVAT: +totalVAT.toFixed(2),
           totalToPay: +(totalDuty + totalVAT).toFixed(2),
-          borderDelay: parsed.borderDelay || '—'
+          borderDelay: parsed.borderDelay || '—',
+          selectedSheetName,
+          selectedSheetDate,
+          sheetReason,
+          ignoredSheets
         };
 
         hideLoader();
@@ -3572,6 +3680,10 @@ ${euRegulations}
         const summaryData = [
           ['LOGI-ANALYZER PRO · ЗВІТ АНАЛІЗУ'],
           ['Дата звіту', new Date().toLocaleString('uk-UA')],
+          ['Аналізований лист', s.selectedSheetName || '—'],
+          ['Дата листа', s.selectedSheetDate || '—'],
+          ['Причина вибору листа', s.sheetReason || '—'],
+          ['Проігноровано листів', s.ignoredSheets ? s.ignoredSheets.length : 0],
           [''],
           ['ФІНАНСОВА ЗВЕДЕНА'],
           ['Митна вартість (CIF)', s.totalCustomsValue || 0],
@@ -3777,6 +3889,16 @@ ${euRegulations}
       const nc = (d.nctsList || []).map(i => `<li>${i}</li>`).join('');
 
       document.getElementById('resultsArea').innerHTML = `
+    ${s.selectedSheetName ? `
+    <div class="status-box" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;border-color:var(--amber);background:var(--amber-dim);">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--amber);white-space:nowrap;margin-top:2px;">▶ ЛИСТ</span>
+      <div style="font-size:12px;line-height:1.6;">
+        <strong style="color:var(--ink);font-family:var(--mono);">"${s.selectedSheetName}"</strong>
+        <span style="color:var(--ink-3);margin-left:8px;">${s.selectedSheetDate || ''}</span>
+        <br><span style="color:var(--ink-2);">${s.sheetReason || ''}</span>
+        ${s.ignoredSheets && s.ignoredSheets.length > 0 ? `<br><span style="color:var(--ink-3);font-size:11px;">Проігноровано (${s.ignoredSheets.length}): ${s.ignoredSheets.join(', ')}</span>` : ''}
+      </div>
+    </div>` : ''}
     <div class="sec-head">
       <span class="sec-num">01 · OVERVIEW</span>
       <span class="sec-title">Фінансова зведена</span>
@@ -3850,7 +3972,7 @@ ${euRegulations}
       const hasHigh = (d.items || []).some(i => i.risk === 'Критичний');
       const hasMed = (d.items || []).some(i => i.risk === 'Середній');
       const total = fmt((s.totalCustomsValue || 0) + (s.totalDuty || 0) + (s.totalVAT || 0));
-      archive.unshift({ url, date: new Date().toLocaleDateString('uk-UA'), items: (d.items || []).length, total, hasHigh, hasMed, data: d });
+      archive.unshift({ url, date: new Date().toLocaleDateString('uk-UA'), items: (d.items || []).length, total, hasHigh, hasMed, selectedSheetName: s.selectedSheetName || '', data: d });
       localStorage.setItem('lap_archive', JSON.stringify(archive.slice(0, 50)));
     }
 
@@ -4420,7 +4542,7 @@ ${euRegulations}
       return out;
     }
 
-    async function analyzeItemsInBatches(allDataRows, systemPrompt, sourceUrl) {
+    async function analyzeItemsInBatches(allDataRows, systemPrompt, sourceUrl, selectedSheetName, selectedSheetDate, currentDate) {
       const BATCH_SIZE = 5;
       const batches = [];
       for (let i = 0; i < allDataRows.length; i += BATCH_SIZE) {
@@ -4444,7 +4566,9 @@ ${euRegulations}
         const batchData = extractBatchData(batch);
 
         const userPrompt = `Джерело: ${sourceUrl}
-Дата: квітень 2026
+Актуальний лист: "${selectedSheetName}" (дата: ${selectedSheetDate})
+Поточна дата аналізу: ${currentDate.toLocaleDateString('uk-UA')}
+Всі інші листи виключені до AI-аналізу. Аналізуй ЛИШЕ рядки нижче.
 Партія ${bi + 1} з ${batches.length} (позиції ${start}–${end} з ${allDataRows.length})
 
 ${isLast
@@ -4453,9 +4577,8 @@ ${isLast
           }
 
 ПРАВИЛА:
-1. Якщо товар зустрічається в кількох листах — бери дані з найновішого.
-2. НЕ вигадуй товари — тільки ті що в даних нижче.
-3. Поверни рівно ${batch.length} об'єктів у масиві items.
+1. НЕ вигадуй товари — тільки ті що в даних нижче.
+2. Поверни рівно ${batch.length} об'єктів у масиві items.
 
 ДАНІ ПАРТІЇ:
 ${batchData}`;
