@@ -174,13 +174,13 @@
     }
 
     .topbar-inner {
-      max-width: 1440px;
+      max-width: 1920px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
       gap: 24px;
-      padding: 0 32px;
+      padding: 0 18px;
       height: 72px;
     }
 
@@ -390,9 +390,10 @@
       display: none;
       position: relative;
       z-index: 1;
-      max-width: 1440px;
+      width: 100%;
+      max-width: 1920px;
       margin: 0 auto;
-      padding: 48px 32px 100px;
+      padding: 38px 10px 96px;
     }
 
     .page.active {
@@ -1445,6 +1446,7 @@
 
     .tbl-scroll {
       overflow-x: auto;
+      width: 100%;
     }
 
     .tbl-scroll::-webkit-scrollbar {
@@ -1467,15 +1469,28 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1680px;
+      min-width: 0;
+      table-layout: fixed;
+    }
+
+    .tbl-col-product { width: 24%; }
+    .tbl-col-qty { width: 8%; }
+    .tbl-col-value { width: 11%; }
+    .tbl-col-eu { width: 26%; }
+    .tbl-col-ua { width: 26%; }
+    .tbl-col-risk { width: 5%; }
+
+    th, td {
+      overflow-wrap: anywhere;
+      word-break: normal;
     }
 
     thead th {
-      padding: 16px 20px;
+      padding: 14px 12px;
       background: var(--surface);
       color: var(--ink-3);
       font-family: var(--mono);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.14em;
@@ -1487,9 +1502,9 @@
     }
 
     tbody td {
-      padding: 20px;
+      padding: 14px 12px;
       border-top: 1px solid var(--line);
-      font-size: 16px;
+      font-size: 15px;
       color: var(--ink);
       vertical-align: top;
       line-height: 1.5;
@@ -1505,7 +1520,7 @@
 
     .td-name {
       font-weight: 600;
-      font-size: 17px;
+      font-size: 16px;
       color: var(--ink);
       letter-spacing: -0.005em;
     }
@@ -1660,14 +1675,14 @@
     .checks-list {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
     }
 
     .check-item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 12px 14px;
+      gap: 10px;
+      padding: 10px 11px;
       background: var(--surface-2);
       border: 1px solid var(--line);
       border-left-width: 2px;
@@ -1741,7 +1756,7 @@
     }
 
     .check-title {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--ink);
       margin-bottom: 3px;
@@ -1749,15 +1764,15 @@
     }
 
     .check-note {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--ink-2);
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     /* Hazard / Storage info card inside td */
     .info-card {
-      margin-top: 12px;
-      padding: 12px 14px;
+      margin-top: 10px;
+      padding: 10px 11px;
       background: var(--surface-2);
       border: 1px solid var(--line);
       border-left: 2px solid;
@@ -1787,19 +1802,19 @@
     }
 
     .info-card-body {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--ink-2);
       line-height: 1.55;
     }
 
     .code-origin-card {
-      margin-top: 11px;
-      padding: 12px 14px;
+      margin-top: 10px;
+      padding: 10px 11px;
       background: rgba(44, 184, 120, 0.07);
       border: 1px solid var(--line);
       border-left: 3px solid var(--amber);
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 12.5px;
       line-height: 1.45;
     }
 
@@ -1821,7 +1836,26 @@
       margin-top: 6px;
       color: var(--ink-3);
       font-family: var(--mono);
-      font-size: 11px;
+      font-size: 10.5px;
+    }
+
+    /* Wide report mode: use almost the full viewport so all manifest columns stay visible. */
+    #resultsArea .tbl-card {
+      width: 100%;
+    }
+
+    #resultsArea .tbl-scroll {
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    @media (min-width: 1500px) {
+      .page { padding-left: 14px; padding-right: 14px; }
+      thead th { padding-left: 14px; padding-right: 14px; }
+      tbody td { padding-left: 14px; padding-right: 14px; }
+    }
+
+    @media (max-width: 1280px) {
+      table { min-width: 1460px; table-layout: auto; }
     }
 
     /* =========== DOWNLOAD BUTTON =========== */
@@ -4503,32 +4537,32 @@ ${euRegulations}
         const hazardClass = hazardSafe ? 'safe' : 'danger';
 
         rows += `<tr>
-      <td style="min-width:360px;max-width:460px">
+      <td class="col-product">
         <div class="td-name">${escHtml(item.name || '—')}</div>
         <div class="td-code">${escHtml(item.uctzedCode || '')}</div>
         ${originBlock}
         ${item.category ? `<span class="td-category">${escHtml(item.category)}</span>` : ''}
         ${item.applications ? `<div class="td-apps">${escHtml(item.applications.substring(0, 220))}${item.applications.length > 220 ? '…' : ''}</div>` : ''}
       </td>
-      <td style="min-width:150px">
+      <td class="col-qty">
         <div class="td-qty">${qtyDisplay}</div>
         <div class="td-price">${priceDisplay}</div>
         ${hazardBadge ? `<div style="margin-top:6px">${hazardBadge}</div>` : ''}
       </td>
-      <td style="min-width:180px">
+      <td class="col-value">
         <div class="td-value-primary">${fmt(item.customsValue)}</div>
         <div class="td-value-line">мито ${dutyRateDisplay} · ${fmt(item.duty)}</div>
         <div class="td-value-vat">ПДВ · ${fmt(item.vat)}</div>
       </td>
-      <td style="min-width:480px;max-width:560px">
+      <td class="col-eu">
         ${renderChecksList(item.euChecks, 'Немає даних про перевірки ЄС')}
         ${item.hazardAnalysis ? `<div class="info-card ${hazardClass}"><div class="info-card-title">Аналіз небезпеки</div><div class="info-card-body">${item.hazardAnalysis}</div></div>` : ''}
         ${item.storageRequirements ? `<div class="info-card warn"><div class="info-card-title">Зберігання</div><div class="info-card-body">${item.storageRequirements}</div></div>` : ''}
       </td>
-      <td style="min-width:480px;max-width:560px">
+      <td class="col-ua">
         ${renderChecksList(item.uaChecks, 'Немає даних про розмитнення UA')}
       </td>
-      <td style="min-width:120px">
+      <td class="col-risk">
         <span class="pill ${rc}">${item.risk || '—'}</span>
         <div class="pill-note">${item.riskNote || ''}</div>
       </td>
@@ -4598,6 +4632,14 @@ ${euRegulations}
       </div>
       <div class="tbl-scroll">
         <table>
+          <colgroup>
+            <col class="tbl-col-product">
+            <col class="tbl-col-qty">
+            <col class="tbl-col-value">
+            <col class="tbl-col-eu">
+            <col class="tbl-col-ua">
+            <col class="tbl-col-risk">
+          </colgroup>
           <thead><tr>
             <th>Товар / УКТЗЕД</th>
             <th>К-сть · Ціна</th>
