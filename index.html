@@ -2685,6 +2685,62 @@
       #resultsArea .tbl-col-risk { width: 6%; }
     }
 
+
+    /* ============================================
+       v2.7 · 90% WIDTH + WIDER RISK COLUMN
+       The analysis area is 10% narrower than full viewport,
+       centered, while the final risk column is expanded for readability.
+       ============================================ */
+    #resultsArea {
+      width: 90vw;
+      max-width: none;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #resultsArea .tbl-scroll {
+      overflow-x: hidden;
+    }
+
+    #resultsArea .tbl-col-product { width: 22%; }
+    #resultsArea .tbl-col-qty { width: 8%; }
+    #resultsArea .tbl-col-value { width: 11%; }
+    #resultsArea .tbl-col-eu { width: 25.5%; }
+    #resultsArea .tbl-col-ua { width: 25.5%; }
+    #resultsArea .tbl-col-risk { width: 8%; }
+
+    @media (max-width: 1500px) {
+      #resultsArea {
+        width: calc(100vw - 20px);
+        margin-left: calc(50% - 50vw + 10px);
+        margin-right: calc(50% - 50vw + 10px);
+      }
+
+      #resultsArea .tbl-scroll {
+        overflow-x: auto;
+      }
+
+      #resultsArea table {
+        min-width: 1500px;
+      }
+    }
+
+    @media (min-width: 1900px) {
+      #resultsArea {
+        width: 90vw;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #resultsArea .tbl-col-product { width: 23%; }
+      #resultsArea .tbl-col-qty { width: 8%; }
+      #resultsArea .tbl-col-value { width: 11%; }
+      #resultsArea .tbl-col-eu { width: 25%; }
+      #resultsArea .tbl-col-ua { width: 25%; }
+      #resultsArea .tbl-col-risk { width: 8%; }
+    }
+
+
   </style>
 </head>
 
