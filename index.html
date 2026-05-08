@@ -2687,15 +2687,23 @@
 
 
     /* ============================================
-       v2.10 · 70% WIDTH + WIDER RISK COLUMN
-       The analysis area is 30% narrower than full viewport,
-       centered, while the final risk column is expanded for readability.
+       v2.11 · UNIFIED 85% WORKSPACE WIDTH
+       The report, archive and knowledge base pages use the same
+       centered 85vw workspace. Risk column remains expanded.
        ============================================ */
-    #resultsArea {
-      width: 70vw;
+    #resultsArea,
+    #page-arch,
+    #page-zed {
+      width: 85vw;
       max-width: none;
       margin-left: auto;
       margin-right: auto;
+    }
+
+    #page-arch,
+    #page-zed {
+      padding-left: 0;
+      padding-right: 0;
     }
 
     #resultsArea .tbl-scroll {
@@ -2710,7 +2718,9 @@
     #resultsArea .tbl-col-risk { width: 8%; }
 
     @media (max-width: 1500px) {
-      #resultsArea {
+      #resultsArea,
+      #page-arch,
+      #page-zed {
         width: calc(100vw - 20px);
         margin-left: calc(50% - 50vw + 10px);
         margin-right: calc(50% - 50vw + 10px);
@@ -2726,8 +2736,10 @@
     }
 
     @media (min-width: 1900px) {
-      #resultsArea {
-        width: 70vw;
+      #resultsArea,
+      #page-arch,
+      #page-zed {
+        width: 85vw;
         margin-left: auto;
         margin-right: auto;
       }
