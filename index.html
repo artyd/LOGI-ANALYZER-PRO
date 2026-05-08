@@ -1792,6 +1792,38 @@
       line-height: 1.55;
     }
 
+    .code-origin-card {
+      margin-top: 9px;
+      padding: 9px 10px;
+      background: rgba(44, 184, 120, 0.07);
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--amber);
+      border-radius: 6px;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .code-origin-title {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--amber);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 4px;
+    }
+
+    .code-origin-body {
+      color: var(--ink-2);
+    }
+
+    .code-origin-meta {
+      margin-top: 4px;
+      color: var(--ink-3);
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
     /* =========== DOWNLOAD BUTTON =========== */
     .download-wrap {
       display: flex;
@@ -3134,7 +3166,8 @@
               if (!row || !row.some(c => c && String(c).trim())) continue;
               const nomValue = nomIdx >= 0 ? String(row[nomIdx] || '').trim() : '';
               if (isJunkRow(nomValue, row, header)) continue;
-              rawDataRows.push({ sheetName: name, date, header, row });
+              const uktzedCode = extractHsCodeFromRow(header, row);
+              rawDataRows.push({ sheetName: name, date, header, row, uktzedCode });
             }
           }
         }
@@ -3183,7 +3216,7 @@
         const allDataRows = [];
         for (const dataRow of rawDataRows) {
           const { header, row } = dataRow;
-          const nomIdx = header.findIndex(h => /номенкл/i.test(h || ''));
+          const nomIdx = header.findIndex(h => /номенкл|наименован|назван|product\b|item\b/i.test(h || ''));
           let rawName = nomIdx >= 0 ? String(row[nomIdx] || '').trim() : '';
 
           if (!rawName) {
@@ -3232,7 +3265,7 @@ ${euRegulations}
 - Цена закупки / цена - ціна за кг в USD
 - Производитель - виробник
 - МСДС / НЮАНСЫ - інформація про небезпеку товару (ADR класи, опасник тощо)
-- код / код ТНВЭД - код товару для митниці
+- код / код ТНВЭД / УКТЗЕД / HS Code - код товару для митниці; цей код є окремим джерелом аналізу походження і способу виробництва
 
 КРИТИЧНЕ ПРАВИЛО ДЖЕРЕЛА ДАНИХ:
 
@@ -3247,6 +3280,7 @@ ${euRegulations}
 - додавати товар, якщо його немає в переданому актуальному листі.
 
 Назву товару бери ЛИШЕ з колонки "Номенклатура" або найближчої за змістом колонки вибраного листа.
+Код УКТЗЕД/HS бери з колонки "код", "код ТНВЭД", "УКТЗЕД", "HS Code" або з явного 8-10-значного коду в рядку. Якщо код є в таблиці — він має пріоритет над припущенням по назві.
 Якщо у вибраному листі немає ціни, ваги, виробника або коду — залиш поле порожнім/null/0, але не шукай дані в інших листах.
 Аналізуй ЛИШЕ передані рядки.
 
@@ -3256,13 +3290,19 @@ ${euRegulations}
 3. Якщо є МСДС або слова "опасник", "ADR", "ОПАСНИК" - це критичний ризик
 4. Розрахуй митні платежі для кожного товару
 5. УСЯ ІНФОРМАЦІЯ ТІЛЬКИ УКРАЇНСЬКОЮ МОВОЮ
+6. Для кожного товару будуй аналіз НЕ тільки від назви/типу, а від коду УКТЗЕД/HS: глава, товарна позиція, тип походження, метод виробництва та додаткові перевірки ЄС/України за кодом і походженням.
 
 ФОРМАТ ВІДПОВІДІ - ТІЛЬКИ JSON без markdown:
 {
   "items": [
     {
       "name": "ТОЧНА назва з таблиці",
-      "uctzedCode": "код якщо є, інакше підібрати для категорії (10 цифр)",
+      "uctzedCode": "код з таблиці якщо є, інакше підібрати для категорії (10 цифр)",
+      "codeBasis": "код з таблиці / підібрано AI / відсутній — перевірити брокером",
+      "originType": "тип походження за кодом: синтетичне / рослинне / тваринне / ферментаційне / мінеральне / змішане / невідоме",
+      "productionMethod": "ймовірний спосіб виробництва: хімічний синтез / екстракція / ферментація / очищення / інше",
+      "originShortNote": "короткий блок 1-2 речення: що означає цей код для походження і які документи це підтверджують",
+      "originConfidence": "high|medium|low",
       "qtyKg": число_кількість_в_кг (тільки число, без 'кг'),
       "buyPricePerKg": число_ціна_за_кг_USD,
       "dutyRatePercent": число_ставка_мита_у_відсотках (напр. 6.5 для 6.5%, 0 для 0%),
@@ -3305,6 +3345,10 @@ ${euRegulations}
 - "red" 🔴 = КРИТИЧНО! без цього документа вантаж не пройде, обов'язкова фізична перевірка, санкційні ризики, заборона на ввезення без спеціального дозволу
 
 ⚠️ ОБОВ'ЯЗКОВА СТРУКТУРА euChecks ТА uaChecks:
+Кожен масив перевірок повинен містити ТРИ БЛОКИ:
+0. КОД/ПОХОДЖЕННЯ: додаткові перевірки, які виникають саме через УКТЗЕД/HS-код і тип походження/виробництва. Назви таких пунктів починай з "Код/походження:".
+
+Далі обов'язково:
 Кожен масив перевірок повинен містити ДВА БЛОКИ:
 1. ФІЗИЧНІ ПРОЦЕДУРИ НА МИТНИЦІ: що фізично відбувається з вантажем (сканування, огляд, зважування, відбір проб, тощо)
 2. ДОКУМЕНТАЛЬНІ ВИМОГИ: які документи перевіряються/вимагаються
@@ -3385,6 +3429,14 @@ ${euRegulations}
 4. ВИМОГИ ДО ЗБЕРІГАННЯ (storageRequirements):
    МАКСИМАЛЬНО КОРОТКО (до 3-5 слів). Напр: "Сухе місце, 15-25°C".
 
+5. ПОХОДЖЕННЯ І СПОСІБ ВИРОБНИЦТВА ЗА КОДОМ (originType, productionMethod, originShortNote):
+   - 29xx / 2942: органічна хімія, зазвичай синтетичне або напівсинтетичне походження; перевіряти CAS, CoA, SDS, REACH/CLP, фарм-призначення.
+   - 2941: антибіотики, часто ферментаційне/напівсинтетичне походження; підвищений фарм-контроль.
+   - 2936: вітаміни, можливе синтетичне або ферментаційне походження; важливе призначення food/feed/pharma.
+   - 12xx / 1302 / 3301: рослинне походження; фітосанітарія, pesticides/MRL, CITES за потреби.
+   - 05xx / 3002: тваринне або біологічне походження; vet/health certificate, TRACES/BCP, біобезпека.
+   - 28xx: неорганічне/мінеральне походження; склад, концентрація, домішки, SDS/ADR.
+
 СТАВКИ МИТА для фармацевтики та хімії (dutyRatePercent):
 - Фармацевтичні субстанції (АФІ, HS 2933-2942): 0-5%
 - Хімічні реактиви (HS 2800-2900): 5-6.5%
@@ -3403,6 +3455,8 @@ ${euRegulations}
 - НЕ вигадуй товари - використовуй ТІЛЬКИ з таблиці.
 - Якщо є поле "цена" або "Цена закупки" - використовуй його як buyPricePerKg
 - Якщо є "Кол-ва, кг" або "Вес нетто, кг" - використовуй його як qtyKg
+- Якщо є код УКТЗЕД/HS у рядку — НЕ замінюй його припущенням по назві; поверни саме цей код.
+- У euChecks та uaChecks обов’язково додай перевірки, які випливають з коду і походження: синтетичне/рослинне/тваринне/ферментаційне/мінеральне.
 - НЕ РАХУЙ customsValue/duty/vat - ти повертаєш тільки qtyKg, buyPricePerKg, dutyRatePercent
 - УСІ ТЕКСТИ УКРАЇНСЬКОЮ МОВОЮ
 - ⚠️ АБСОЛЮТНО КРИТИЧНО: ТИ ПОВИНЕН ОПРАЦЮВАТИ УСІ 100% РЯДКІВ/ТОВАРІВ З ТАБЛИЦІ. НЕ СКОРОЧУЙ, НЕ ВИДАЛЯЙ І НЕ ГРУПУЙ ТОВАРИ. СКІЛЬКИ ТОВАРІВ У ТАБЛИЦІ (АБО ЗВЕДЕНОМУ СПИСКУ), СТІЛЬКИ МАЄ БУТИ ОБ'ЄКТІВ В МАСИВІ "items".`;
@@ -3438,6 +3492,24 @@ ${euRegulations}
         if (removedCount > 0) {
           console.warn(`[SAFETY FILTER] Видалено ${removedCount} товарів не з листа "${selectedSheetName}"`);
         }
+
+        // ===== HS/УКТЗЕД ENRICHMENT: код з таблиці → походження → метод виробництва → додаткові перевірки =====
+        const rowMetaByName = new Map();
+        allDataRows.forEach(dr => {
+          const nomIdx = dr.header.findIndex(h => /номенкл|наименован|назван|product\b|item\b/i.test(h || ''));
+          const raw = nomIdx >= 0 ? String(dr.row[nomIdx] || '').trim() : '';
+          const key = normalizeItemName(raw);
+          if (!key) return;
+          rowMetaByName.set(key, {
+            uktzedCode: dr.uktzedCode || extractHsCodeFromRow(dr.header, dr.row),
+            sheetName: dr.sheetName
+          });
+        });
+
+        parsed.items = (parsed.items || []).map(item => {
+          const key = normalizeItemName(item.name || '');
+          return enrichItemWithCodeOrigin(item, rowMetaByName.get(key) || {});
+        });
 
         // Додаємо метадані аналізу
         parsed._meta = {
@@ -3645,6 +3717,274 @@ ${euRegulations}
     // ===== DOWNLOAD XLSX REPORT =====
     let lastAnalysisData = null;
 
+    // ===== HS / УКТЗЕД ORIGIN INTELLIGENCE =====
+    // Deterministic enrichment layer: code from the source table has priority over AI guesses.
+    function escHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function normalizeHsCode(value) {
+      if (value == null) return '';
+      let digits = String(value).replace(/[^0-9]/g, '');
+      if (!digits) return '';
+      // Prefer a 10-digit customs code if it is embedded in longer text.
+      const ten = digits.match(/(?:28|29|30|32|33|35|38|39|12|13|05|21)\d{8}/);
+      if (ten) return ten[0];
+      if (digits.length >= 10) return digits.slice(0, 10);
+      if (digits.length >= 6) return digits;
+      return '';
+    }
+
+    function detectHsCodeColumnIndex(header) {
+      if (!Array.isArray(header)) return -1;
+      const strong = /(^|\b)(код\s*(тн\s*вэд|тнвэд|укт\s*зед|уктзед)|тн\s*вэд|тнвэд|укт\s*зед|уктзед|hs\s*code|hscode|commodity\s*code|tariff\s*code)(\b|$)/i;
+      let idx = header.findIndex(h => strong.test(String(h || '').trim()));
+      if (idx >= 0) return idx;
+      // Weak fallback: a column named just "код" is accepted only when it contains HS-like values.
+      return header.findIndex(h => /^\s*(код|code)\s*$/i.test(String(h || '').trim()));
+    }
+
+    function extractHsCodeFromRow(header, row) {
+      const idx = detectHsCodeColumnIndex(header);
+      if (idx >= 0) {
+        const code = normalizeHsCode(row[idx]);
+        if (code) return code;
+      }
+      // Fallback scan: helps when the code is pasted in notes or merged columns.
+      for (const cell of (row || [])) {
+        const code = normalizeHsCode(cell);
+        if (code && code.length >= 8) return code;
+      }
+      return '';
+    }
+
+    function makeCheck(item, status, note) {
+      return { item, status, note };
+    }
+
+    function mergeChecks(existing, extra) {
+      const out = [];
+      const seen = new Set();
+      [...(Array.isArray(extra) ? extra : []), ...(Array.isArray(existing) ? existing : [])].forEach(c => {
+        if (!c || !c.item) return;
+        const key = String(c.item).toLowerCase().replace(/\s+/g, ' ').trim();
+        if (seen.has(key)) return;
+        seen.add(key);
+        out.push({ item: c.item, status: c.status || 'yellow', note: c.note || '' });
+      });
+      return out;
+    }
+
+    function codeBasedOriginProfile(code, item = {}) {
+      const hs = normalizeHsCode(code || item.uctzedCode);
+      const heading = hs.slice(0, 4);
+      const chapter = hs.slice(0, 2);
+      const category = String(item.category || '').toLowerCase();
+      const name = String(item.name || '').toLowerCase();
+      const isApi = /афі|api|субстанц|лікар|лекар|фарма/i.test(category + ' ' + name);
+
+      const base = {
+        hs,
+        heading: heading || '—',
+        originType: 'Не визначено',
+        productionMethod: 'Потрібне підтвердження CoA/SDS',
+        originShortNote: hs
+          ? `Код ${hs}: походження не визначається автоматично; потрібні CoA/SDS, CAS та опис виробництва.`
+          : 'Код УКТЗЕД відсутній: походження та метод виробництва треба підтвердити документами.',
+        originConfidence: hs ? 'medium' : 'low',
+        euChecks: [],
+        uaChecks: []
+      };
+
+      function addStandardChemical(profile) {
+        profile.euChecks.push(
+          makeCheck('Код/походження: CAS + IUPAC + CoA', 'yellow', 'Для хімічної речовини митниця звіряє код із хімічною ідентичністю, CAS, CoA та описом складу.'),
+          makeCheck('Код/походження: SDS/CLP/REACH', 'yellow', 'За кодом і походженням перевіряють SDS, класифікацію небезпеки та REACH-статус/винятки для транзиту або імпорту.'),
+          makeCheck('Код/походження: санкційний і dual-use screening', 'yellow', 'Для органічних хімічних сполук перевіряють код, країну походження, виробника і можливе подвійне призначення.')
+        );
+        profile.uaChecks.push(
+          makeCheck('Код/походження: митна лабораторна ідентифікація', 'yellow', 'Українська митниця може відібрати проби, якщо код не збігається з назвою, CAS або CoA.'),
+          makeCheck('Код/походження: підтвердження призначення', 'yellow', 'Потрібно підтвердити застосування: фарма, ветеринарія, харчове, косметичне або промислове використання.'),
+          makeCheck('Код/походження: сертифікат походження', 'green', 'Сертифікат походження звіряється з інвойсом, пакувальним листом і заявленим кодом УКТЗЕД.')
+        );
+        if (isApi) {
+          profile.euChecks.push(makeCheck('API/GMP контекст за кодом', 'yellow', 'Якщо речовина заявлена як АФІ, можуть додатково запитувати GMP/DMF/CEP або письмове підтвердження фарм-призначення.'));
+          profile.uaChecks.push(makeCheck('Держлікслужба / фарм-призначення', 'red', 'Для АФІ критично підтвердити ліцензію імпортера, реєстраційний контекст і документи якості виробника.'));
+        }
+        return profile;
+      }
+
+      if (!hs) return base;
+
+      if (heading === '2942') {
+        return addStandardChemical({
+          ...base,
+          originType: 'Синтетичне / органічне',
+          productionMethod: 'Хімічний синтез, очищення, кристалізація',
+          originShortNote: `Код ${hs}: інші органічні сполуки. Типове походження — хімічний синтез або напівсинтез; ботанічне/тваринне походження не підтверджується самим кодом.`,
+          originConfidence: 'high'
+        });
+      }
+
+      if (chapter === '29') {
+        const profile = addStandardChemical({
+          ...base,
+          originType: 'Синтетичне / органічне',
+          productionMethod: 'Хімічний синтез або напівсинтез',
+          originShortNote: `Код ${hs}: органічна хімічна сполука. Аналіз треба будувати від структури/CAS, способу синтезу та заявленого застосування.`,
+          originConfidence: 'high'
+        });
+        if (heading === '2936') {
+          profile.originType = 'Синтетичне або ферментаційне';
+          profile.productionMethod = 'Синтез, ферментація або біотехнологія';
+          profile.originShortNote = `Код ${hs}: вітаміни/похідні. Можливе синтетичне або ферментаційне походження; важливо підтвердити grade і призначення.`;
+          profile.euChecks.push(makeCheck('Вітаміни: food/feed/pharma grade', 'yellow', 'За кодом 2936 перевіряють, чи це харчова, кормова або фарм-якість; документи мають відповідати призначенню.'));
+          profile.uaChecks.push(makeCheck('Вітаміни: призначення та реєстраційний режим', 'yellow', 'Для харчового/кормового/фармацевтичного використання потрібні різні дозвільні й якісні документи.'));
+        }
+        if (heading === '2941') {
+          profile.originType = 'Ферментаційне / напівсинтетичне';
+          profile.productionMethod = 'Ферментація, біосинтез або напівсинтез';
+          profile.originShortNote = `Код ${hs}: антибіотики. Походження часто ферментаційне або напівсинтетичне; контроль документів і призначення підвищений.`;
+          profile.euChecks.push(makeCheck('Антибіотики: GMP/фарм-документи', 'yellow', 'Для антибіотиків очікувано запитують CoA, GMP/DMF/CEP та підтвердження виробника.'));
+          profile.uaChecks.push(makeCheck('Антибіотики: імпорт фармсубстанції', 'red', 'Якщо це АФІ, без належного імпортного та реєстраційного пакета ризик блокування високий.'));
+        }
+        return profile;
+      }
+
+      if (chapter === '28') {
+        const profile = {
+          ...base,
+          originType: 'Мінеральне / неорганічне',
+          productionMethod: 'Неорганічний синтез, нейтралізація або очищення',
+          originShortNote: `Код ${hs}: неорганічна хімія. Основний фокус — чистота, домішки, клас небезпеки, SDS і коректне маркування.`,
+          originConfidence: 'high',
+          euChecks: [], uaChecks: []
+        };
+        profile.euChecks.push(
+          makeCheck('Неорганічна хімія: SDS/CLP', 'yellow', 'Перевіряється небезпека, упаковка, маркування та можливий ADR-статус.'),
+          makeCheck('Неорганічна хімія: REACH/санкційний screening', 'yellow', 'За кодом і CAS перевіряють обмеження та санкційні ризики.')
+        );
+        profile.uaChecks.push(
+          makeCheck('Неорганічна хімія: митна лабораторія', 'yellow', 'Можливий відбір проб для перевірки складу, концентрації та домішок.'),
+          makeCheck('Неорганічна хімія: SDS + маркування', 'yellow', 'SDS і маркування мають відповідати фактичній концентрації та упаковці.')
+        );
+        return profile;
+      }
+
+      if (chapter === '12' || heading === '1302' || heading === '3301') {
+        const profile = {
+          ...base,
+          originType: 'Рослинне / ботанічне',
+          productionMethod: heading === '3301' ? 'Дистиляція або екстракція' : 'Збір, сушіння, різання або екстракція',
+          originShortNote: `Код ${hs}: ботанічне походження. Основні ризики — фітосанітарія, пестициди, мікробіологія, CITES/карантинні обмеження.`,
+          originConfidence: 'high',
+          euChecks: [], uaChecks: []
+        };
+        profile.euChecks.push(
+          makeCheck('Рослинне походження: фітосанітарний контроль', 'red', 'Для рослинної сировини перевіряють phytosanitary certificate, карантинні ризики та країну походження.'),
+          makeCheck('Рослинне походження: pesticides/MRL', 'yellow', 'Можуть вимагати підтвердження залишків пестицидів, мікробіології та важких металів.'),
+          makeCheck('Рослинне походження: CITES/ботанічна ідентифікація', 'yellow', 'Для окремих рослин/екстрактів перевіряють латинську назву, частину рослини та CITES-обмеження.')
+        );
+        profile.uaChecks.push(
+          makeCheck('Рослинне походження: фітосанітарний сертифікат', 'red', 'Для ввезення в Україну критично мати коректний фітосанітарний сертифікат затвердженого зразка.'),
+          makeCheck('Рослинне походження: карантинний огляд', 'yellow', 'Можливий фізичний огляд, відбір проб і перевірка шкідників, вологості та сторонніх домішок.'),
+          makeCheck('Рослинне походження: пестициди/радіологія', 'yellow', 'Для харчового або фарм-використання можуть вимагати протоколи за пестицидами, мікробіологією та радіологією.')
+        );
+        return profile;
+      }
+
+      if (chapter === '05' || heading === '3002') {
+        const profile = {
+          ...base,
+          originType: 'Тваринне / біологічне',
+          productionMethod: 'Біологічне отримання, очищення або переробка',
+          originShortNote: `Код ${hs}: можливе тваринне або біологічне походження. Основний контроль — ветеринарні документи, біобезпека, простежуваність партії.`,
+          originConfidence: 'medium',
+          euChecks: [], uaChecks: []
+        };
+        profile.euChecks.push(
+          makeCheck('Тваринне/біо походження: vet/health certificate', 'red', 'Без ветеринарного або health certificate вантаж із тваринним/біологічним походженням може бути затриманий.'),
+          makeCheck('Тваринне/біо походження: TRACES/BCP', 'yellow', 'У ЄС можуть перевіряти через прикордонний контрольний пункт, залежно від коду, походження і призначення.'),
+          makeCheck('Тваринне/біо походження: простежуваність', 'yellow', 'Потрібні batch records, країна/фабрика походження та підтвердження відсутності заборонених матеріалів.')
+        );
+        profile.uaChecks.push(
+          makeCheck('Тваринне/біо походження: міжнародний ветсертифікат', 'red', 'Для України критично перевірити затверджену форму міжнародного ветеринарного сертифіката.'),
+          makeCheck('Тваринне/біо походження: Держпродспоживслужба', 'red', 'Може знадобитися погодження/контроль ДПСС залежно від призначення і коду.'),
+          makeCheck('Тваринне/біо походження: температурний режим', 'yellow', 'Для біологічних товарів перевіряють умови транспортування, cold chain і цілісність упаковки.')
+        );
+        return profile;
+      }
+
+      if (heading === '3507') {
+        const profile = {
+          ...base,
+          originType: 'Ферментаційне / біотехнологічне',
+          productionMethod: 'Ферментація, виділення ферменту, стандартизація',
+          originShortNote: `Код ${hs}: ферменти. Походження часто мікробіологічне; важливі виробничий штам, активність, носій і мікробіологія.`,
+          originConfidence: 'high',
+          euChecks: [], uaChecks: []
+        };
+        profile.euChecks.push(
+          makeCheck('Ферменти: мікробіологічне походження', 'yellow', 'Перевіряють виробничий штам, носій, активність і можливі GMO/novel food нюанси.'),
+          makeCheck('Ферменти: SDS + temperature control', 'yellow', 'Потрібні SDS, CoA, активність і умови зберігання/температури.')
+        );
+        profile.uaChecks.push(
+          makeCheck('Ферменти: мікробіологія/активність', 'yellow', 'Можуть вимагати CoA із активністю, мікробіологією та підтвердженням носія.'),
+          makeCheck('Ферменти: призначення food/feed/pharma', 'yellow', 'Режим контролю залежить від заявленого застосування.')
+        );
+        return profile;
+      }
+
+      if (chapter === '30') {
+        const profile = {
+          ...base,
+          originType: 'Фармацевтичне / готова або спеціальна форма',
+          productionMethod: 'Фармацевтичне виробництво або фасування',
+          originShortNote: `Код ${hs}: фармацевтична продукція. Головний фокус — реєстраційний статус, ліцензія, GMP і відповідність документів партії.`,
+          originConfidence: 'medium',
+          euChecks: [], uaChecks: []
+        };
+        profile.euChecks.push(
+          makeCheck('Фарма-продукція: GMP/MA контекст', 'yellow', 'Можуть перевіряти виробника, GMP і призначення товару під час транзиту.'),
+          makeCheck('Фарма-продукція: санкційний screening', 'yellow', 'Перевірка коду, країни походження, виробника і кінцевого отримувача.')
+        );
+        profile.uaChecks.push(
+          makeCheck('Фарма-продукція: реєстрація МОЗ/Держлікслужба', 'red', 'Для готових лікарських засобів або АФІ критично підтвердити реєстраційний та ліцензійний режим.'),
+          makeCheck('Фарма-продукція: CoA/GMP/серія', 'red', 'Документи якості мають збігатися з серією, виробником і маркуванням.')
+        );
+        return profile;
+      }
+
+      return base;
+    }
+
+    function enrichItemWithCodeOrigin(item, rowMeta = {}) {
+      const tableCode = normalizeHsCode(rowMeta.uctzedCode);
+      const aiCode = normalizeHsCode(item.uctzedCode);
+      const finalCode = tableCode || aiCode;
+      const profile = codeBasedOriginProfile(finalCode, item);
+
+      item.uctzedCode = finalCode || item.uctzedCode || '—';
+      item.codeBasis = tableCode
+        ? 'Код взято з вихідної таблиці; має пріоритет над AI.'
+        : aiCode
+          ? 'Код запропоновано AI; обов’язково перевірити брокером.'
+          : 'Код не знайдено; потрібна класифікація брокером.';
+      item.originType = item.originType || profile.originType;
+      item.productionMethod = item.productionMethod || profile.productionMethod;
+      item.originShortNote = item.originShortNote || profile.originShortNote;
+      item.originConfidence = item.originConfidence || profile.originConfidence;
+      item.euChecks = mergeChecks(item.euChecks, profile.euChecks);
+      item.uaChecks = mergeChecks(item.uaChecks, profile.uaChecks);
+      return item;
+    }
+
+
     function createRipple(event, btn) {
       const ripple = document.createElement('span');
       ripple.className = 'dl-ripple';
@@ -3717,7 +4057,8 @@ ${euRegulations}
 
         // ===== SHEET 2: ДЕТАЛЬНИЙ АНАЛІЗ =====
         const headers = [
-          '№', 'Назва товару', 'Код УКТЗЕД', 'Категорія', 'Застосування',
+          '№', 'Назва товару', 'Код УКТЗЕД', 'Джерело коду', 'Походження за кодом',
+          'Спосіб виробництва', 'Короткий опис походження', 'Категорія', 'Застосування',
           'Кількість (кг)', 'Ціна за кг ($)', 'Митна вартість ($)',
           'Ставка мита (%)', 'Мито ($)', 'ПДВ ($)',
           'Аналіз небезпеки', 'Зберігання', 'Ризик', 'Причина ризику'
@@ -3729,6 +4070,10 @@ ${euRegulations}
             idx + 1,
             item.name || '—',
             item.uctzedCode || '—',
+            item.codeBasis || '—',
+            item.originType || '—',
+            item.productionMethod || '—',
+            item.originShortNote || '—',
             item.category || '—',
             item.applications || '—',
             item.qtyKg || 0,
@@ -3747,7 +4092,7 @@ ${euRegulations}
         // Totals row
         rows.push([]);
         rows.push([
-          '', 'РАЗОМ', '', '', '',
+          '', 'РАЗОМ', '', '', '', '', '', '', '',
           (d.items || []).reduce((a, i) => a + (i.qtyKg || 0), 0), '',
           s.totalCustomsValue || 0, '',
           s.totalDuty || 0,
@@ -3757,53 +4102,60 @@ ${euRegulations}
 
         const ws2 = XLSX.utils.aoa_to_sheet(rows);
         ws2['!cols'] = [
-          { wch: 4 }, { wch: 30 }, { wch: 14 }, { wch: 22 }, { wch: 28 },
+          { wch: 4 }, { wch: 30 }, { wch: 14 }, { wch: 32 }, { wch: 24 },
+          { wch: 28 }, { wch: 55 }, { wch: 24 }, { wch: 28 },
           { wch: 14 }, { wch: 14 }, { wch: 16 },
           { wch: 14 }, { wch: 12 }, { wch: 12 },
           { wch: 40 }, { wch: 25 }, { wch: 12 }, { wch: 35 }
         ];
-        ws2['!autofilter'] = { ref: `A1:O${rows.length}` };
+        ws2['!autofilter'] = { ref: `A1:S${rows.length}` };
 
         XLSX.utils.book_append_sheet(wb, ws2, 'Детальний аналіз');
 
         // ===== SHEET 3: ПЕРЕВІРКИ ЄС =====
-        const euHeaders = ['Товар', 'Перевірка', 'Статус', 'Коментар'];
+        const euHeaders = ['Товар', 'Код УКТЗЕД', 'Походження / метод', 'Перевірка', 'Статус', 'Коментар'];
         const euRows = [euHeaders];
         (d.items || []).forEach(item => {
           const checks = Array.isArray(item.euChecks) ? item.euChecks : [];
+          const originMethod = [item.originType, item.productionMethod].filter(Boolean).join(' / ') || '—';
           checks.forEach((c, ci) => {
             euRows.push([
               ci === 0 ? (item.name || '—') : '',
+              ci === 0 ? (item.uctzedCode || '—') : '',
+              ci === 0 ? originMethod : '',
               c.item || '—',
               c.status === 'green' ? '🟢 Ок' : c.status === 'red' ? '🔴 Критично' : '🟡 Увага',
               c.note || '—'
             ]);
           });
-          if (checks.length > 0) euRows.push(['', '', '', '']); // separator
+          if (checks.length > 0) euRows.push(['', '', '', '', '', '']); // separator
         });
 
         const ws3 = XLSX.utils.aoa_to_sheet(euRows);
-        ws3['!cols'] = [{ wch: 30 }, { wch: 40 }, { wch: 14 }, { wch: 60 }];
+        ws3['!cols'] = [{ wch: 30 }, { wch: 14 }, { wch: 35 }, { wch: 42 }, { wch: 14 }, { wch: 65 }];
         XLSX.utils.book_append_sheet(wb, ws3, 'Перевірки ЄС');
 
         // ===== SHEET 4: РОЗМИТНЕННЯ UA =====
-        const uaHeaders = ['Товар', 'Перевірка', 'Статус', 'Коментар'];
+        const uaHeaders = ['Товар', 'Код УКТЗЕД', 'Походження / метод', 'Перевірка', 'Статус', 'Коментар'];
         const uaRows = [uaHeaders];
         (d.items || []).forEach(item => {
           const checks = Array.isArray(item.uaChecks) ? item.uaChecks : [];
+          const originMethod = [item.originType, item.productionMethod].filter(Boolean).join(' / ') || '—';
           checks.forEach((c, ci) => {
             uaRows.push([
               ci === 0 ? (item.name || '—') : '',
+              ci === 0 ? (item.uctzedCode || '—') : '',
+              ci === 0 ? originMethod : '',
               c.item || '—',
               c.status === 'green' ? '🟢 Ок' : c.status === 'red' ? '🔴 Критично' : '🟡 Увага',
               c.note || '—'
             ]);
           });
-          if (checks.length > 0) uaRows.push(['', '', '', '']);
+          if (checks.length > 0) uaRows.push(['', '', '', '', '', '']);
         });
 
         const ws4 = XLSX.utils.aoa_to_sheet(uaRows);
-        ws4['!cols'] = [{ wch: 30 }, { wch: 40 }, { wch: 14 }, { wch: 60 }];
+        ws4['!cols'] = [{ wch: 30 }, { wch: 14 }, { wch: 35 }, { wch: 42 }, { wch: 14 }, { wch: 65 }];
         XLSX.utils.book_append_sheet(wb, ws4, 'Розмитнення UA');
 
         // Generate file
@@ -3847,16 +4199,24 @@ ${euRegulations}
         const qtyDisplay = item.qty || (item.qtyKg ? item.qtyKg.toLocaleString('uk-UA') + ' кг' : '—');
         const priceDisplay = item.buyPricePerKg ? fmt(item.buyPricePerKg) + '/кг' : '—';
         const dutyRateDisplay = item.dutyRatePercent != null ? `${item.dutyRatePercent}%` : '—';
+        const originMeta = [item.originType, item.productionMethod].filter(Boolean).join(' · ');
+        const originBlock = item.originShortNote ? `<div class="code-origin-card">
+          <div class="code-origin-title">Походження за кодом</div>
+          <div class="code-origin-body">${escHtml(item.originShortNote)}</div>
+          ${originMeta ? `<div class="code-origin-meta">${escHtml(originMeta)}</div>` : ''}
+          ${item.codeBasis ? `<div class="code-origin-meta">${escHtml(item.codeBasis)}</div>` : ''}
+        </div>` : '';
 
         const hazardSafe = item.hazardAnalysis && item.hazardAnalysis.includes('Не класифікується');
         const hazardClass = hazardSafe ? 'safe' : 'danger';
 
         rows += `<tr>
       <td style="min-width:220px;max-width:280px">
-        <div class="td-name">${item.name || '—'}</div>
-        <div class="td-code">${item.uctzedCode || ''}</div>
-        ${item.category ? `<span class="td-category">${item.category}</span>` : ''}
-        ${item.applications ? `<div class="td-apps">${item.applications.substring(0, 120)}${item.applications.length > 120 ? '…' : ''}</div>` : ''}
+        <div class="td-name">${escHtml(item.name || '—')}</div>
+        <div class="td-code">${escHtml(item.uctzedCode || '')}</div>
+        ${originBlock}
+        ${item.category ? `<span class="td-category">${escHtml(item.category)}</span>` : ''}
+        ${item.applications ? `<div class="td-apps">${escHtml(item.applications.substring(0, 120))}${item.applications.length > 120 ? '…' : ''}</div>` : ''}
       </td>
       <td style="min-width:130px">
         <div class="td-qty">${qtyDisplay}</div>
@@ -4520,16 +4880,16 @@ ${euRegulations}
 
     function extractBatchData(batchRows) {
       const bySheet = new Map();
-      batchRows.forEach(({ sheetName, date, header, row }) => {
+      batchRows.forEach(({ sheetName, date, header, row, uktzedCode }) => {
         if (!bySheet.has(sheetName)) bySheet.set(sheetName, { date, header, rows: [] });
-        bySheet.get(sheetName).rows.push(row);
+        bySheet.get(sheetName).rows.push({ row, uktzedCode: uktzedCode || extractHsCodeFromRow(header, row) });
       });
       let out = '';
       bySheet.forEach(({ date, header, rows }, sheetName) => {
         const dateInfo = date ? ` [${date.toLocaleDateString('uk-UA')}]` : '';
         out += `\n=== Лист: "${sheetName}"${dateInfo} ===\n`;
         out += 'КОЛОНКИ: ' + header.map((h, i) => `[${i}]"${(h || '').substring(0, 30)}"`).join(' | ') + '\n';
-        rows.forEach((row, ri) => {
+        rows.forEach(({ row, uktzedCode }, ri) => {
           const cells = header.map((_, i) => {
             const c = row[i];
             if (!c) return '—';
@@ -4537,6 +4897,7 @@ ${euRegulations}
             return s.length > 120 ? s.substring(0, 120) + '…' : (s || '—');
           });
           out += `Р${ri + 1}: ${cells.join(' | ')}\n`;
+          out += `КОД_УКТЗЕД_З_ТАБЛИЦІ: ${uktzedCode || '—'}\n`;
         });
       });
       return out;
@@ -4579,6 +4940,8 @@ ${isLast
 ПРАВИЛА:
 1. НЕ вигадуй товари — тільки ті що в даних нижче.
 2. Поверни рівно ${batch.length} об'єктів у масиві items.
+3. Якщо в рядку є "КОД_УКТЗЕД_З_ТАБЛИЦІ" — використовуй його як основний код.
+4. Побудуй originType, productionMethod, originShortNote та додаткові euChecks/uaChecks саме від коду і походження.
 
 ДАНІ ПАРТІЇ:
 ${batchData}`;
