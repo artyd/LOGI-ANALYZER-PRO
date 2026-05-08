@@ -2586,6 +2586,105 @@
         width: 100%;
       }
     }
+
+
+    /* ============================================
+       v2.6 · FULL-WIDTH ANALYSIS MODE
+       The report area breaks out of the centered layout and uses
+       nearly the entire viewport, so EU / UA / risk columns are not clipped.
+       ============================================ */
+    #page-new {
+      max-width: none;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    #page-new > .akc-scene,
+    #page-new > .deck {
+      max-width: 1440px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #resultsArea {
+      width: calc(100vw - 20px);
+      max-width: none;
+      margin-left: calc(50% - 50vw + 10px);
+      margin-right: calc(50% - 50vw + 10px);
+    }
+
+    #resultsArea .sheet-banner,
+    #resultsArea .metrics,
+    #resultsArea .sec-head,
+    #resultsArea .download-wrap,
+    #resultsArea .tbl-card,
+    #resultsArea .alerts {
+      width: 100%;
+      max-width: none;
+    }
+
+    #resultsArea .tbl-card {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #resultsArea .tbl-scroll {
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    #resultsArea table {
+      width: 100%;
+      min-width: 0;
+      table-layout: fixed;
+    }
+
+    #resultsArea .tbl-col-product { width: 22%; }
+    #resultsArea .tbl-col-qty { width: 8%; }
+    #resultsArea .tbl-col-value { width: 11%; }
+    #resultsArea .tbl-col-eu { width: 26.5%; }
+    #resultsArea .tbl-col-ua { width: 26.5%; }
+    #resultsArea .tbl-col-risk { width: 6%; }
+
+    #resultsArea thead th,
+    #resultsArea tbody td {
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    #resultsArea .checks-list {
+      gap: 8px;
+    }
+
+    #resultsArea .check-item {
+      padding: 11px 12px;
+    }
+
+    @media (max-width: 1500px) {
+      #resultsArea .tbl-scroll {
+        overflow-x: auto;
+      }
+
+      #resultsArea table {
+        min-width: 1500px;
+      }
+    }
+
+    @media (min-width: 1900px) {
+      #resultsArea {
+        width: calc(100vw - 32px);
+        margin-left: calc(50% - 50vw + 16px);
+        margin-right: calc(50% - 50vw + 16px);
+      }
+
+      #resultsArea .tbl-col-product { width: 23%; }
+      #resultsArea .tbl-col-qty { width: 8%; }
+      #resultsArea .tbl-col-value { width: 11%; }
+      #resultsArea .tbl-col-eu { width: 26%; }
+      #resultsArea .tbl-col-ua { width: 26%; }
+      #resultsArea .tbl-col-risk { width: 6%; }
+    }
+
   </style>
 </head>
 
@@ -2710,7 +2809,7 @@
         <div class="deck-head-left">SYSTEM READY · Ingestion Bay</div>
       </div>
       <div class="deck-body">
-        <div class="deck-eyebrow">Freight Intelligence · v2.0</div>
+        <div class="deck-eyebrow">Freight Intelligence · v2.6</div>
         <h1 class="deck-title">
           Аналіз <em>збірної партії</em> перед відправкою з Європи до України
         </h1>
