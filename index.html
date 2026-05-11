@@ -2753,6 +2753,236 @@
     }
 
 
+    /* ============================================
+       v2.12 · QDPRO ORIGIN SELECTOR + TRANSIT BROKER CHECKS
+       Interactive verified-origin selector and logistics/broker control panel.
+       ============================================ */
+    .tbl-col-transit { width: 20%; }
+
+    .origin-selector-card {
+      margin-top: 10px;
+      padding: 10px 11px;
+      background: linear-gradient(180deg, rgba(44, 184, 120, 0.08), var(--surface-2));
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--amber);
+      border-radius: 9px;
+    }
+
+    .origin-selector-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .origin-selector-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--amber);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .qdpro-link {
+      flex-shrink: 0;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--amber-bright);
+      text-decoration: none;
+      padding: 3px 7px;
+      border: 1px solid rgba(44, 184, 120, 0.26);
+      border-radius: 999px;
+      background: rgba(44, 184, 120, 0.08);
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .qdpro-link:hover {
+      transform: translateY(-1px);
+      border-color: var(--amber);
+      background: var(--amber-dim);
+    }
+
+    .origin-select {
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--line-2);
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 11px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .origin-select:focus {
+      border-color: var(--amber);
+      box-shadow: 0 0 0 2px var(--amber-dim);
+    }
+
+    .origin-panel {
+      margin-top: 9px;
+      padding-top: 9px;
+      border-top: 1px dashed var(--line-2);
+      animation: origin-panel-in 0.28s ease both;
+    }
+
+    @keyframes origin-panel-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .origin-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .origin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid var(--line-2);
+      background: var(--surface-3);
+      color: var(--ink-2);
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
+    .origin-badge.rec {
+      border-color: rgba(44, 184, 120, 0.32);
+      background: var(--amber-dim);
+      color: var(--amber-bright);
+    }
+
+    .origin-panel-note {
+      color: var(--ink-2);
+      font-size: 11.5px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .origin-panel-mini-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ink-3);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 8px 0 5px;
+    }
+
+    .mini-check-list {
+      display: grid;
+      gap: 5px;
+    }
+
+    .mini-check {
+      display: grid;
+      grid-template-columns: 8px 1fr;
+      gap: 7px;
+      align-items: start;
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+    }
+
+    .mini-check i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-top: 4px;
+    }
+
+    .mini-check.red i { background: var(--red-bright); box-shadow: 0 0 7px var(--red); }
+    .mini-check.yellow i { background: var(--yellow); box-shadow: 0 0 7px var(--yellow); }
+    .mini-check.green i { background: var(--green-bright); box-shadow: 0 0 7px var(--green); }
+
+    .mini-check b {
+      display: block;
+      color: var(--ink);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .mini-check span {
+      display: block;
+      color: var(--ink-2);
+      font-size: 10.5px;
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+
+    #resultsArea .tbl-col-product { width: 20%; }
+    #resultsArea .tbl-col-qty { width: 7%; }
+    #resultsArea .tbl-col-value { width: 9%; }
+    #resultsArea .tbl-col-eu { width: 20%; }
+    #resultsArea .tbl-col-transit { width: 20%; }
+    #resultsArea .tbl-col-ua { width: 17%; }
+    #resultsArea .tbl-col-risk { width: 7%; }
+
+    @media (max-width: 1500px) {
+      #resultsArea table { min-width: 1680px; }
+      #resultsArea .tbl-scroll { overflow-x: auto; }
+    }
+
+
+
+
+    /* ============================================
+       v2.13 · 80% ANALYSIS TABLE + REGIONAL TRANSIT COLUMNS
+       Transit / broker information is embedded into EU and UA transit columns.
+       ============================================ */
+    #resultsArea {
+      width: 80vw !important;
+      max-width: none !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    #resultsArea .tbl-card,
+    #resultsArea .tbl-scroll,
+    #resultsArea table {
+      width: 100%;
+    }
+
+    #resultsArea table {
+      table-layout: fixed;
+      min-width: 0;
+    }
+
+    #resultsArea .tbl-col-product { width: 20%; }
+    #resultsArea .tbl-col-qty { width: 8%; }
+    #resultsArea .tbl-col-value { width: 10%; }
+    #resultsArea .tbl-col-eu { width: 27%; }
+    #resultsArea .tbl-col-ua { width: 27%; }
+    #resultsArea .tbl-col-risk { width: 8%; }
+
+    @media (max-width: 1500px) {
+      #resultsArea {
+        width: 80vw !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+
+      #resultsArea .tbl-scroll {
+        overflow-x: auto;
+      }
+
+      #resultsArea table {
+        min-width: 1180px;
+      }
+    }
   </style>
 </head>
 
@@ -4453,6 +4683,401 @@ ${euRegulations}
       return sortProfileChecks(base);
     }
 
+    // ===== QDPRO + ORIGIN OPTIONS + TRANSIT/BROKER CHECKS =====
+    const QDPRO_GOODINFO_BASE = 'https://www.qdpro.com.ua/goodinfo';
+
+    function buildQdProGoodInfoUrl(code) {
+      const hs = normalizeHsCode(code);
+      return hs ? `${QDPRO_GOODINFO_BASE}/${hs}` : QDPRO_GOODINFO_BASE;
+    }
+
+    function getQdProChapterNote(code) {
+      const hs = normalizeHsCode(code);
+      const ch = hs.slice(0, 2);
+      const heading = hs.slice(0, 4);
+      const map = {
+        '01': 'QDPro: Розділ I — живі тварини; продукти тваринного походження.',
+        '02': 'QDPro: Розділ I — продукти тваринного походження.',
+        '03': 'QDPro: Розділ I — риба/морепродукти; тваринне походження.',
+        '04': 'QDPro: Розділ I — молочні продукти, яйця, мед; тваринне походження.',
+        '05': 'QDPro: Розділ I — інші продукти тваринного походження.',
+        '06': 'QDPro: Розділ II — продукти рослинного походження.',
+        '07': 'QDPro: Розділ II — продукти рослинного походження.',
+        '08': 'QDPro: Розділ II — продукти рослинного походження.',
+        '09': 'QDPro: Розділ II — кава/чай/прянощі; рослинне походження.',
+        '10': 'QDPro: Розділ II — зернові; рослинне походження.',
+        '11': 'QDPro: Розділ II — продукція борошномельно-круп’яної промисловості.',
+        '12': 'QDPro: Розділ II — насіння, плоди, лікарські рослини; рослинне походження.',
+        '13': 'QDPro: Розділ II — соки й екстракти рослинного походження.',
+        '14': 'QDPro: Розділ II — інші рослинні матеріали.',
+        '15': 'QDPro: Розділ III — жири й олії тваринного, рослинного або мікробного походження.',
+        '28': 'QDPro: Група 28 — неорганічна хімія; мінеральне/синтетичне походження.',
+        '29': 'QDPro: Група 29 — органічні хімічні сполуки; походження підтверджується CoA/SDS/виробником.',
+        '30': 'QDPro: Група 30 — фармацевтична продукція; контроль залежить від форми та призначення.',
+        '32': 'QDPro: Група 32 — екстракти, барвники, пігменти; можливе рослинне або синтетичне походження.',
+        '33': 'QDPro: Група 33 — ефірні олії, парфумерія, косметична сировина.',
+        '35': 'QDPro: Група 35 — білкові речовини, желатин, ферменти; можливе тваринне/ферментаційне походження.',
+        '38': 'QDPro: Група 38 — різні хімічні продукти; походження підтверджується документами.',
+        '39': 'QDPro: Група 39 — пластмаси/полімери; зазвичай синтетичне походження.'
+      };
+      if (heading === '1302') return 'QDPro: 1302 — соки й екстракти рослинного походження; перевірити botanical source.';
+      if (heading === '3001') return 'QDPro: 3001 — органи/екстракти/секреції; можливе людське або тваринне походження.';
+      if (heading === '3002') return 'QDPro: 3002 — кров, вакцини, культури, біологічні продукти; біологічне походження.';
+      if (heading === '3503') return 'QDPro: 3503 — желатин та похідні; зазвичай тваринне походження.';
+      if (heading === '3507') return 'QDPro: 3507 — ферменти; часто ферментаційне/біотехнологічне походження.';
+      return map[ch] || 'QDPro: код потрібно перевірити в довіднику goodinfo та підтвердити документами партії.';
+    }
+
+    function originCheck(item, status, note) {
+      return makeCheck(item, status, note);
+    }
+
+    function coreTransitChecks(item = {}) {
+      const hs = normalizeHsCode(item.uctzedCode);
+      const isAdr = /adr|клас|class|un\s*\d{4}|небезпеч|опасн/i.test(String(item.hazardAnalysis || '') + ' ' + String(item.storageRequirements || ''));
+      const checks = [
+        originCheck('NCTS/T1: код, вага, місця', 'green', 'Для логіста/брокера звірити УКТЗЕД, net/gross, кількість місць, інвойс, PL, CMR/AWB/BL і транзитну декларацію.'),
+        originCheck('Маркування партії', 'green', 'Назва, batch/lot, виробник, країна походження та кількість мають збігатися у CoA, SDS, Invoice і Packing List.'),
+        originCheck('Тарифна класифікація', hs ? 'yellow' : 'red', hs ? 'Код є, але брокер має перевірити 10-значну деталізацію, опис товару і ставку.' : 'Код відсутній: без класифікації брокера є ризик затримки на транзиті/митниці.')
+      ];
+      if (isAdr) {
+        checks.unshift(
+          originCheck('ADR/IMDG/IATA маршрут', 'red', 'Підтвердити UN number, packing group, labels, tunnel code/обмеження маршруту, сумісність у збірному вантажі.'),
+          originCheck('Аварійний комплект і DGD', 'red', 'Для небезпечного вантажу перевірити Dangerous Goods Declaration, emergency instructions і допуск перевізника.')
+        );
+      } else {
+        checks.push(originCheck('ADR статус', 'green', 'Якщо SDS підтверджує non-dangerous cargo, логісту достатньо мати SDS/statement для перевізника.'));
+      }
+      return checks;
+    }
+
+    function originProfileByKey(key, item = {}) {
+      const hs = normalizeHsCode(item.uctzedCode);
+      const chapterNote = getQdProChapterNote(hs);
+      const qdproUrl = buildQdProGoodInfoUrl(hs);
+      const profileMap = {
+        synthetic: {
+          key: 'synthetic', label: 'Синтетичне / органічний синтез', shortLabel: 'Синтетичне', confidence: 'medium',
+          basis: `${chapterNote} Для синтетичного походження потрібні CoA, SDS/TDS і підтвердження виробника щодо manufacturing route.`,
+          qdproUrl,
+          euChecks: [
+            originCheck('Синтетичне: SDS/CLP/ADR', 'yellow', 'Брокеру/логісту перевірити hazard class, CLP pictograms, UN number і умови перевезення за SDS.'),
+            originCheck('Синтетичне: REACH/обмеження', 'yellow', 'Для транзиту через ЄС перевірити, чи немає Annex XVII/SVHC/precursor нюансів за речовиною й застосуванням.'),
+            originCheck('Синтетичне: CoA/TDS', 'green', 'Підготувати CoA, TDS/specification, CAS, assay і impurities для підтвердження опису товару.')
+          ],
+          uaChecks: [
+            originCheck('Синтетичне: митна лабораторія', 'yellow', 'Можливий відбір проб для підтвердження речовини, концентрації, CAS і коду УКТЗЕД.'),
+            originCheck('Синтетичне: SDS українською/англійською', 'yellow', 'Для небезпечних або подвійних за призначенням речовин SDS має бути повним і узгодженим з маркуванням.'),
+            originCheck('Синтетичне: стандартний пакет', 'green', 'Invoice, PL, CoA, SDS/TDS, контракт і транспортні документи зазвичай є базою оформлення.')
+          ],
+          transitChecks: [
+            originCheck('Синтетика: сумісність у збірному вантажі', 'yellow', 'Перевірити несумісність з кислотами/лугами/окисниками, температурний режим і вимоги до вентиляції.'),
+            originCheck('Синтетика: HS/CAS matching', 'yellow', 'CAS, назва, концентрація й код у документах мають не конфліктувати між собою.'),
+            originCheck('Синтетика: non-DG statement', 'green', 'Якщо не ADR — отримати коротке підтвердження non-dangerous cargo для перевізника.')
+          ]
+        },
+        fermentation: {
+          key: 'fermentation', label: 'Ферментаційне / біотехнологічне', shortLabel: 'Ферментаційне', confidence: 'medium',
+          basis: `${chapterNote} Ферментаційне походження підтверджується CoA, описом виробничого штаму/носія, GMO/non-GMO за потреби.`,
+          qdproUrl,
+          euChecks: [
+            originCheck('Ферментація: strain/GMO', 'yellow', 'Перевірити виробничий штам, носій, GMO/non-GMO, allergen і food/feed/pharma статус.'),
+            originCheck('Ферментація: microbiology', 'yellow', 'Потрібні мікробіологічні показники, activity/assay, endotoxin/bioburden якщо релевантно.'),
+            originCheck('Ферментація: temperature', 'yellow', 'Для ферментів/біологічних продуктів логіст перевіряє температурний режим і термін придатності.')
+          ],
+          uaChecks: [
+            originCheck('Ферментація: призначення товару', 'yellow', 'Режим контролю залежить від food/feed/pharma/vet призначення; брокеру треба мати чіткий end-use.'),
+            originCheck('Ферментація: CoA/активність', 'yellow', 'CoA має містити активність/assay, мікробіологію, вологість і batch.'),
+            originCheck('Ферментація: ДПСС/фарм контроль', 'yellow', 'Для кормового, ветеринарного або фарм-використання можливий додатковий контроль.')
+          ],
+          transitChecks: [
+            originCheck('Біотех: data logger', 'yellow', 'Якщо є температурний режим — обов’язково погодити data logger і допустимі excursions.'),
+            originCheck('Біотех: не змішувати з odor cargo', 'yellow', 'У збірному вантажі уникати сусідства з пахучими, токсичними або пиловими товарами.'),
+            originCheck('Біотех: lot traceability', 'green', 'Batch/lot у всіх документах має повністю збігатися для трасування партії.')
+          ]
+        },
+        plant: {
+          key: 'plant', label: 'Рослинне / ботанічне', shortLabel: 'Рослинне', confidence: 'high',
+          basis: `${chapterNote} Рослинне походження перевіряється за латинською назвою, частиною рослини, країною збору/виробництва і phytosanitary documents.`,
+          qdproUrl,
+          euChecks: [
+            originCheck('Рослинне: phytosanitary', 'red', 'Перевірити наявність фітосанітарного сертифіката, латинської назви, частини рослини та країни походження.'),
+            originCheck('Рослинне: pesticides/MRL', 'yellow', 'Для food/pharma/herbal використання підготувати pesticides, heavy metals, microbiology, aflatoxins за потреби.'),
+            originCheck('Рослинне: CITES/карантин', 'yellow', 'Перевірити CITES, карантинні шкідники, дерев’яну упаковку/IPPC і ризики огляду.')
+          ],
+          uaChecks: [
+            originCheck('Рослинне: фітосанітарний сертифікат', 'red', 'Для України потрібна коректна форма фітосанітарного сертифіката і збіг даних з Invoice/PL.'),
+            originCheck('Рослинне: карантинний огляд', 'yellow', 'Ймовірний фізичний огляд, відбір проб, перевірка шкідників, вологості та сторонніх домішок.'),
+            originCheck('Рослинне: санітарні показники', 'yellow', 'Для харчового/фарм використання можуть запитати мікробіологію, пестициди, радіологію, важкі метали.')
+          ],
+          transitChecks: [
+            originCheck('Ботаніка: route via BCP', 'yellow', 'Заздалегідь погодити пункт перетину, де можливий фітосанітарний/карантинний контроль.'),
+            originCheck('Ботаніка: запах/вологість', 'yellow', 'Не ставити поруч з odor-sensitive API/фарма сировиною; контролювати сухість, палети та цілісність мішків.'),
+            originCheck('Ботаніка: latin name matching', 'red', 'Латинська назва, частина рослини і batch мають збігатися в усіх документах.')
+          ]
+        },
+        animal: {
+          key: 'animal', label: 'Тваринне / біологічне', shortLabel: 'Тваринне', confidence: 'high',
+          basis: `${chapterNote} Тваринне або біологічне походження підтверджується species/source, health/veterinary certificate, traceability і manufacturing statement.`,
+          qdproUrl,
+          euChecks: [
+            originCheck('Тваринне: vet/health certificate', 'red', 'Перевірити міжнародний ветеринарний або health certificate, species/source і країну походження.'),
+            originCheck('Тваринне: TRACES/BCP', 'red', 'Для ЄС можливий контроль через Border Control Post/TRACES залежно від коду та призначення.'),
+            originCheck('Тваринне: TSE/BSE/traceability', 'yellow', 'Потрібні підтвердження TSE/BSE, non-human/animal source, batch traceability за видом сировини.')
+          ],
+          uaChecks: [
+            originCheck('Тваринне: міжнародний ветсертифікат', 'red', 'Для України критично перевірити затверджену форму міжнародного ветеринарного сертифіката.'),
+            originCheck('Тваринне: ДПСС контроль', 'red', 'ДПСС може вимагати попереднє погодження, огляд або відбір проб залежно від призначення.'),
+            originCheck('Тваринне: температурний режим', 'yellow', 'Якщо товар біологічний/чутливий — підтвердити cold chain, упаковку і data logger.')
+          ],
+          transitChecks: [
+            originCheck('Тваринне: pre-alert BCP', 'red', 'Логісту потрібно заздалегідь погодити BCP/ветконтроль, часові слоти й пакет документів.'),
+            originCheck('Тваринне: segregated cargo', 'yellow', 'Не змішувати з харчовою/фарма сировиною без підтвердження сумісності; перевірити hygiene requirements.'),
+            originCheck('Тваринне: seal + temp log', 'yellow', 'Контролювати пломби, температуру, цілісність тари й час на кордоні.')
+          ]
+        },
+        mineral: {
+          key: 'mineral', label: 'Мінеральне / неорганічне', shortLabel: 'Мінеральне', confidence: 'high',
+          basis: `${chapterNote} Мінеральне/неорганічне походження підтверджується складом, concentration, assay, impurities і SDS.`,
+          qdproUrl,
+          euChecks: [
+            originCheck('Мінеральне: концентрація/assay', 'yellow', 'Код може залежати від концентрації, форми, чистоти та домішок; перевірити CoA.'),
+            originCheck('Мінеральне: SDS/ADR', 'yellow', 'Перевірити корозійність, токсичність, UN number, packing group і сумісність у транспорті.'),
+            originCheck('Мінеральне: restrictions/precursors', 'yellow', 'Для окремих солей/кислот/лугів перевірити precursor або дозвільні обмеження.')
+          ],
+          uaChecks: [
+            originCheck('Мінеральне: лабораторна ідентифікація', 'yellow', 'Можливий відбір проб на концентрацію/домішки/відповідність коду.'),
+            originCheck('Мінеральне: небезпечний вантаж', 'yellow', 'Якщо ADR — потрібні labels, UN number, інструкції й підтвердження допуску перевізника.'),
+            originCheck('Мінеральне: стандартні документи', 'green', 'Invoice, PL, CoA, SDS, TDS, контракт і транспортні документи.')
+          ],
+          transitChecks: [
+            originCheck('Мінеральне: segregation', 'yellow', 'Перевірити несумісність з кислотами/лугами/окисниками та вимоги до піддонів/пакування.'),
+            originCheck('Мінеральне: spill control', 'yellow', 'Для рідин або корозійних речовин погодити аварійний комплект і герметичність тари.'),
+            originCheck('Мінеральне: gross weight', 'green', 'Звірити допустиме навантаження, вагу на вісь і кількість місць у транзитних документах.')
+          ]
+        },
+        mixed: {
+          key: 'mixed', label: 'Змішане / багатокомпонентне', shortLabel: 'Змішане', confidence: 'medium',
+          basis: `${chapterNote} Для сумішей або подвійного походження треба отримати composition statement і підтвердити, яка частина визначає код та контроль.`,
+          qdproUrl,
+          euChecks: [
+            originCheck('Змішане: composition statement', 'red', 'Без складу/відсотків компонентів брокер не зможе надійно підтвердити класифікацію.'),
+            originCheck('Змішане: dominant component', 'yellow', 'Перевірити компонент, який визначає код, небезпеку, походження і режим контролю.'),
+            originCheck('Змішане: SDS/label consistency', 'yellow', 'SDS, label і CoA мають однаково описувати склад та hazard classification.')
+          ],
+          uaChecks: [
+            originCheck('Змішане: митна лабораторія', 'yellow', 'Ймовірний відбір проб для підтвердження складу, коду і класифікації.'),
+            originCheck('Змішане: призначення', 'yellow', 'Food/feed/pharma/cosmetic призначення змінює документи та контроль.'),
+            originCheck('Змішане: походження компонентів', 'yellow', 'Для тваринних/рослинних компонентів можуть додаватися вет/фіто вимоги.')
+          ],
+          transitChecks: [
+            originCheck('Змішане: cargo compatibility', 'yellow', 'Логіст перевіряє сумісність усіх компонентів у збірному вантажі.'),
+            originCheck('Змішане: label vs SDS', 'yellow', 'Маркування, SDS і invoice description не повинні конфліктувати.'),
+            originCheck('Змішане: broker pre-check', 'red', 'Перед відправкою потрібна попередня класифікація брокером по складу.')
+          ]
+        },
+        unknown: {
+          key: 'unknown', label: 'Невідоме / підтвердити документами', shortLabel: 'Невідоме', confidence: 'low',
+          basis: `${chapterNote} Автоматично підтвердити походження неможливо: потрібні CoA, SDS, TDS, виробник, route of synthesis/origin statement.`,
+          qdproUrl,
+          euChecks: [
+            originCheck('Невідоме: origin statement', 'red', 'Запросити у постачальника офіційне підтвердження походження та методу виробництва.'),
+            originCheck('Невідоме: SDS/CoA/TDS', 'yellow', 'Документи мають підтвердити CAS, склад, застосування, небезпеку і batch.'),
+            originCheck('Невідоме: broker classification', 'red', 'До бронювання транспорту потрібна попередня перевірка коду брокером.')
+          ],
+          uaChecks: [
+            originCheck('Невідоме: класифікаційне рішення', 'red', 'Без підтвердження походження/складу високий ризик запиту митниці або лабораторії.'),
+            originCheck('Невідоме: контроль за призначенням', 'yellow', 'Потрібно чітко визначити призначення: pharma, food, feed, vet, cosmetic або industrial.'),
+            originCheck('Невідоме: документи партії', 'yellow', 'CoA, SDS, Invoice, PL і маркування мають збігатися по назві, batch і виробнику.')
+          ],
+          transitChecks: [
+            originCheck('Невідоме: no dispatch before pre-check', 'red', 'Не відправляти вантаж до попередньої перевірки коду, небезпеки, документів і маршруту.'),
+            originCheck('Невідоме: transport acceptance', 'yellow', 'Перевізник має підтвердити прийняття вантажу за SDS/описом.'),
+            originCheck('Невідоме: contingency time', 'yellow', 'Закласти час на запити брокера, митної лабораторії або контрольних органів.')
+          ]
+        }
+      };
+      return profileMap[key] || profileMap.unknown;
+    }
+
+    function inferOriginCandidateKeys(item = {}, profile = {}) {
+      const hs = normalizeHsCode(item.uctzedCode || profile.hs);
+      const ch = hs.slice(0, 2);
+      const heading = hs.slice(0, 4);
+      const text = [item.name, item.category, item.applications, item.originType, item.productionMethod, item.originShortNote].filter(Boolean).join(' ').toLowerCase();
+      const keys = new Set();
+      const addByText = () => {
+        if (/plant|botanic|herb|extract|екстракт|рослин|растител|олія|масло|leaf|root|flower|seed/.test(text)) keys.add('plant');
+        if (/animal|bovine|porcine|fish|gelatin|желатин|lanolin|тварин|животн|молоч|dairy/.test(text)) keys.add('animal');
+        if (/ferment|фермент|enzyme|ензим|biotech|біотех|штам|strain|biosynthesis/.test(text)) keys.add('fermentation');
+        if (/mineral|inorganic|неорган|мінерал|минерал|oxide|hydroxide|salt|сіль|соль|кислота|луг/.test(text)) keys.add('mineral');
+        if (/synthetic|synthesis|синтет|синтез|semi/.test(text)) keys.add('synthetic');
+        if (/mixture|blend|solution|смесь|суміш|композиція|комплекс/.test(text)) keys.add('mixed');
+      };
+      if (/^(01|02|03|04|05)$/.test(ch)) keys.add('animal');
+      if (/^(06|07|08|09|10|11|12|13|14)$/.test(ch) || heading === '1302') keys.add('plant');
+      if (ch === '15') { keys.add('plant'); keys.add('animal'); keys.add('fermentation'); }
+      if (ch === '28') keys.add('mineral');
+      if (ch === '29') {
+        keys.add('synthetic');
+        if (heading === '2936' || heading === '2941') keys.add('fermentation');
+        if (heading === '2941') keys.add('synthetic');
+      }
+      if (ch === '30') {
+        keys.add('synthetic');
+        if (heading === '3001' || heading === '3002') { keys.add('animal'); keys.add('fermentation'); }
+      }
+      if (ch === '32' || ch === '33') { keys.add('plant'); keys.add('synthetic'); }
+      if (ch === '35') {
+        if (heading === '3503') keys.add('animal');
+        if (heading === '3507') keys.add('fermentation');
+        keys.add('mixed');
+      }
+      if (ch === '38' || ch === '39') keys.add('synthetic');
+      addByText();
+      if (keys.size === 0 && profile.originType && profile.originType !== 'Не визначено') {
+        if (/рослин|ботан|plant/i.test(profile.originType)) keys.add('plant');
+        else if (/тварин|animal|біо|bio/i.test(profile.originType)) keys.add('animal');
+        else if (/фермент|біотех|ferment/i.test(profile.originType)) keys.add('fermentation');
+        else if (/мінерал|неорган|mineral/i.test(profile.originType)) keys.add('mineral');
+        else if (/синтет|organic|орган/i.test(profile.originType)) keys.add('synthetic');
+      }
+      if (keys.size === 0) keys.add('unknown');
+      // Keep fallback option for uncertain chemical/pharma codes.
+      if (['29', '30', '32', '33', '35', '38'].includes(ch)) keys.add('unknown');
+      return [...keys];
+    }
+
+    function chooseRecommendedOriginKey(item = {}, options = [], profile = {}) {
+      const text = String(item.originType || profile.originType || '').toLowerCase();
+      const exactMap = [
+        ['plant', /рослин|ботан|plant/],
+        ['animal', /тварин|animal|біо|bio|желатин/],
+        ['fermentation', /фермент|біотех|ferment|enzyme/],
+        ['mineral', /мінерал|неорган|mineral|inorganic/],
+        ['synthetic', /синтет|organic|орган|synthesis/],
+        ['mixed', /зміш|mixed|суміш/]
+      ];
+      for (const [key, re] of exactMap) {
+        if (re.test(text) && options.some(o => o.key === key)) return key;
+      }
+      const high = options.find(o => o.confidence === 'high');
+      return (high || options[0] || { key: 'unknown' }).key;
+    }
+
+    function buildOriginOptionsForItem(item = {}, profile = {}) {
+      const keys = inferOriginCandidateKeys(item, profile);
+      const options = keys.map(key => originProfileByKey(key, item));
+      const recommended = chooseRecommendedOriginKey(item, options, profile);
+      return options.map(o => ({ ...o, recommended: o.key === recommended }));
+    }
+
+    function mergeOriginProfileIntoItem(item, originProfile) {
+      if (!originProfile) return item;
+      item.euChecks = mergeChecks(item.euChecks, originProfile.euChecks || []);
+      item.uaChecks = mergeChecks(item.uaChecks, originProfile.uaChecks || []);
+      item.transitChecks = mergeChecks(item.transitChecks, originProfile.transitChecks || []);
+      item.transitChecks = mergeChecks(item.transitChecks, coreTransitChecks(item));
+      item.originSelectionNote = originProfile.basis || item.originSelectionNote || '';
+      return item;
+    }
+
+    function shortChecksHtml(checks, max = 4) {
+      const items = sortChecksByImportance(checks || []).slice(0, max).map(c => {
+        const status = c.status || 'yellow';
+        return `<div class="mini-check ${status}"><i></i><div><b>${escHtml(c.item || '—')}</b>${c.note ? `<span>${escHtml(c.note)}</span>` : ''}</div></div>`;
+      }).join('');
+      return items || '<div class="origin-panel-note">Немає окремих перевірок для цього варіанту.</div>';
+    }
+
+    function selectedOriginProfile(item = {}, key) {
+      const opts = Array.isArray(item.originOptions) ? item.originOptions : buildOriginOptionsForItem(item, codeBasedOriginProfile(item.uctzedCode, item));
+      return opts.find(o => o.key === key) || opts.find(o => o.recommended) || opts[0] || originProfileByKey('unknown', item);
+    }
+
+    function renderOriginPanel(item = {}, key) {
+      const op = selectedOriginProfile(item, key);
+      const qdproUrl = op.qdproUrl || item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
+      const confidence = op.confidence === 'high' ? 'висока' : op.confidence === 'medium' ? 'середня' : 'низька';
+      return `
+        <div class="origin-badges">
+          <span class="origin-badge rec">✓ ${escHtml(op.shortLabel || op.label)}</span>
+          <span class="origin-badge">Довіра: ${confidence}</span>
+          <span class="origin-badge">${escHtml(normalizeHsCode(item.uctzedCode) || 'код ?')}</span>
+        </div>
+        <div class="origin-panel-note">${escHtml(op.basis || 'Походження потрібно підтвердити документами партії.')}</div>
+        <div class="origin-panel-mini-title">Ключові EU/UA перевірки після вибору походження</div>
+        <div class="mini-check-list">${shortChecksHtml([...(op.euChecks || []), ...(op.uaChecks || [])], 4)}</div>
+        <div style="margin-top:8px"><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro goodinfo ↗</a></div>`;
+    }
+
+    function renderOriginSelectorCard(item = {}, idx = 0) {
+      const opts = Array.isArray(item.originOptions) && item.originOptions.length
+        ? item.originOptions
+        : buildOriginOptionsForItem(item, codeBasedOriginProfile(item.uctzedCode, item));
+      const selectedKey = item.selectedOriginKey || chooseRecommendedOriginKey(item, opts, codeBasedOriginProfile(item.uctzedCode, item));
+      const qdproUrl = item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
+      const optionsHtml = opts.map(o => `<option value="${escHtml(o.key)}" ${o.key === selectedKey ? 'selected' : ''}>${o.recommended ? '✓ ' : ''}${escHtml(o.label)}</option>`).join('');
+      return `<div class="origin-selector-card" id="originCard-${idx}">
+        <div class="origin-selector-head">
+          <div class="origin-selector-title">Можливе походження</div>
+          <a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro ↗</a>
+        </div>
+        <select class="origin-select" onchange="handleOriginSelectChange(${idx}, this.value)">${optionsHtml}</select>
+        <div class="origin-panel" id="originPanel-${idx}">${renderOriginPanel(item, selectedKey)}</div>
+      </div>`;
+    }
+
+    function decorateTransitChecksForRegion(checks = [], region = 'eu') {
+      const regionLabel = region === 'ua' ? 'UA транзит / брокер' : 'EU транзит / брокер';
+      return sortChecksByImportance(checks || []).map(c => ({
+        item: `${regionLabel}: ${c.item || 'перевірка'}`,
+        status: c.status || 'yellow',
+        note: c.note || ''
+      }));
+    }
+
+    function buildRegionalTransitChecks(item = {}, originProfile = null, region = 'eu') {
+      const op = originProfile || selectedOriginProfile(item, item.selectedOriginKey);
+      const transit = mergeChecks(mergeChecks(item.transitChecks, op.transitChecks || []), coreTransitChecks(item));
+      return decorateTransitChecksForRegion(transit, region);
+    }
+
+    function buildRegionalDisplayChecks(item = {}, originProfile = null, region = 'eu') {
+      const op = originProfile || selectedOriginProfile(item, item.selectedOriginKey);
+      const base = region === 'ua'
+        ? mergeChecks(item.uaChecks, op.uaChecks || [])
+        : mergeChecks(item.euChecks, op.euChecks || []);
+      return mergeChecks(base, buildRegionalTransitChecks(item, op, region));
+    }
+
+    function renderEuTransitCell(item = {}, idx = 0) {
+      const hazardSafe = item.hazardAnalysis && item.hazardAnalysis.includes('Не класифікується');
+      const hazardClass = hazardSafe ? 'safe' : 'danger';
+      return `${renderChecksList(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'eu'), 'Немає даних про транзит ЄС')}
+        ${item.hazardAnalysis ? `<div class="info-card ${hazardClass}"><div class="info-card-title">ADR / небезпека для EU транзиту</div><div class="info-card-body">${escHtml(item.hazardAnalysis)}</div></div>` : ''}
+        ${item.storageRequirements ? `<div class="info-card warn"><div class="info-card-title">Зберігання / температурний режим</div><div class="info-card-body">${escHtml(item.storageRequirements)}</div></div>` : ''}`;
+    }
+
+    function renderUaTransitCell(item = {}, idx = 0) {
+      return `${renderChecksList(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'ua'), 'Немає даних про транзит/розмитнення UA')}
+        ${item.storageRequirements ? `<div class="info-card warn"><div class="info-card-title">Умови доставки до України</div><div class="info-card-body">${escHtml(item.storageRequirements)}</div></div>` : ''}`;
+    }
+
+    function handleOriginSelectChange(idx, key) {
+      if (!lastAnalysisData || !Array.isArray(lastAnalysisData.items) || !lastAnalysisData.items[idx]) return;
+      const item = lastAnalysisData.items[idx];
+      item.selectedOriginKey = key;
+      const op = selectedOriginProfile(item, key);
+      const panel = document.getElementById(`originPanel-${idx}`);
+      if (panel) panel.innerHTML = renderOriginPanel(item, key);
+      const euCell = document.getElementById(`euChecks-${idx}`);
+      if (euCell) euCell.innerHTML = renderEuTransitCell(item, idx);
+      const uaCell = document.getElementById(`uaChecks-${idx}`);
+      if (uaCell) uaCell.innerHTML = renderUaTransitCell(item, idx);
+    }
+
+
     function enrichItemWithCodeOrigin(item, rowMeta = {}) {
       const tableCode = normalizeHsCode(rowMeta.uctzedCode);
       const aiCode = normalizeHsCode(item.uctzedCode);
@@ -4473,6 +5098,13 @@ ${euRegulations}
       item.originEvidence = profile.originEvidence || '—';
       item.euChecks = mergeChecks(item.euChecks, profile.euChecks);
       item.uaChecks = mergeChecks(item.uaChecks, profile.uaChecks);
+      item.qdproUrl = buildQdProGoodInfoUrl(finalCode);
+      item.qdproChapterNote = getQdProChapterNote(finalCode);
+      item.originOptions = buildOriginOptionsForItem(item, profile);
+      item.selectedOriginKey = chooseRecommendedOriginKey(item, item.originOptions, profile);
+      const selectedProfile = selectedOriginProfile(item, item.selectedOriginKey);
+      mergeOriginProfileIntoItem(item, selectedProfile);
+      item.possibleOriginLabels = (item.originOptions || []).map(o => o.label).join(' | ');
       return item;
     }
 
@@ -4553,7 +5185,9 @@ ${euRegulations}
           'Спосіб виробництва', 'Короткий опис походження', 'Категорія', 'Застосування',
           'Кількість (кг)', 'Ціна за кг ($)', 'Митна вартість ($)',
           'Ставка мита (%)', 'Мито ($)', 'ПДВ ($)',
-          'Аналіз небезпеки', 'Зберігання', 'Ризик', 'Причина ризику'
+          'Аналіз небезпеки', 'Зберігання', 'Ризик', 'Причина ризику',
+          'QDPro goodinfo', 'Можливі походження', 'Вибране походження',
+          'ЄС транзит / брокер', 'UA транзит / брокер'
         ];
 
         const rows = [headers];
@@ -4577,7 +5211,12 @@ ${euRegulations}
             item.hazardAnalysis || '—',
             item.storageRequirements || '—',
             item.risk || '—',
-            item.riskNote || '—'
+            item.riskNote || '—',
+            item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode),
+            item.possibleOriginLabels || ((item.originOptions || []).map(o => o.label).join(' | ') || '—'),
+            (selectedOriginProfile(item, item.selectedOriginKey) || {}).label || item.originType || '—',
+            buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'eu').map(c => `${c.status || 'yellow'}: ${c.item} — ${c.note || ''}`).join('\n') || '—',
+            buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'ua').map(c => `${c.status || 'yellow'}: ${c.item} — ${c.note || ''}`).join('\n') || '—'
           ]);
         });
 
@@ -4589,7 +5228,7 @@ ${euRegulations}
           s.totalCustomsValue || 0, '',
           s.totalDuty || 0,
           s.totalVAT || 0,
-          '', '', '', ''
+          '', '', '', '', '', '', '', '', ''
         ]);
 
         const ws2 = XLSX.utils.aoa_to_sheet(rows);
@@ -4598,17 +5237,18 @@ ${euRegulations}
           { wch: 28 }, { wch: 55 }, { wch: 24 }, { wch: 28 },
           { wch: 14 }, { wch: 14 }, { wch: 16 },
           { wch: 14 }, { wch: 12 }, { wch: 12 },
-          { wch: 40 }, { wch: 25 }, { wch: 12 }, { wch: 35 }
+          { wch: 40 }, { wch: 25 }, { wch: 12 }, { wch: 35 },
+          { wch: 42 }, { wch: 50 }, { wch: 28 }, { wch: 80 }, { wch: 80 }
         ];
-        ws2['!autofilter'] = { ref: `A1:S${rows.length}` };
+        ws2['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { c: 0, r: 0 }, e: { c: headers.length - 1, r: rows.length - 1 } }) };
 
         XLSX.utils.book_append_sheet(wb, ws2, 'Детальний аналіз');
 
-        // ===== SHEET 3: ПЕРЕВІРКИ ЄС =====
+        // ===== SHEET 3: ТРАНЗИТ ЄС / БРОКЕР =====
         const euHeaders = ['Товар', 'Код УКТЗЕД', 'Походження / метод', 'Перевірка', 'Статус', 'Коментар'];
         const euRows = [euHeaders];
         (d.items || []).forEach(item => {
-          const checks = sortChecksByImportance(Array.isArray(item.euChecks) ? item.euChecks : []);
+          const checks = buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'eu');
           const originMethod = [item.originType, item.productionMethod].filter(Boolean).join(' / ') || '—';
           checks.forEach((c, ci) => {
             euRows.push([
@@ -4625,13 +5265,13 @@ ${euRegulations}
 
         const ws3 = XLSX.utils.aoa_to_sheet(euRows);
         ws3['!cols'] = [{ wch: 36 }, { wch: 15 }, { wch: 42 }, { wch: 52 }, { wch: 16 }, { wch: 82 }];
-        XLSX.utils.book_append_sheet(wb, ws3, 'Перевірки ЄС');
+        XLSX.utils.book_append_sheet(wb, ws3, 'Транзит ЄС');
 
-        // ===== SHEET 4: РОЗМИТНЕННЯ UA =====
+        // ===== SHEET 4: ТРАНЗИТ / РОЗМИТНЕННЯ UA =====
         const uaHeaders = ['Товар', 'Код УКТЗЕД', 'Походження / метод', 'Перевірка', 'Статус', 'Коментар'];
         const uaRows = [uaHeaders];
         (d.items || []).forEach(item => {
-          const checks = sortChecksByImportance(Array.isArray(item.uaChecks) ? item.uaChecks : []);
+          const checks = buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'ua');
           const originMethod = [item.originType, item.productionMethod].filter(Boolean).join(' / ') || '—';
           checks.forEach((c, ci) => {
             uaRows.push([
@@ -4648,7 +5288,7 @@ ${euRegulations}
 
         const ws4 = XLSX.utils.aoa_to_sheet(uaRows);
         ws4['!cols'] = [{ wch: 36 }, { wch: 15 }, { wch: 42 }, { wch: 52 }, { wch: 16 }, { wch: 82 }];
-        XLSX.utils.book_append_sheet(wb, ws4, 'Розмитнення UA');
+        XLSX.utils.book_append_sheet(wb, ws4, 'Транзит UA');
 
         // Generate file
         const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -4684,7 +5324,17 @@ ${euRegulations}
       lastAnalysisData = d;
       const s = d.summary || {};
       let rows = '';
-      (d.items || []).forEach(item => {
+      (d.items || []).forEach((item, idx) => {
+        if (!Array.isArray(item.originOptions) || !item.originOptions.length) {
+          const fallbackProfile = codeBasedOriginProfile(item.uctzedCode, item);
+          item.qdproUrl = item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
+          item.qdproChapterNote = item.qdproChapterNote || getQdProChapterNote(item.uctzedCode);
+          item.originOptions = buildOriginOptionsForItem(item, fallbackProfile);
+          item.selectedOriginKey = item.selectedOriginKey || chooseRecommendedOriginKey(item, item.originOptions, fallbackProfile);
+          mergeOriginProfileIntoItem(item, selectedOriginProfile(item, item.selectedOriginKey));
+        } else if (!Array.isArray(item.transitChecks) || !item.transitChecks.length) {
+          mergeOriginProfileIntoItem(item, selectedOriginProfile(item, item.selectedOriginKey));
+        }
         const rc = item.risk === 'Критичний' ? 'pill-r' : item.risk === 'Середній' ? 'pill-y' : 'pill-g';
         const hasAdr = item.hazardAnalysis && item.hazardAnalysis.includes('Клас');
         const hazardBadge = hasAdr ? `<span class="adr-badge">▲ ADR</span>` : '';
@@ -4692,13 +5342,15 @@ ${euRegulations}
         const priceDisplay = item.buyPricePerKg ? fmt(item.buyPricePerKg) + '/кг' : '—';
         const dutyRateDisplay = item.dutyRatePercent != null ? `${item.dutyRatePercent}%` : '—';
         const originMeta = [item.originType, item.productionMethod].filter(Boolean).join(' · ');
-        const originBlock = item.originShortNote ? `<div class="code-origin-card">
+        const staticOriginSummary = item.originShortNote ? `<div class="code-origin-card">
           <div class="code-origin-title">Походження + застосування за кодом</div>
           <div class="code-origin-body">${escHtml(item.originShortNote)}</div>
           ${originMeta ? `<div class="code-origin-meta">${escHtml(originMeta)}</div>` : ''}
           ${item.applicationContext ? `<div class="code-origin-meta">Застосування: ${escHtml(item.applicationContext)}</div>` : ''}
           ${item.codeBasis ? `<div class="code-origin-meta">${escHtml(item.codeBasis)}</div>` : ''}
+          ${item.qdproChapterNote ? `<div class="code-origin-meta">${escHtml(item.qdproChapterNote)}</div>` : ''}
         </div>` : '';
+        const originBlock = staticOriginSummary + renderOriginSelectorCard(item, idx);
 
         const hazardSafe = item.hazardAnalysis && item.hazardAnalysis.includes('Не класифікується');
         const hazardClass = hazardSafe ? 'safe' : 'danger';
@@ -4721,13 +5373,11 @@ ${euRegulations}
         <div class="td-value-line">мито ${dutyRateDisplay} · ${fmt(item.duty)}</div>
         <div class="td-value-vat">ПДВ · ${fmt(item.vat)}</div>
       </td>
-      <td class="col-eu">
-        ${renderChecksList(item.euChecks, 'Немає даних про перевірки ЄС')}
-        ${item.hazardAnalysis ? `<div class="info-card ${hazardClass}"><div class="info-card-title">Аналіз небезпеки</div><div class="info-card-body">${item.hazardAnalysis}</div></div>` : ''}
-        ${item.storageRequirements ? `<div class="info-card warn"><div class="info-card-title">Зберігання</div><div class="info-card-body">${item.storageRequirements}</div></div>` : ''}
+      <td class="col-eu" id="euChecks-${idx}">
+        ${renderEuTransitCell(item, idx)}
       </td>
-      <td class="col-ua">
-        ${renderChecksList(item.uaChecks, 'Немає даних про розмитнення UA')}
+      <td class="col-ua" id="uaChecks-${idx}">
+        ${renderUaTransitCell(item, idx)}
       </td>
       <td class="col-risk">
         <span class="pill ${rc}">${item.risk || '—'}</span>
@@ -4811,8 +5461,8 @@ ${euRegulations}
             <th>Товар / УКТЗЕД</th>
             <th>К-сть · Ціна</th>
             <th>Вартість · Платежі</th>
-            <th>🇪🇺 Перевірки в ЄС</th>
-            <th>🇺🇦 Розмитнення UA</th>
+            <th>🇪🇺 Транзит ЄС / брокер</th>
+            <th>🇺🇦 Транзит UA / брокер</th>
             <th>Ризик</th>
           </tr></thead>
           <tbody>${rows}</tbody>
