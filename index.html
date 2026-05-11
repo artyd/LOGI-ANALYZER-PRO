@@ -3150,6 +3150,125 @@
       line-height: 1.45;
     }
 
+
+    /* ============================================
+       v2.16 · PRODUCT-COLUMN ACCORDIONS
+       Product name/code blocks now use the same animated grouping as transit checks.
+       ============================================ */
+    .product-block-stack {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .product-title-card {
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--amber);
+      border-radius: 9px;
+      background: linear-gradient(180deg, rgba(44, 184, 120, 0.08), var(--surface-2));
+    }
+
+    .product-title-card .td-name {
+      margin: 0;
+      line-height: 1.32;
+    }
+
+    .product-title-card .td-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 7px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      color: var(--ink-2);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+
+    .product-block-stack .logi-accordion {
+      margin: 0;
+      background: var(--surface-2);
+    }
+
+    .product-block-stack .logi-acc-head {
+      padding: 9px 10px;
+      font-size: 10.5px;
+    }
+
+    .product-block-stack .logi-acc-inner {
+      padding: 0 9px 9px;
+    }
+
+    .product-id-card,
+    .product-doc-card,
+    .product-context-card {
+      display: grid;
+      gap: 7px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink-2);
+      font-size: 11.5px;
+      line-height: 1.45;
+    }
+
+    .product-kv {
+      display: grid;
+      grid-template-columns: minmax(76px, 0.42fr) minmax(0, 1fr);
+      gap: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .product-kv:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .product-kv b {
+      color: var(--ink-3);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .product-kv span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .product-context-card .td-category,
+    .product-context-card .td-apps {
+      margin-top: 0;
+    }
+
+    .product-context-card .td-apps {
+      font-size: 12px;
+      font-family: var(--sans);
+      color: var(--ink-2);
+      line-height: 1.5;
+    }
+
+    .product-doc-card a.qdpro-link {
+      width: fit-content;
+    }
+
+    .product-origin-wrap .code-origin-card,
+    .product-origin-wrap .origin-selector-card {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .product-origin-wrap .origin-selector-card:last-child,
+    .product-origin-wrap .code-origin-card:last-child {
+      margin-bottom: 0;
+    }
+
   </style>
 </head>
 
@@ -5368,6 +5487,68 @@ ${euRegulations}
         <div style="margin-top:8px"><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro goodinfo ↗</a></div>`;
     }
 
+
+
+    function renderStaticOriginSummary(item = {}) {
+      const originMeta = [item.originType, item.productionMethod].filter(Boolean).join(' · ');
+      if (!item.originShortNote && !originMeta && !item.applicationContext && !item.codeBasis && !item.qdproChapterNote) return '';
+      return `<div class="code-origin-card">
+        <div class="code-origin-title">Походження + застосування за кодом</div>
+        ${item.originShortNote ? `<div class="code-origin-body">${escHtml(item.originShortNote)}</div>` : ''}
+        ${originMeta ? `<div class="code-origin-meta">${escHtml(originMeta)}</div>` : ''}
+        ${item.applicationContext ? `<div class="code-origin-meta">Застосування: ${escHtml(item.applicationContext)}</div>` : ''}
+        ${item.codeBasis ? `<div class="code-origin-meta">${escHtml(item.codeBasis)}</div>` : ''}
+        ${item.qdproChapterNote ? `<div class="code-origin-meta">${escHtml(item.qdproChapterNote)}</div>` : ''}
+      </div>`;
+    }
+
+    function renderProductInfoCell(item = {}, idx = 0) {
+      const name = escHtml(item.name || '—');
+      const hs = escHtml(item.uctzedCode || '—');
+      const qdproUrl = item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
+      const originSummary = renderStaticOriginSummary(item);
+      const originSelector = renderOriginSelectorCard(item, idx);
+      const categoryHtml = item.category ? `<span class="td-category">${escHtml(item.category)}</span>` : '<div class="origin-panel-note">Категорію не визначено: брокеру потрібно звірити опис, CAS/склад і 10-значний код.</div>';
+      const apps = item.applications || item.applicationContext || '';
+      const appsHtml = apps ? `<div class="td-apps">${escHtml(String(apps).substring(0, 420))}${String(apps).length > 420 ? '…' : ''}</div>` : '<div class="origin-panel-note">Застосування не вказано: потрібно підтвердити use/application у постачальника або клієнта.</div>';
+      const selected = selectedOriginProfile(item, item.selectedOriginKey) || {};
+      const possible = (item.originOptions || []).map(o => o.shortLabel || o.label).filter(Boolean).join(' · ') || 'потрібно підтвердити документами';
+
+      const identityHtml = `<div class="product-id-card">
+        <div class="product-kv"><b>Товар</b><span>${name}</span></div>
+        <div class="product-kv"><b>Код</b><span>${hs}</span></div>
+        <div class="product-kv"><b>Ризик</b><span>${escHtml(item.risk || '—')} ${item.riskNote ? '· ' + escHtml(item.riskNote) : ''}</span></div>
+      </div>`;
+
+      const originHtml = `<div class="product-origin-wrap">
+        ${originSummary}
+        ${originSelector}
+      </div>`;
+
+      const contextHtml = `<div class="product-context-card">
+        ${categoryHtml}
+        ${appsHtml}
+      </div>`;
+
+      const docHtml = `<div class="product-doc-card">
+        <div class="product-kv"><b>QDPro</b><span><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">Довідка по товару ↗</a></span></div>
+        <div class="product-kv"><b>Режим</b><span>Звірити Імпорт / Транзит / Експорт для поточного 10-значного коду.</span></div>
+        <div class="product-kv"><b>Варіанти</b><span>${escHtml(possible)}</span></div>
+        <div class="product-kv"><b>Обрано</b><span>${escHtml(selected.label || item.originType || '—')}</span></div>
+      </div>`;
+
+      return `<div class="product-block-stack">
+        <div class="product-title-card">
+          <div class="td-name">${name}</div>
+          <div class="td-code">УКТЗЕД · ${hs}</div>
+        </div>
+        ${renderAccordionBlock('Найменування / код', identityHtml, { tone: 'info', open: true, countText: 'товар' })}
+        ${renderAccordionBlock('Походження / QDPro', originHtml, { tone: 'warning', open: true, countText: 'origin' })}
+        ${renderAccordionBlock('Категорія / застосування', contextHtml, { tone: 'ok', open: false, countText: 'контекст' })}
+        ${renderAccordionBlock('Документи для брокера', docHtml, { tone: 'info', open: false, countText: 'QDPro' })}
+      </div>`;
+    }
+
     function renderOriginSelectorCard(item = {}, idx = 0) {
       const opts = Array.isArray(item.originOptions) && item.originOptions.length
         ? item.originOptions
@@ -5719,27 +5900,9 @@ ${euRegulations}
         const qtyDisplay = item.qty || (item.qtyKg ? item.qtyKg.toLocaleString('uk-UA') + ' кг' : '—');
         const priceDisplay = item.buyPricePerKg ? fmt(item.buyPricePerKg) + '/кг' : '—';
         const dutyRateDisplay = item.dutyRatePercent != null ? `${item.dutyRatePercent}%` : '—';
-        const originMeta = [item.originType, item.productionMethod].filter(Boolean).join(' · ');
-        const staticOriginSummary = item.originShortNote ? `<div class="code-origin-card">
-          <div class="code-origin-title">Походження + застосування за кодом</div>
-          <div class="code-origin-body">${escHtml(item.originShortNote)}</div>
-          ${originMeta ? `<div class="code-origin-meta">${escHtml(originMeta)}</div>` : ''}
-          ${item.applicationContext ? `<div class="code-origin-meta">Застосування: ${escHtml(item.applicationContext)}</div>` : ''}
-          ${item.codeBasis ? `<div class="code-origin-meta">${escHtml(item.codeBasis)}</div>` : ''}
-          ${item.qdproChapterNote ? `<div class="code-origin-meta">${escHtml(item.qdproChapterNote)}</div>` : ''}
-        </div>` : '';
-        const originBlock = staticOriginSummary + renderOriginSelectorCard(item, idx);
-
-        const hazardSafe = item.hazardAnalysis && item.hazardAnalysis.includes('Не класифікується');
-        const hazardClass = hazardSafe ? 'safe' : 'danger';
-
         rows += `<tr>
       <td class="col-product">
-        <div class="td-name">${escHtml(item.name || '—')}</div>
-        <div class="td-code">${escHtml(item.uctzedCode || '')}</div>
-        ${originBlock}
-        ${item.category ? `<span class="td-category">${escHtml(item.category)}</span>` : ''}
-        ${item.applications ? `<div class="td-apps">${escHtml(item.applications.substring(0, 220))}${item.applications.length > 220 ? '…' : ''}</div>` : ''}
+        ${renderProductInfoCell(item, idx)}
       </td>
       <td class="col-qty">
         <div class="td-qty">${qtyDisplay}</div>
