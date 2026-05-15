@@ -1769,6 +1769,687 @@
       line-height: 1.45;
     }
 
+    /* =============================================
+       SUMMARY CARDS — replaces all accordions/chevron rows
+       ============================================= */
+    .transit-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .sc-empty {
+      font-size: 12px;
+      color: var(--ink-4);
+      font-style: italic;
+      padding: 8px 2px;
+    }
+
+    .summary-card {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 11px 13px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.14s ease, box-shadow 0.18s ease, background 0.14s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.18s;
+      border-radius: inherit;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .summary-card:hover { transform: translateY(-2px); }
+    .summary-card:hover::after { opacity: 1; }
+    .summary-card:active { transform: translateY(0) scale(0.985); }
+
+    .summary-card-red {
+      background: rgba(239,74,74,0.09);
+      border-color: rgba(239,74,74,0.28);
+      box-shadow: 0 2px 12px -4px rgba(239,74,74,0.2);
+    }
+    .summary-card-red:hover { box-shadow: 0 6px 20px -4px rgba(239,74,74,0.35); }
+
+    .summary-card-yellow {
+      background: rgba(229,181,58,0.09);
+      border-color: rgba(229,181,58,0.28);
+      box-shadow: 0 2px 12px -4px rgba(229,181,58,0.15);
+    }
+    .summary-card-yellow:hover { box-shadow: 0 6px 20px -4px rgba(229,181,58,0.3); }
+
+    .summary-card-green {
+      background: rgba(44,184,120,0.08);
+      border-color: rgba(44,184,120,0.25);
+      box-shadow: 0 2px 12px -4px rgba(44,184,120,0.15);
+    }
+    .summary-card-green:hover { box-shadow: 0 6px 20px -4px rgba(44,184,120,0.3); }
+
+    .summary-card-info {
+      background: var(--surface-2);
+      border-color: var(--line-2);
+    }
+    .summary-card-info:hover { background: var(--surface-3); }
+
+    .sc-icon-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sc-icon-wrap.red    { background: rgba(239,74,74,0.18);   }
+    .sc-icon-wrap.yellow { background: rgba(229,181,58,0.18);  }
+    .sc-icon-wrap.green  { background: rgba(44,184,120,0.18);  }
+    .sc-icon-wrap.info   { background: var(--surface-3);       }
+
+    .sc-icon {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .sc-icon-wrap.red    .sc-icon { color: var(--red-bright);   }
+    .sc-icon-wrap.yellow .sc-icon { color: var(--yellow);       }
+    .sc-icon-wrap.green  .sc-icon { color: var(--green-bright); }
+    .sc-icon-wrap.info   .sc-icon { color: var(--amber);        }
+
+    .sc-body { flex: 1; min-width: 0; }
+
+    .sc-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+
+    .summary-card-red    .sc-title { color: var(--red-bright);   }
+    .summary-card-yellow .sc-title { color: var(--yellow);       }
+    .summary-card-green  .sc-title { color: var(--green-bright); }
+
+    .sc-note {
+      font-size: 11px;
+      color: var(--ink-3);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    .sc-count {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink-2);
+      flex-shrink: 0;
+      min-width: 24px;
+      text-align: right;
+    }
+
+    .summary-card-red    .sc-count { color: var(--red-bright);   }
+    .summary-card-yellow .sc-count { color: var(--yellow);       }
+    .summary-card-green  .sc-count { color: var(--green-bright); }
+
+    .sc-arrow {
+      font-size: 18px;
+      color: var(--ink-4);
+      flex-shrink: 0;
+      transition: transform 0.18s, color 0.15s;
+    }
+
+    .summary-card:hover .sc-arrow { transform: translateX(3px); color: var(--amber); }
+
+    /* INFO CARD BUTTONS (product column) */
+    .info-card-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.14s, border-color 0.16s, transform 0.12s;
+    }
+
+    .info-card-btn:hover {
+      background: var(--surface-3);
+      border-color: var(--line-2);
+      transform: translateY(-1px);
+    }
+
+    .info-card-btn:active { transform: scale(0.985); }
+
+    .icb-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .icb-dot.red    { background: var(--red-bright);    box-shadow: 0 0 6px var(--red);   }
+    .icb-dot.yellow { background: var(--yellow);        box-shadow: 0 0 6px var(--yellow); }
+    .icb-dot.green  { background: var(--green-bright);  box-shadow: 0 0 6px var(--green);  }
+    .icb-dot.ok     { background: var(--green-bright);  box-shadow: 0 0 6px var(--green);  }
+    .icb-dot.info   { background: var(--amber-bright);  box-shadow: 0 0 6px var(--amber);  }
+    .icb-dot.warn   { background: var(--yellow);        box-shadow: 0 0 6px var(--yellow); }
+
+    .icb-body { flex: 1; min-width: 0; }
+
+    .icb-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-2);
+    }
+
+    .icb-note {
+      font-size: 11px;
+      color: var(--ink-3);
+      margin-top: 1px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .icb-arrow {
+      font-size: 16px;
+      color: var(--ink-4);
+      flex-shrink: 0;
+      transition: transform 0.15s, color 0.14s;
+    }
+
+    .info-card-btn:hover .icb-arrow { transform: translateX(2px); color: var(--amber); }
+
+    /* PRODUCT TITLE CARD enhancements */
+    .ptc-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .ptc-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+
+    .ptc-badge.risk {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--rc, var(--ink-2));
+      font-weight: 700;
+    }
+
+    .ptc-badge.duty {
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      color: var(--ink-3);
+    }
+
+    .ptc-badge.cat {
+      background: var(--amber-dim);
+      border: 1px solid rgba(44,184,120,0.2);
+      color: var(--amber);
+    }
+
+    .precursor-badge {
+      margin-top: 7px;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--red-dim);
+      color: var(--red-bright);
+      border: 1px solid rgba(239,74,74,0.3);
+      letter-spacing: 0.04em;
+      display: inline-block;
+    }
+
+    .precursor-inline {
+      font-size: 10px;
+      padding: 1px 5px;
+      background: var(--red-dim);
+      color: var(--red-bright);
+      border-radius: 3px;
+      vertical-align: middle;
+      font-family: var(--mono);
+      margin-left: 4px;
+    }
+
+    /* ORIGIN PANEL RESULT */
+    .origin-panel-result {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--amber);
+      border-radius: 9px;
+    }
+
+    .opr-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+
+    .opr-flag {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .opr-flag.green  { background: var(--green-bright); box-shadow: 0 0 8px var(--green); }
+    .opr-flag.yellow { background: var(--yellow);        box-shadow: 0 0 8px var(--yellow); }
+    .opr-flag.red    { background: var(--red-bright);    box-shadow: 0 0 8px var(--red); }
+
+    .opr-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .opr-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .opr-conclusion {
+      font-size: 11.5px;
+      color: var(--ink-2);
+      line-height: 1.5;
+    }
+
+    .opr-checks-note {
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-3);
+    }
+
+    /* =============================================
+       DETAIL CARD MODAL (DCM)
+       ============================================= */
+    .dcm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .dcm-overlay.open {
+      display: flex;
+      animation: dcm-fade 0.22s ease;
+    }
+
+    @keyframes dcm-fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .dcm-modal {
+      position: relative;
+      width: 70vw;
+      max-width: 1000px;
+      max-height: 70vh;
+      min-width: 300px;
+      background: var(--surface);
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 30px 90px -12px rgba(0,0,0,0.7);
+      animation: dcm-slide 0.24s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    @keyframes dcm-slide {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @media (max-width: 700px) {
+      .dcm-modal { width: 94vw; max-height: 88vh; }
+    }
+
+    .dcm-modal-red    { border-top: 3px solid var(--red);    }
+    .dcm-modal-yellow { border-top: 3px solid var(--yellow); }
+    .dcm-modal-green  { border-top: 3px solid var(--green);  }
+    .dcm-modal-info   { border-top: 3px solid var(--amber);  }
+
+    .dcm-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--surface-2), var(--surface));
+      flex-shrink: 0;
+    }
+
+    .dcm-head-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .dcm-head-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dcm-head-dot.red    { background: var(--red-bright);    box-shadow: 0 0 10px var(--red);    }
+    .dcm-head-dot.yellow { background: var(--yellow);        box-shadow: 0 0 10px var(--yellow); }
+    .dcm-head-dot.green  { background: var(--green-bright);  box-shadow: 0 0 10px var(--green);  }
+    .dcm-head-dot.info   { background: var(--amber-bright);  box-shadow: 0 0 10px var(--amber);  }
+
+    .dcm-head-info { flex: 1; min-width: 0; }
+
+    .dcm-head-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dcm-head-sub {
+      font-size: 11px;
+      color: var(--ink-3);
+      margin-top: 2px;
+      font-family: var(--mono);
+    }
+
+    .dcm-head-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .dcm-status-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .dcm-status-badge.red    { background: rgba(239,74,74,0.15);  color: var(--red-bright);   border: 1px solid rgba(239,74,74,0.3);   }
+    .dcm-status-badge.yellow { background: rgba(229,181,58,0.14); color: var(--yellow);        border: 1px solid rgba(229,181,58,0.3);  }
+    .dcm-status-badge.green  { background: rgba(44,184,120,0.13); color: var(--green-bright);  border: 1px solid rgba(44,184,120,0.28); }
+    .dcm-status-badge.info   { background: var(--amber-dim);      color: var(--amber-bright);  border: 1px solid rgba(44,184,120,0.2);  }
+
+    .dcm-count-badge {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink-2);
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .dcm-close {
+      width: 32px;
+      height: 32px;
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      color: var(--ink-2);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.14s, color 0.14s;
+      flex-shrink: 0;
+    }
+
+    .dcm-close:hover { background: var(--red-dim); color: var(--red-bright); border-color: rgba(239,74,74,0.35); }
+
+    .dcm-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 20px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .dcm-conclusion {
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+
+    .dcm-conclusion.red    { background: rgba(239,74,74,0.08);  border-left: 3px solid var(--red);   }
+    .dcm-conclusion.yellow { background: rgba(229,181,58,0.08); border-left: 3px solid var(--yellow); }
+    .dcm-conclusion.green  { background: rgba(44,184,120,0.08); border-left: 3px solid var(--green);  }
+    .dcm-conclusion.info   { background: var(--amber-dim);      border-left: 3px solid var(--amber);  }
+
+    .dcm-section { display: flex; flex-direction: column; gap: 6px; }
+
+    .dcm-section-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--amber);
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dcm-checks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .dcm-check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+    }
+
+    .dcm-check-row.red    { background: rgba(239,74,74,0.07);  border-color: rgba(239,74,74,0.2);   }
+    .dcm-check-row.yellow { background: rgba(229,181,58,0.07); border-color: rgba(229,181,58,0.2);  }
+    .dcm-check-row.green  { background: rgba(44,184,120,0.06); border-color: rgba(44,184,120,0.18); }
+
+    .dcm-check-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .dcm-check-dot.red    { background: var(--red-bright);    box-shadow: 0 0 6px var(--red);    }
+    .dcm-check-dot.yellow { background: var(--yellow);        box-shadow: 0 0 6px var(--yellow); }
+    .dcm-check-dot.green  { background: var(--green-bright);  box-shadow: 0 0 6px var(--green);  }
+
+    .dcm-check-body { flex: 1; min-width: 0; }
+
+    .dcm-check-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    .dcm-check-note {
+      font-size: 11px;
+      color: var(--ink-3);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .dcm-check-badge {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .dcm-check-badge.red    { background: rgba(239,74,74,0.15);  color: var(--red-bright);   }
+    .dcm-check-badge.yellow { background: rgba(229,181,58,0.14); color: var(--yellow);        }
+    .dcm-check-badge.green  { background: rgba(44,184,120,0.12); color: var(--green-bright);  }
+
+    .dcm-docs-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .dcm-doc-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-2);
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      border-radius: 5px;
+      padding: 3px 9px;
+    }
+
+    .dcm-info-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 12px;
+    }
+
+    .dcm-info-row:last-child { border-bottom: none; }
+
+    .dcm-info-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-top: 1px;
+    }
+
+    .dcm-info-val {
+      color: var(--ink-2);
+      overflow-wrap: anywhere;
+    }
+
+    .dcm-text {
+      font-size: 12.5px;
+      color: var(--ink-2);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      background: var(--surface-2);
+      border-radius: 7px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+    }
+
+    .dcm-rec {
+      padding: 11px 14px;
+      border-radius: 8px;
+    }
+
+    .dcm-rec.red    { background: rgba(239,74,74,0.07);  border-left: 3px solid var(--red);   }
+    .dcm-rec.yellow { background: rgba(229,181,58,0.07); border-left: 3px solid var(--yellow); }
+    .dcm-rec.green  { background: rgba(44,184,120,0.07); border-left: 3px solid var(--green);  }
+    .dcm-rec.info   { background: var(--amber-dim);      border-left: 3px solid var(--amber);  }
+
+    .dcm-rec-text {
+      font-size: 12.5px;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    .dcm-footer {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 20px 14px;
+      border-top: 1px solid var(--line);
+      background: var(--surface-2);
+      flex-shrink: 0;
+    }
+
+    .dcm-btn {
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+    }
+
+    .dcm-btn:active { transform: scale(0.97); }
+
+    .dcm-btn-primary {
+      background: var(--amber);
+      color: var(--bg);
+    }
+    .dcm-btn-primary:hover { background: var(--amber-bright); box-shadow: 0 4px 14px -4px var(--amber-glow); }
+
+    .dcm-btn-secondary {
+      background: var(--surface-3);
+      color: var(--ink-2);
+      border: 1px solid var(--line-2) !important;
+    }
+    .dcm-btn-secondary:hover { background: var(--surface-raise); }
+
+    .dcm-btn-link {
+      background: transparent;
+      color: var(--amber-bright);
+      border: 1px solid rgba(44,184,120,0.3) !important;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .dcm-btn-link:hover { background: var(--amber-dim); }
+
     /* Hazard / Storage info card inside td */
     .info-card {
       margin-top: 10px;
@@ -1842,94 +2523,6 @@
     /* Wide report mode: use almost the full viewport so all manifest columns stay visible. */
     #resultsArea .tbl-card {
       width: 100%;
-    }
-
-    /* ===== STATUS SUMMARY CARDS (EU/UA transit cells) ===== */
-    .status-summary-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin-bottom: 10px;
-    }
-
-    .status-summary-card {
-      display: flex;
-      align-items: flex-start;
-      gap: 9px;
-      padding: 8px 11px;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      cursor: default;
-      transition: background 0.15s, border-color 0.15s;
-    }
-
-    .status-summary-card.green {
-      background: rgba(44,184,120,0.09);
-      border-color: rgba(44,184,120,0.25);
-    }
-
-    .status-summary-card.yellow {
-      background: rgba(229,181,58,0.09);
-      border-color: rgba(229,181,58,0.25);
-    }
-
-    .status-summary-card.red {
-      background: rgba(239,74,74,0.09);
-      border-color: rgba(239,74,74,0.25);
-    }
-
-    .status-summary-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
-      margin-top: 1px;
-    }
-
-    .status-summary-card.green .status-summary-icon {
-      background: rgba(44,184,120,0.25);
-      color: var(--green-bright);
-      box-shadow: 0 0 8px rgba(44,184,120,0.3);
-    }
-
-    .status-summary-card.yellow .status-summary-icon {
-      background: rgba(229,181,58,0.2);
-      color: var(--yellow);
-      box-shadow: 0 0 8px rgba(229,181,58,0.3);
-    }
-
-    .status-summary-card.red .status-summary-icon {
-      background: rgba(239,74,74,0.18);
-      color: var(--red-bright);
-      box-shadow: 0 0 8px rgba(239,74,74,0.25);
-    }
-
-    .status-summary-content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .status-summary-title {
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 1.4;
-    }
-
-    .status-summary-card.green .status-summary-title { color: var(--green-bright); }
-    .status-summary-card.yellow .status-summary-title { color: var(--yellow); }
-    .status-summary-card.red .status-summary-title { color: var(--red-bright); }
-
-    .status-summary-note {
-      font-size: 11px;
-      color: var(--ink-3);
-      line-height: 1.4;
-      margin-top: 2px;
-      font-family: var(--mono);
     }
 
     #resultsArea .tbl-scroll {
@@ -3716,274 +4309,9 @@
 
 
     /* ============================================
-       FLAT CARD BLOCKS — no accordions
+       v2.16 · PRODUCT-COLUMN ACCORDIONS
+       Product name/code blocks now use the same animated grouping as transit checks.
        ============================================ */
-
-    /* Flat section block replacing accordion */
-    .flat-block {
-      background: var(--surface-2);
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      overflow: hidden;
-    }
-
-    .flat-block.critical { border-left: 3px solid var(--red); }
-    .flat-block.warning  { border-left: 3px solid var(--yellow); }
-    .flat-block.ok       { border-left: 3px solid var(--green); }
-    .flat-block.info     { border-left: 3px solid var(--amber); }
-
-    .flat-block-head {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 11px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .flat-block-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .flat-block.critical .flat-block-dot { background: var(--red-bright); box-shadow: 0 0 6px var(--red); }
-    .flat-block.warning  .flat-block-dot { background: var(--yellow);     box-shadow: 0 0 6px var(--yellow); }
-    .flat-block.ok       .flat-block-dot { background: var(--green-bright);box-shadow: 0 0 6px var(--green); }
-    .flat-block.info     .flat-block-dot { background: var(--amber-bright);box-shadow: 0 0 6px var(--amber); }
-
-    .flat-block-title {
-      font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--ink-2);
-      flex: 1;
-    }
-
-    .flat-block-count {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--ink-4);
-    }
-
-    .flat-block-inner {
-      padding: 8px 10px;
-    }
-
-    /* Clickable check card */
-    .check-card {
-      display: flex;
-      align-items: flex-start;
-      gap: 9px;
-      padding: 9px 11px;
-      background: var(--surface-2);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.14s, border-color 0.14s, transform 0.1s;
-      text-align: left;
-      width: 100%;
-    }
-
-    .check-card:hover {
-      background: var(--surface-3);
-      border-color: var(--line-2);
-      transform: translateY(-1px);
-    }
-
-    .check-card.green { border-left: 2px solid var(--green); }
-    .check-card.yellow { border-left: 2px solid var(--yellow); }
-    .check-card.red { border-left: 2px solid var(--red); }
-
-    .check-card-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 4px;
-    }
-
-    .check-card.green .check-card-dot  { background: var(--green-bright); box-shadow: 0 0 6px var(--green); }
-    .check-card.yellow .check-card-dot { background: var(--yellow);        box-shadow: 0 0 6px var(--yellow); }
-    .check-card.red .check-card-dot    { background: var(--red-bright);    box-shadow: 0 0 6px var(--red); }
-
-    .check-card-body { flex: 1; min-width: 0; }
-
-    .check-card-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--ink);
-      line-height: 1.4;
-      margin-bottom: 2px;
-    }
-
-    .check-card-note {
-      font-size: 11px;
-      color: var(--ink-3);
-      line-height: 1.4;
-    }
-
-    .check-card-arrow {
-      font-size: 11px;
-      color: var(--ink-4);
-      flex-shrink: 0;
-      margin-top: 3px;
-      transition: color 0.14s;
-    }
-
-    .check-card:hover .check-card-arrow { color: var(--amber); }
-
-    .check-cards-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    /* Flat product info sections */
-    .product-section {
-      background: var(--surface-2);
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      padding: 9px 11px;
-    }
-
-    .product-section-label {
-      font-family: var(--mono);
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--ink-3);
-      margin-bottom: 6px;
-    }
-
-    /* Check detail modal */
-    .check-detail-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9100;
-      background: rgba(0,0,0,0.68);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .check-detail-overlay.open {
-      display: flex;
-      animation: fade-in 0.2s ease;
-    }
-
-    .check-detail-modal {
-      position: relative;
-      width: 70vw;
-      max-width: 860px;
-      max-height: 70vh;
-      min-width: 300px;
-      background: var(--surface);
-      border: 1px solid var(--line-2);
-      border-radius: var(--radius-lg);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 24px 80px -12px rgba(0,0,0,0.6);
-    }
-
-    @media (max-width: 700px) {
-      .check-detail-modal { width: 94vw; max-height: 88vh; }
-    }
-
-    .check-detail-head {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, var(--surface-2), var(--surface));
-      flex-shrink: 0;
-    }
-
-    .check-detail-status-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .check-detail-head.green .check-detail-status-dot { background: var(--green-bright); box-shadow: 0 0 8px var(--green); }
-    .check-detail-head.yellow .check-detail-status-dot { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
-    .check-detail-head.red .check-detail-status-dot { background: var(--red-bright); box-shadow: 0 0 8px var(--red); }
-
-    .check-detail-head-title {
-      flex: 1;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ink);
-    }
-
-    .check-detail-close {
-      background: var(--surface-3);
-      border: 1px solid var(--line-2);
-      color: var(--ink-2);
-      width: 30px;
-      height: 30px;
-      border-radius: 7px;
-      cursor: pointer;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.14s, color 0.14s;
-    }
-
-    .check-detail-close:hover { background: var(--red-dim); color: var(--red-bright); }
-
-    .check-detail-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px 18px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .check-detail-section-label {
-      font-family: var(--mono);
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--amber);
-      margin-bottom: 5px;
-    }
-
-    .check-detail-text {
-      font-size: 13px;
-      color: var(--ink-2);
-      line-height: 1.6;
-    }
-
-    .check-detail-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .check-detail-status-badge.green  { background: rgba(44,184,120,0.15);  color: var(--green-bright); }
-    .check-detail-status-badge.yellow { background: rgba(229,181,58,0.14);  color: var(--yellow); }
-    .check-detail-status-badge.red    { background: rgba(239,74,74,0.12);   color: var(--red-bright); }
-
-    /* Product column stack */
     .product-block-stack {
       display: grid;
       gap: 7px;
@@ -5443,6 +5771,156 @@ ${euRegulations}
       return '$' + Math.round(n).toLocaleString('en-US');
     }
 
+    // ===================================================
+    // CARD STORE — all data for detail modals
+    // ===================================================
+    const _cardStore = {};
+    let _cardId = 0;
+    function _storeCard(data) {
+      const id = 'cd' + (++_cardId);
+      _cardStore[id] = data;
+      return id;
+    }
+
+    // ===================================================
+    // UNIFIED DETAIL MODAL
+    // ===================================================
+    let _detailEscBound = false;
+    function _detailEsc(e) { if (e.key === 'Escape') closeDetailCard(); }
+
+    function openDetailCard(id) {
+      const data = _cardStore[id];
+      if (!data) return;
+      const ov = document.getElementById('detailCardOverlay');
+      if (!ov) return;
+      ov.innerHTML = _renderDetailCardModal(data);
+      ov.classList.add('open');
+      if (!_detailEscBound) {
+        document.addEventListener('keydown', _detailEsc);
+        _detailEscBound = true;
+      }
+    }
+
+    function closeDetailCard() {
+      const ov = document.getElementById('detailCardOverlay');
+      if (ov) ov.classList.remove('open');
+    }
+
+    function _renderDetailCardModal(d) {
+      const statusLabel = d.status === 'red' ? 'Критично' : d.status === 'yellow' ? 'Увага' : d.status === 'green' ? 'Пройдено' : 'Інформація';
+      const statusClass = d.status || 'info';
+
+      // Checks list inside modal
+      function checksHtml(checks, title) {
+        if (!Array.isArray(checks) || !checks.length) return '';
+        const items = checks.map(c => {
+          const st = c.status || 'yellow';
+          const stLabel = st === 'red' ? 'Критично' : st === 'yellow' ? 'Увага' : 'Ок';
+          return `<div class="dcm-check-row ${st}">
+            <div class="dcm-check-dot ${st}"></div>
+            <div class="dcm-check-body">
+              <div class="dcm-check-title">${escHtml(c.item || '—')}</div>
+              ${c.note ? `<div class="dcm-check-note">${escHtml(c.note)}</div>` : ''}
+            </div>
+            <span class="dcm-check-badge ${st}">${stLabel}</span>
+          </div>`;
+        }).join('');
+        return `<div class="dcm-section">
+          <div class="dcm-section-label">${escHtml(title)}</div>
+          <div class="dcm-checks-list">${items}</div>
+        </div>`;
+      }
+
+      // Documents list
+      const docsHtml = Array.isArray(d.docs) && d.docs.length
+        ? `<div class="dcm-section">
+            <div class="dcm-section-label">Документи для перевірки</div>
+            <div class="dcm-docs-grid">${d.docs.map(doc => `<span class="dcm-doc-tag">📄 ${escHtml(doc)}</span>`).join('')}</div>
+           </div>` : '';
+
+      // Info rows
+      const infoHtml = Array.isArray(d.info) && d.info.length
+        ? `<div class="dcm-section">
+            <div class="dcm-section-label">Деталі</div>
+            ${d.info.map(row => `<div class="dcm-info-row"><span class="dcm-info-label">${escHtml(row.label)}</span><span class="dcm-info-val">${escHtml(row.value)}</span></div>`).join('')}
+           </div>` : '';
+
+      // Text block
+      const textHtml = d.text
+        ? `<div class="dcm-section"><div class="dcm-section-label">Опис</div><div class="dcm-text">${escHtml(d.text)}</div></div>` : '';
+
+      // Recommendation
+      const recHtml = d.recommendation
+        ? `<div class="dcm-section dcm-rec ${statusClass}">
+            <div class="dcm-section-label">Рекомендація</div>
+            <div class="dcm-rec-text">${escHtml(d.recommendation)}</div>
+           </div>` : '';
+
+      // Red checks
+      const redHtml = checksHtml(d.redChecks, 'Критично · до відправки');
+      const yellowHtml = checksHtml(d.yellowChecks, 'Увага · перевірити');
+      const greenHtml = checksHtml(d.greenChecks, 'Стандартно · пройдено');
+
+      const qBtn = d.qdproUrl
+        ? `<a class="dcm-btn dcm-btn-link" href="${escHtml(d.qdproUrl)}" target="_blank" rel="noopener">Відкрити QDPro ↗</a>` : '';
+      const confirmBtn = d.onConfirm
+        ? `<button class="dcm-btn dcm-btn-primary" onclick="${escHtml(d.onConfirm)};closeDetailCard()">${escHtml(d.confirmLabel || 'Підтвердити')}</button>` : '';
+
+      return `<div class="dcm-modal dcm-modal-${statusClass}">
+        <div class="dcm-head">
+          <div class="dcm-head-left">
+            <div class="dcm-head-dot ${statusClass}"></div>
+            <div class="dcm-head-info">
+              <div class="dcm-head-title">${escHtml(d.title || '—')}</div>
+              ${d.subtitle ? `<div class="dcm-head-sub">${escHtml(d.subtitle)}</div>` : ''}
+            </div>
+          </div>
+          <div class="dcm-head-right">
+            <span class="dcm-status-badge ${statusClass}">${statusLabel}</span>
+            ${d.count != null ? `<span class="dcm-count-badge">${d.count}</span>` : ''}
+            <button class="dcm-close" onclick="closeDetailCard()">✕</button>
+          </div>
+        </div>
+        <div class="dcm-body">
+          ${d.conclusion ? `<div class="dcm-conclusion ${statusClass}">${escHtml(d.conclusion)}</div>` : ''}
+          ${infoHtml}
+          ${textHtml}
+          ${redHtml}${yellowHtml}${greenHtml}
+          ${docsHtml}
+          ${recHtml}
+        </div>
+        <div class="dcm-footer">
+          ${confirmBtn}
+          ${qBtn}
+          <button class="dcm-btn dcm-btn-secondary" onclick="closeDetailCard()">Закрити</button>
+        </div>
+      </div>`;
+    }
+
+    // ===================================================
+    // SUMMARY CARD — clickable, opens detail modal
+    // ===================================================
+    function renderSummaryCard(opts) {
+      // opts: { status, title, note, count, id, extraClass }
+      const st = opts.status || 'info';
+      const icon = st === 'red' ? '✕' : st === 'yellow' ? '!' : st === 'green' ? '✓' : 'i';
+      const cls = `summary-card summary-card-${st}${opts.extraClass ? ' ' + opts.extraClass : ''}`;
+      const countBadge = opts.count != null ? `<span class="sc-count">${opts.count}</span>` : '';
+      return `<button class="${cls}" onclick="openDetailCard('${opts.id}')" type="button">
+        <div class="sc-icon-wrap ${st}"><span class="sc-icon">${icon}</span></div>
+        <div class="sc-body">
+          <div class="sc-title">${escHtml(opts.title)}</div>
+          ${opts.note ? `<div class="sc-note">${escHtml(opts.note)}</div>` : ''}
+        </div>
+        ${countBadge}
+        <div class="sc-arrow">›</div>
+      </button>`;
+    }
+
+    // ===================================================
+    // renderAccordionBlock — kept for ZED/archive sections only,
+    // but transit/product cells no longer call it
+    // ===================================================
     function renderAccordionBlock(title, innerHtml, options = {}) {
       const tone = options.tone || 'info';
       const countText = options.countText || '';
@@ -5467,142 +5945,85 @@ ${euRegulations}
       const isOpen = acc.classList.contains('open');
       if (isOpen) {
         body.style.maxHeight = body.scrollHeight + 'px';
-        requestAnimationFrame(() => {
-          acc.classList.remove('open');
-          body.style.maxHeight = '0px';
-          body.style.opacity = '0';
-        });
+        requestAnimationFrame(() => { acc.classList.remove('open'); body.style.maxHeight = '0px'; body.style.opacity = '0'; });
       } else {
-        acc.classList.add('open');
-        body.style.opacity = '1';
-        body.style.maxHeight = body.scrollHeight + 'px';
-        setTimeout(() => {
-          if (acc.classList.contains('open')) body.style.maxHeight = 'none';
-        }, 360);
+        acc.classList.add('open'); body.style.opacity = '1'; body.style.maxHeight = body.scrollHeight + 'px';
+        setTimeout(() => { if (acc.classList.contains('open')) body.style.maxHeight = 'none'; }, 360);
       }
     }
 
     function refreshOpenAccordions(scope = document) {
       (scope || document).querySelectorAll('.logi-accordion.open .logi-acc-body').forEach(body => {
-        body.style.maxHeight = 'none';
-        body.style.opacity = '1';
+        body.style.maxHeight = 'none'; body.style.opacity = '1';
       });
     }
 
-    // Global store for check card data (avoid JSON.stringify in onclick)
-    const _checkCardStore = {};
-    let _checkCardIdCounter = 0;
-
-    function storeCheckCard(c) {
-      const id = '_ck' + (++_checkCardIdCounter);
-      _checkCardStore[id] = c;
-      return id;
-    }
-
+    // Legacy — kept for compatibility
     function checksItemsHtml(checks = []) {
       const validStatuses = { green: 'green', yellow: 'yellow', red: 'red' };
       return (checks || []).map(c => {
         const status = validStatuses[c.status] || 'yellow';
-        const title = escHtml(c.item || '—');
-        const note = escHtml(c.note || '');
-        const id = storeCheckCard(c);
-        return `<button class="check-card ${status}" onclick="openCheckDetailModal('${id}')" type="button">
-          <div class="check-card-dot"></div>
-          <div class="check-card-body">
-            <div class="check-card-title">${title}</div>
-            ${note ? `<div class="check-card-note">${note}</div>` : ''}
-          </div>
-          <div class="check-card-arrow">›</div>
-        </button>`;
+        return `<div class="check-item ${status}"><div class="check-light ${status}"></div><div class="check-content"><div class="check-title">${escHtml(c.item || '—')}</div>${c.note ? `<div class="check-note">${escHtml(c.note)}</div>` : ''}</div></div>`;
       }).join('');
     }
 
-    function openCheckDetailModal(id) {
-      const c = _checkCardStore[id];
-      if (!c) return;
-      const overlay = document.getElementById('checkDetailOverlay');
-      if (!overlay) return;
-      const status = c.status || 'yellow';
-      const statusLabel = status === 'red' ? 'Критично' : status === 'yellow' ? 'Увага' : 'Стандартно';
-      const statusBadge = `<span class="check-detail-status-badge ${status}">${statusLabel}</span>`;
-      overlay.innerHTML = `<div class="check-detail-modal">
-        <div class="check-detail-head ${status}">
-          <div class="check-detail-status-dot"></div>
-          <div class="check-detail-head-title">${escHtml(c.item || '—')}</div>
-          <button class="check-detail-close" onclick="closeCheckDetailModal()">✕</button>
-        </div>
-        <div class="check-detail-body">
-          <div>
-            <div class="check-detail-section-label">Статус перевірки</div>
-            ${statusBadge}
-          </div>
-          ${c.note ? `<div>
-            <div class="check-detail-section-label">Деталі</div>
-            <div class="check-detail-text">${escHtml(c.note)}</div>
-          </div>` : ''}
-          ${c.item ? `<div>
-            <div class="check-detail-section-label">Що потрібно перевірити</div>
-            <div class="check-detail-text">${escHtml(c.item)}</div>
-          </div>` : ''}
-          <div>
-            <div class="check-detail-section-label">Рекомендація</div>
-            <div class="check-detail-text">${
-              status === 'red'
-                ? 'Критичне питання — необхідно вирішити до відправки вантажу. Зверніться до митного брокера або логіста для усунення.'
-                : status === 'yellow'
-                  ? 'Потрібна додаткова перевірка. Уточніть у брокера або постачальника перед транзитом.'
-                  : 'Стандартна вимога виконана. Звірте відповідні документи перед відправкою.'
-            }</div>
-          </div>
-        </div>
-      </div>`;
-      overlay.classList.add('open');
-      document.addEventListener('keydown', _checkDetailEscHandler);
-    }
-
-    function closeCheckDetailModal() {
-      const overlay = document.getElementById('checkDetailOverlay');
-      if (overlay) overlay.classList.remove('open');
-      document.removeEventListener('keydown', _checkDetailEscHandler);
-    }
-
-    function _checkDetailEscHandler(e) {
-      if (e.key === 'Escape') closeCheckDetailModal();
-    }
-
-    function renderChecksList(checks, fallbackText) {
+    // renderChecksList — now renders summary cards that open full detail modal
+    function renderChecksList(checks, fallbackText, context) {
       if (typeof checks === 'string') {
-        return `<div class="flat-block info"><div class="flat-block-inner"><div style="font-size:13px;color:var(--ink-2);line-height:1.55">${escHtml(checks)}</div></div></div>`;
+        const id = _storeCard({ status: 'info', title: 'Коментар для логіста / брокера', text: checks, recommendation: checks });
+        return renderSummaryCard({ status: 'info', title: 'Коментар для логіста / брокера', note: checks.substring(0, 80), id });
       }
       if (!Array.isArray(checks) || checks.length === 0) {
-        return `<div style="font-size:12px;color:var(--ink-3);font-style:italic;padding:6px 2px">${fallbackText || '—'}</div>`;
+        return `<div class="sc-empty">${fallbackText || 'Немає перевірок'}</div>`;
       }
-      const orderedChecks = sortChecksByImportance(checks);
-      const red = orderedChecks.filter(c => (c.status || 'yellow') === 'red');
-      const yellow = orderedChecks.filter(c => (c.status || 'yellow') === 'yellow');
-      const green = orderedChecks.filter(c => (c.status || 'yellow') === 'green');
-
+      const ordered = sortChecksByImportance(checks);
+      const red = ordered.filter(c => (c.status || 'yellow') === 'red');
+      const yellow = ordered.filter(c => (c.status || 'yellow') === 'yellow');
+      const green = ordered.filter(c => (c.status || 'yellow') === 'green');
+      const ctx = context || {};
       let html = '';
+
       if (red.length) {
-        html += `<div class="flat-block critical" style="margin-bottom:6px">
-          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Критично · до відправки</div><div class="flat-block-count">${red.length}</div></div>
-          <div class="flat-block-inner"><div class="check-cards-group">${checksItemsHtml(red)}</div></div>
-        </div>`;
+        const rec = red.length === 1
+          ? 'Вирішіть це критичне питання до відправки вантажу. Зверніться до брокера.'
+          : `Необхідно вирішити всі ${red.length} критичних перевірки до відправки. Зверніться до митного брокера або логіста.`;
+        const id = _storeCard({
+          status: 'red', title: 'Критично · до відправки', subtitle: ctx.productName || '',
+          count: red.length, redChecks: red,
+          conclusion: `${red.length} критичних перевірки потребують вирішення перед відправкою вантажу.`,
+          recommendation: rec, docs: ctx.docs || []
+        });
+        html += renderSummaryCard({ status: 'red', title: 'Критично · до відправки', note: `${red.length} ${plural(red.length, 'критична перевірка', 'критичні перевірки', 'критичних перевірок')} потребу${red.length === 1 ? 'є' : 'ють'} вирішення перед відправкою`, count: red.length, id });
       }
       if (yellow.length) {
-        html += `<div class="flat-block warning" style="margin-bottom:6px">
-          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Увага · перевірити</div><div class="flat-block-count">${yellow.length}</div></div>
-          <div class="flat-block-inner"><div class="check-cards-group">${checksItemsHtml(yellow)}</div></div>
-        </div>`;
+        const rec = `Перевірте ${yellow.length} пункти з командою брокера або постачальником перед транзитом.`;
+        const id = _storeCard({
+          status: 'yellow', title: 'Увага · перевірити перед транзитом', subtitle: ctx.productName || '',
+          count: yellow.length, yellowChecks: yellow,
+          conclusion: `${yellow.length} пунктів потребують уваги брокера або логіста.`,
+          recommendation: rec, docs: ctx.docs || []
+        });
+        html += renderSummaryCard({ status: 'yellow', title: 'Потрібна додаткова перевірка документів', note: `${yellow.length} ${plural(yellow.length, 'пункт', 'пункти', 'пунктів')} потребу${yellow.length === 1 ? 'є' : 'ють'} уваги брокера / логіста`, count: yellow.length, id });
       }
       if (green.length) {
-        html += `<div class="flat-block ok" style="margin-bottom:6px">
-          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Стандартно · ок</div><div class="flat-block-count">${green.length}</div></div>
-          <div class="flat-block-inner"><div class="check-cards-group">${checksItemsHtml(green)}</div></div>
-        </div>`;
+        const id = _storeCard({
+          status: 'green', title: 'Стандартно · документи / контроль', subtitle: ctx.productName || '',
+          count: green.length, greenChecks: green,
+          conclusion: `${green.length} стандартних перевірки пройдено. Базові вимоги виконано.`,
+          recommendation: 'Стандартні вимоги виконано. Звірте відповідні документи перед відправкою.', docs: ctx.docs || []
+        });
+        html += renderSummaryCard({ status: 'green', title: `${green.length} стандартних перевірок пройдено`, note: 'Базові вимоги виконано', count: green.length, id });
       }
-      return html || `<div style="font-size:12px;color:var(--ink-3);font-style:italic;padding:6px 2px">${fallbackText || '—'}</div>`;
+      return html || `<div class="sc-empty">${fallbackText || 'Немає перевірок'}</div>`;
     }
+
+    function plural(n, one, few, many) {
+      const mod10 = n % 10, mod100 = n % 100;
+      if (mod10 === 1 && mod100 !== 11) return one;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+      return many;
+    }
+
 
     // ===== DOWNLOAD XLSX REPORT =====
     let lastAnalysisData = null;
@@ -6563,11 +6984,12 @@ ${euRegulations}
     }
 
     function shortChecksHtml(checks, max = 4) {
+      // kept for modal inner use
       const items = sortChecksByImportance(checks || []).slice(0, max).map(c => {
         const status = c.status || 'yellow';
-        return `<div class="mini-check ${status}"><i></i><div><b>${escHtml(c.item || '—')}</b>${c.note ? `<span>${escHtml(c.note)}</span>` : ''}</div></div>`;
+        return `<div class="dcm-check-row ${status}"><div class="dcm-check-dot ${status}"></div><div class="dcm-check-body"><div class="dcm-check-title">${escHtml(c.item || '—')}</div>${c.note ? `<div class="dcm-check-note">${escHtml(c.note)}</div>` : ''}</div></div>`;
       }).join('');
-      return items || '<div class="origin-panel-note">Немає окремих перевірок для цього варіанту.</div>';
+      return items || '<div style="color:var(--ink-3);font-size:11px">Немає перевірок</div>';
     }
 
     function selectedOriginProfile(item = {}, key) {
@@ -6580,34 +7002,37 @@ ${euRegulations}
       const qdproUrl = op.qdproUrl || item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
       const conf = op.confidence || 'low';
       const confLabel = conf === 'high' ? 'ВИСОКА' : conf === 'medium' ? 'СЕРЕДНЯ' : 'НИЗЬКА';
-      const statusIcon = conf === 'high' ? '✓' : conf === 'medium' ? '!' : '?';
       const statusColor = conf === 'high' ? 'green' : conf === 'medium' ? 'yellow' : 'red';
       const originLabel = op.label || op.country || 'Невідомо';
       const conclusion = op.shortConclusion || op.basis || 'Походження потрібно підтвердити документами партії.';
 
-      const detailBtn = idx !== null
-        ? `<button class="origin-card-detail-btn" style="margin-top:7px;width:100%;justify-content:center;text-align:center" onclick="openOriginDetailCard(${idx}, '${escHtml(op.key)}')">Детальніше про походження →</button>`
+      const detailBtnHtml = idx !== null
+        ? `<button class="origin-card-detail-btn" style="width:100%;text-align:center;margin-top:8px" onclick="openOriginDetailCard(${idx},'${escHtml(op.key)}')">Детальніше про походження →</button>`
         : '';
-
-      const keyChecks = [...(op.euChecks || []), ...(op.uaChecks || [])].slice(0, 4);
-      const miniChecksHtml = keyChecks.length ? `<div class="check-cards-group" style="margin-top:8px">${checksItemsHtml(keyChecks)}</div>` : '';
 
       const qdproModes = getQdProModeBadges(item.uctzedCode).map(m => `<span class="qdpro-mode-badge" title="${escHtml(m.note)}">${escHtml(m.label)}</span>`).join('');
 
-      return `<div class="status-summary-card ${statusColor}" style="margin-bottom:8px">
-        <div class="status-summary-icon">${statusIcon}</div>
-        <div class="status-summary-content">
-          <div class="status-summary-title">Обране: ${escHtml(originLabel)} · <span class="origin-confidence ${conf}" style="font-size:9px;padding:1px 4px">${confLabel}</span></div>
-          <div class="status-summary-note">${escHtml(conclusion.substring(0, 130))}</div>
+      // Key checks as mini summary cards
+      const keyChecks = [...(op.euChecks || []), ...(op.uaChecks || [])];
+      const red = keyChecks.filter(c => c.status === 'red').length;
+      const yel = keyChecks.filter(c => c.status === 'yellow' || !c.status).length;
+      const checksNote = red > 0 ? `${red} критичних · ${yel} уважних` : yel > 0 ? `${yel} пунктів для уваги` : 'Основні перевірки ок';
+
+      return `<div class="origin-panel-result">
+        <div class="opr-top">
+          <div class="opr-flag ${statusColor}"></div>
+          <div class="opr-info">
+            <div class="opr-name">${escHtml(originLabel)}</div>
+            <span class="origin-confidence ${conf}">${confLabel}</span>
+          </div>
         </div>
-      </div>
-      ${detailBtn}
-      ${miniChecksHtml}
-      ${qdproModes ? `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${qdproModes}</div>` : ''}
-      <div style="margin-top:8px"><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro goodinfo ↗</a></div>`;
+        <div class="opr-conclusion">${escHtml(conclusion.substring(0, 160))}</div>
+        ${keyChecks.length ? `<div class="opr-checks-note">${escHtml(checksNote)}</div>` : ''}
+        ${qdproModes ? `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${qdproModes}</div>` : ''}
+        ${detailBtnHtml}
+        <div style="margin-top:8px"><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro goodinfo ↗</a></div>
+      </div>`;
     }
-
-
 
     function renderStaticOriginSummary(item = {}) {
       const originMeta = [item.originType, item.productionMethod].filter(Boolean).join(' · ');
@@ -6629,34 +7054,96 @@ ${euRegulations}
       const originSelector = renderOriginSelectorCard(item, idx);
       const apps = item.applications || item.applicationContext || '';
       const selected = selectedOriginProfile(item, item.selectedOriginKey) || {};
+      const riskColor = item.risk === 'Критичний' ? 'var(--red-bright)' : item.risk === 'Середній' ? 'var(--yellow)' : 'var(--green-bright)';
 
       const precursorBadge = item.precursorRisk
-        ? `<div style="margin-top:5px;padding:3px 7px;border-radius:5px;font-size:11px;font-weight:600;background:var(--red-dim);color:var(--red-bright);border:1px solid rgba(239,74,74,0.3);letter-spacing:0.04em;display:inline-block">⚠ ПРЕКУРСОР / КОНТРОЛЬОВАНА РЕЧОВИНА</div>`
-        : '';
+        ? `<div class="precursor-badge">⚠ ПРЕКУРСОР / КОНТРОЛЬОВАНА РЕЧОВИНА</div>` : '';
 
-      const riskColor = item.risk === 'Критичний' ? 'var(--red-bright)' : item.risk === 'Середній' ? 'var(--yellow)' : 'var(--green-bright)';
+      // Store data for product info card modal
+      const infoCardId = _storeCard({
+        status: 'info',
+        title: item.name || 'Товар',
+        subtitle: `УКТЗЕД: ${item.uctzedCode || '—'}`,
+        conclusion: `${item.risk ? 'Рівень ризику: ' + item.risk + '. ' : ''}${item.riskNote || ''}`,
+        info: [
+          { label: 'Назва', value: item.name || '—' },
+          { label: 'УКТЗЕД', value: item.uctzedCode || '—' },
+          { label: 'Ризик', value: (item.risk || '—') + (item.riskNote ? ' · ' + item.riskNote : '') },
+          { label: 'Мито', value: item.dutyRateBasis || (item.dutyRatePercent != null ? item.dutyRatePercent + '%' : '—') },
+          { label: 'Категорія', value: item.category || '—' },
+          { label: 'Код (база)', value: item.codeBasis || '—' }
+        ].filter(r => r.value && r.value !== '—'),
+        recommendation: 'Звірте 10-значний код УКТЗЕД у QDPro goodinfo перед оформленням митної декларації.',
+        qdproUrl
+      });
+
+      const contextCardId = _storeCard({
+        status: 'info',
+        title: 'Категорія / застосування',
+        subtitle: item.category || '',
+        text: [item.category, apps, item.applicationContext].filter(Boolean).join('\n\n'),
+        info: [
+          item.category && { label: 'Категорія', value: item.category },
+          apps && { label: 'Застосування', value: apps }
+        ].filter(Boolean),
+        recommendation: 'Підтвердіть застосування у постачальника або клієнта для точної митної класифікації.'
+      });
+
+      const docCardId = _storeCard({
+        status: 'info',
+        title: 'Документи для брокера',
+        subtitle: `QDPro: ${item.uctzedCode || '—'}`,
+        conclusion: 'Звірте Імпорт / Транзит / Експорт для поточного 10-значного коду.',
+        info: [
+          { label: 'QDPro', value: qdproUrl },
+          { label: 'Варіанти', value: (item.originOptions || []).map(o => o.label).join(' | ') || '—' },
+          { label: 'Обрано', value: selected.label || item.originType || '—' }
+        ].filter(r => r.value && r.value !== '—'),
+        docs: ['Certificate of Origin', 'Invoice', 'Packing List', 'SDS/MSDS'],
+        recommendation: 'Логіст/брокер має звірити вкладки Імпорт / Транзит / Експорт у QDPro goodinfo.',
+        qdproUrl
+      });
 
       return `<div class="product-block-stack">
         <div class="product-title-card">
-          <div class="td-name">${name}${item.precursorRisk ? ' <span style="font-size:10px;padding:1px 5px;background:var(--red-dim);color:var(--red-bright);border-radius:3px;vertical-align:middle;font-family:var(--mono)">ПРЕКУРСОР</span>' : ''}</div>
+          <div class="td-name">${name}${item.precursorRisk ? ' <span class="precursor-inline">ПРЕКУРСОР</span>' : ''}</div>
           <div class="td-code">УКТЗЕД · ${hs}</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;align-items:center">
-            <span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--surface-3);border:1px solid var(--line-2);color:var(--ink-3)">Ризик: <span style="color:${riskColor};font-weight:700">${escHtml(item.risk || '—')}</span></span>
-            ${item.dutyRatePercent != null ? `<span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--surface-3);border:1px solid var(--line-2);color:var(--ink-3)">Мито: ${item.dutyRatePercent}%</span>` : ''}
-            ${item.category ? `<span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--amber-dim);border:1px solid rgba(44,184,120,0.2);color:var(--amber)">${escHtml(item.category)}</span>` : ''}
+          <div class="ptc-badges">
+            <span class="ptc-badge risk" style="--rc:${riskColor}">${escHtml(item.risk || '—')}</span>
+            ${item.dutyRatePercent != null ? `<span class="ptc-badge duty">Мито ${item.dutyRatePercent}%</span>` : ''}
+            ${item.category ? `<span class="ptc-badge cat">${escHtml(item.category)}</span>` : ''}
           </div>
           ${precursorBadge}
         </div>
-        ${apps ? `<div class="product-section"><div class="product-section-label">Застосування</div><div style="font-size:11px;color:var(--ink-2);line-height:1.45">${escHtml(String(apps).substring(0, 300))}${String(apps).length > 300 ? '…' : ''}</div></div>` : ''}
-        <div class="product-section" style="border-left:3px solid var(--amber)">
-          <div class="product-section-label">Документи</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-            <a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener" style="font-size:11px">QDPro довідка ↗</a>
-            <span style="font-size:10px;color:var(--ink-3);font-family:var(--mono)">Обране: ${escHtml(selected.label || item.originType || '—')}</span>
+
+        <button class="info-card-btn" onclick="openDetailCard('${infoCardId}')" type="button">
+          <div class="icb-dot info"></div>
+          <div class="icb-body">
+            <div class="icb-title">Найменування / код</div>
+            <div class="icb-note">Товар · ${hs}</div>
           </div>
-          ${item.codeBasis ? `<div style="font-size:10px;color:var(--ink-4);font-family:var(--mono);margin-top:4px">${escHtml(item.codeBasis)}</div>` : ''}
-        </div>
+          <div class="icb-arrow">›</div>
+        </button>
+
         ${originSelector}
+
+        ${apps || item.category ? `<button class="info-card-btn" onclick="openDetailCard('${contextCardId}')" type="button">
+          <div class="icb-dot ok"></div>
+          <div class="icb-body">
+            <div class="icb-title">Категорія / застосування</div>
+            <div class="icb-note">${escHtml((item.category || apps || '').substring(0, 50))}</div>
+          </div>
+          <div class="icb-arrow">›</div>
+        </button>` : ''}
+
+        <button class="info-card-btn" onclick="openDetailCard('${docCardId}')" type="button">
+          <div class="icb-dot info"></div>
+          <div class="icb-body">
+            <div class="icb-title">Документи для брокера</div>
+            <div class="icb-note">QDPro · <span style="color:var(--amber)">${escHtml(selected.label || '—')}</span></div>
+          </div>
+          <div class="icb-arrow">›</div>
+        </button>
       </div>`;
     }
 
@@ -6900,7 +7387,6 @@ ${euRegulations}
             </div>
             <div class="origin-detail-section">
               <div class="origin-detail-section-title">Перевірки для логіста та брокера</div>
-              ${renderStatusSummaryCards([...(op.euChecks || []), ...(op.uaChecks || []), ...(op.brokerChecks || [])], 'eu')}
               <div class="origin-detail-checks-grid">
                 ${checksGroupHtml(op.euChecks, 'Перевірки для транзиту через ЄС')}
                 ${checksGroupHtml(op.uaChecks, 'Перевірки для митного оформлення в Україні')}
@@ -6958,26 +7444,23 @@ ${euRegulations}
         const isActive = o.key === selectedKey;
         const conf = o.confidence || 'low';
         const confLabel = conf === 'high' ? 'ВИСОКА' : conf === 'medium' ? 'СЕРЕДНЯ' : 'НИЗЬКА';
-        const recBadge = o.recommended ? '<span class="origin-card-rec-badge">Рекомендовано</span>' : '';
         return `<div class="origin-option-card${isActive ? ' active' : ''}${o.recommended ? ' recommended' : ''}" id="originOptionCard-${idx}-${escHtml(o.key)}">
           <div class="origin-card-top">
             <span class="origin-country">${escHtml(o.label || o.shortLabel || '—')}</span>
             <span class="origin-confidence ${conf}">${confLabel}</span>
-            ${recBadge}
+            ${o.recommended ? '<span class="origin-card-rec-badge">Рекомендовано</span>' : ''}
           </div>
           <div class="origin-short">${escHtml((o.shortConclusion || o.basis || o.label || '').substring(0, 72))}</div>
           <div class="origin-basis-card">${escHtml((o.basis || '').substring(0, 90))}</div>
           <div class="origin-card-actions">
-            <button class="origin-card-select-btn${isActive ? ' selected' : ''}" onclick="handleOriginCardSelect(${idx}, '${escHtml(o.key)}'); event.stopPropagation();">${isActive ? '✓ Обрано' : 'Обрати'}</button>
-            <button class="origin-card-detail-btn" onclick="openOriginDetailCard(${idx}, '${escHtml(o.key)}'); event.stopPropagation();">Детальніше →</button>
+            <button class="origin-card-select-btn${isActive ? ' selected' : ''}" onclick="handleOriginCardSelect(${idx},'${escHtml(o.key)}');event.stopPropagation()">${isActive ? '✓ Обрано' : 'Обрати'}</button>
+            <button class="origin-card-detail-btn" onclick="openOriginDetailCard(${idx},'${escHtml(o.key)}');event.stopPropagation()">Детальніше →</button>
           </div>
         </div>`;
       }).join('');
 
-      // Show loading state if AI enrichment pending
       const aiNote = item._needsAIOrigin !== false
-        ? '<div class="origin-ai-loading">AI аналізує походження...</div>'
-        : '';
+        ? '<div class="origin-ai-loading">AI аналізує походження...</div>' : '';
 
       return `<div class="origin-selector-card" id="originCard-${idx}">
         <div class="origin-selector-head">
@@ -6986,7 +7469,7 @@ ${euRegulations}
         </div>
         ${aiNote}
         <div class="origin-cards-grid">${cardsHtml}</div>
-        <div class="origin-select-all-note">AI визначив варіанти походження за наявними даними. Натисніть <b>Обрати</b> для вибору або <b>Детальніше</b> для перегляду повного аналізу. EU/UA блоки оновляться автоматично.</div>
+        <div class="origin-select-all-note">AI визначив варіанти походження. Натисніть <b>Обрати</b> або <b>Детальніше</b>.</div>
         <div class="origin-panel" id="originPanel-${idx}">${renderOriginPanel(item, selectedKey, idx)}</div>
       </div>`;
     }
@@ -7014,7 +7497,6 @@ ${euRegulations}
       return mergeChecks(base, buildRegionalTransitChecks(item, op, region));
     }
 
-
     function logisticsBrokerOnlyChecks(checks = []) {
       const blacklist = /(оплата|платеж|пдв|vat|мито\s*\+|до сплати|фінанс|комерц|ціна|прибут|маржа)/i;
       return sortChecksByImportance((checks || []).filter(c => !blacklist.test(`${c.item || ''} ${c.note || ''}`)));
@@ -7022,92 +7504,68 @@ ${euRegulations}
 
     function qdproModeHtml(item = {}) {
       const badges = getQdProModeBadges(item.uctzedCode).map(m => `<span class="qdpro-mode-badge" title="${escHtml(m.note)}">${escHtml(m.label)}</span>`).join('');
-      return `<div class="origin-panel-mini-title">QDPro: довідка по товару УКТЗЕД</div>
-        <div>${badges}</div>
-        <div class="origin-select-all-note">Логіст/брокер має звірити вкладки Імпорт / Транзит / Експорт у QDPro goodinfo для поточного 10-значного коду, а походження підтвердити документами партії.</div>`;
-    }
-
-    // Build status summary cards for EU/UA transit cells
-    function renderStatusSummaryCards(checks, region) {
-      if (!Array.isArray(checks) || !checks.length) return '';
-
-      const redCount = checks.filter(c => c.status === 'red').length;
-      const yellowCount = checks.filter(c => c.status === 'yellow').length;
-      const greenCount = checks.filter(c => c.status === 'green').length;
-
-      const cards = [];
-
-      if (region === 'eu') {
-        if (redCount > 0) {
-          cards.push({ status: 'red', icon: '✕', title: 'Високий ризик для транзиту через ЄС', note: `${redCount} критичн${redCount === 1 ? 'а' : 'их'} перевірк${redCount === 1 ? 'а' : 'и'} потребу${redCount === 1 ? 'є' : 'ють'} вирішення перед відправкою` });
-        }
-        if (yellowCount > 0) {
-          cards.push({ status: 'yellow', icon: '!', title: 'Потрібна додаткова перевірка документів', note: `${yellowCount} пункт${yellowCount === 1 ? '' : 'и'} потребу${yellowCount === 1 ? 'є' : 'ють'} уваги брокера / логіста` });
-        }
-        if (greenCount > 0 && redCount === 0 && yellowCount === 0) {
-          cards.push({ status: 'green', icon: '✓', title: 'Можна використовувати для транзиту через ЄС', note: 'Стандартні вимоги виконано — звірте 10-значний код у QDPro' });
-        } else if (greenCount > 0) {
-          cards.push({ status: 'green', icon: '✓', title: `${greenCount} стандартн${greenCount === 1 ? 'а' : 'их'} перевірк${greenCount === 1 ? 'а' : 'и'} пройдено`, note: 'Базові вимоги виконано' });
-        }
-      } else {
-        if (redCount > 0) {
-          cards.push({ status: 'red', icon: '✕', title: 'Є ризик затримки або відмови при митному оформленні', note: `${redCount} критичн${redCount === 1 ? 'а' : 'их'} перевірк${redCount === 1 ? 'а' : 'и'} — потрібне вирішення до подачі декларації` });
-        }
-        if (yellowCount > 0) {
-          cards.push({ status: 'yellow', icon: '!', title: 'Потрібно перевірити Certificate of Origin / Invoice / Packing List', note: `${yellowCount} пункт${yellowCount === 1 ? '' : 'и'} для уточнення — зверніться до брокера` });
-        }
-        if (greenCount > 0 && redCount === 0 && yellowCount === 0) {
-          cards.push({ status: 'green', icon: '✓', title: 'Документи виглядають достатніми для митного оформлення', note: 'Базовий пакет документів сформовано — звірте з брокером' });
-        } else if (greenCount > 0) {
-          cards.push({ status: 'green', icon: '✓', title: `${greenCount} пункт${greenCount === 1 ? '' : 'и'} підтверджено`, note: 'Частина вимог виконана' });
-        }
-      }
-
-      if (!cards.length) return '';
-
-      const cardsHtml = cards.map(c => `
-        <div class="status-summary-card ${c.status}">
-          <div class="status-summary-icon">${c.icon}</div>
-          <div class="status-summary-content">
-            <div class="status-summary-title">${c.title}</div>
-            <div class="status-summary-note">${c.note}</div>
-          </div>
-        </div>`).join('');
-
-      return `<div class="status-summary-cards">${cardsHtml}</div>`;
+      return badges ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${badges}</div>` : '';
     }
 
     function renderEuTransitCell(item = {}, idx = 0) {
       const checks = logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'eu'));
-      const summaryCards = renderStatusSummaryCards(checks, 'eu');
+      const ctx = { productName: item.name, docs: ['Invoice', 'Packing List', 'Certificate of Origin', 'NCTS Declaration'] };
+      const checkCards = renderChecksList(checks, 'Немає даних про транзит ЄС', ctx);
 
-      const hazardSafe = item.hazardAnalysis && /не\s*adr|безпеч|не класифікується/i.test(item.hazardAnalysis);
-      const hazardCard = item.hazardAnalysis ? `
-        <div class="flat-block ${hazardSafe ? 'ok' : 'critical'}" style="margin-top:6px">
-          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">ADR / SDS / маршрут ЄС</div><div class="flat-block-count">${hazardSafe ? 'non-DG' : 'DG!'}</div></div>
-          <div class="flat-block-inner"><div style="font-size:11.5px;color:var(--ink-2);line-height:1.5">${escHtml(item.hazardAnalysis)}</div></div>
-        </div>` : '';
+      // Hazard summary card
+      let hazardCard = '';
+      if (item.hazardAnalysis) {
+        const hazardSafe = /не\s*adr|безпеч|не класифікується/i.test(item.hazardAnalysis);
+        const hId = _storeCard({
+          status: hazardSafe ? 'green' : 'red',
+          title: 'ADR / SDS / маршрут ЄС',
+          subtitle: item.name || '',
+          text: item.hazardAnalysis,
+          conclusion: hazardSafe ? 'Вантаж не відноситься до небезпечних за ADR.' : 'Вантаж може відноситись до небезпечних вантажів ADR. Потрібна перевірка.',
+          recommendation: hazardSafe ? 'Стандартний транзит ЄС без обмежень ADR.' : 'Перевірте клас ADR, SDS документ та маршрут ЄС разом з перевізником.',
+          docs: ['SDS/MSDS', 'ADR Transport Document']
+        });
+        hazardCard = renderSummaryCard({ status: hazardSafe ? 'green' : 'red', title: 'ADR / SDS / маршрут ЄС', note: hazardSafe ? 'Не відноситься до небезпечних (non-DG)' : 'Потрібна перевірка небезпечності вантажу', id: hId });
+      }
 
-      const storageCard = item.storageRequirements ? `
-        <div class="flat-block warning" style="margin-top:6px">
-          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Пакування / температура</div></div>
-          <div class="flat-block-inner"><div style="font-size:11.5px;color:var(--ink-2);line-height:1.5">${escHtml(item.storageRequirements)}</div></div>
-        </div>` : '';
+      // Storage/packaging summary card
+      let storageCard = '';
+      if (item.storageRequirements) {
+        const sId = _storeCard({
+          status: 'yellow',
+          title: 'Пакування / температура / сумісність',
+          subtitle: item.name || '',
+          text: item.storageRequirements,
+          conclusion: 'Є особливі вимоги до пакування або температурного режиму.',
+          recommendation: 'Перевірте умови зберігання та пакування з перевізником та складом.',
+          docs: ['Packing List', 'Temperature Log']
+        });
+        storageCard = renderSummaryCard({ status: 'yellow', title: 'Пакування / температура / сумісність', note: item.storageRequirements.substring(0, 80), id: sId });
+      }
 
-      return `${summaryCards}${renderChecksList(checks, 'Немає даних про транзит ЄС')}${hazardCard}${storageCard}`;
+      return `<div class="transit-cards">${checkCards}${hazardCard}${storageCard}</div>`;
     }
 
     function renderUaTransitCell(item = {}, idx = 0) {
       const checks = logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'ua'));
-      const summaryCards = renderStatusSummaryCards(checks, 'ua');
+      const ctx = { productName: item.name, docs: ['Invoice', 'Packing List', 'Certificate of Origin', 'ВМД'] };
+      const checkCards = renderChecksList(checks, 'Немає даних про транзит/розмитнення UA', ctx);
 
-      const storageCard = item.storageRequirements ? `
-        <div class="flat-block warning" style="margin-top:6px">
-          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Доставка до України / умови</div></div>
-          <div class="flat-block-inner"><div style="font-size:11.5px;color:var(--ink-2);line-height:1.5">${escHtml(item.storageRequirements)}</div></div>
-        </div>` : '';
+      let storageCard = '';
+      if (item.storageRequirements) {
+        const sId = _storeCard({
+          status: 'yellow',
+          title: 'Доставка до України / умови вантажу',
+          subtitle: item.name || '',
+          text: item.storageRequirements,
+          conclusion: 'Є особливі вимоги до доставки або умов вантажу в Україні.',
+          recommendation: 'Узгодьте умови доставки з брокером та митним органом.',
+          docs: ['Packing List', 'CMR', 'Invoice']
+        });
+        storageCard = renderSummaryCard({ status: 'yellow', title: 'Доставка до України / умови вантажу', note: item.storageRequirements.substring(0, 80), id: sId });
+      }
 
-      return `${summaryCards}${renderChecksList(checks, 'Немає даних про транзит/розмитнення UA')}${storageCard}`;
+      return `<div class="transit-cards">${checkCards}${storageCard}</div>`;
     }
 
     function handleOriginSelectChange(idx, key) {
@@ -8811,8 +9269,8 @@ ${batchData}`;
       closeOriginDetailCard,
       selectOriginFromModal,
       handleOriginCardSelect,
-      openCheckDetailModal,
-      closeCheckDetailModal,
+      openDetailCard,
+      closeDetailCard,
       openZed,
       closeZed
     });
@@ -8876,10 +9334,8 @@ ${batchData}`;
       </div>
     </div>
   </div>
-  <!-- ============ CHECK DETAIL MODAL ============ -->
-  <div class="check-detail-overlay" id="checkDetailOverlay" onclick="if(event.target===this)closeCheckDetailModal()">
-  </div>
-
+  <!-- ============ DETAIL CARD MODAL ============ -->
+  <div class="dcm-overlay" id="detailCardOverlay" onclick="if(event.target===this)closeDetailCard()"></div>
   <!-- ============ ORIGIN DETAIL MODAL ============ -->
   <div class="origin-detail-overlay" id="originDetailOverlay" onclick="if(event.target===this)closeOriginDetailCard()">
   </div>
