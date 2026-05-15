@@ -1844,6 +1844,94 @@
       width: 100%;
     }
 
+    /* ===== STATUS SUMMARY CARDS (EU/UA transit cells) ===== */
+    .status-summary-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .status-summary-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 8px 11px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: default;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .status-summary-card.green {
+      background: rgba(44,184,120,0.09);
+      border-color: rgba(44,184,120,0.25);
+    }
+
+    .status-summary-card.yellow {
+      background: rgba(229,181,58,0.09);
+      border-color: rgba(229,181,58,0.25);
+    }
+
+    .status-summary-card.red {
+      background: rgba(239,74,74,0.09);
+      border-color: rgba(239,74,74,0.25);
+    }
+
+    .status-summary-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .status-summary-card.green .status-summary-icon {
+      background: rgba(44,184,120,0.25);
+      color: var(--green-bright);
+      box-shadow: 0 0 8px rgba(44,184,120,0.3);
+    }
+
+    .status-summary-card.yellow .status-summary-icon {
+      background: rgba(229,181,58,0.2);
+      color: var(--yellow);
+      box-shadow: 0 0 8px rgba(229,181,58,0.3);
+    }
+
+    .status-summary-card.red .status-summary-icon {
+      background: rgba(239,74,74,0.18);
+      color: var(--red-bright);
+      box-shadow: 0 0 8px rgba(239,74,74,0.25);
+    }
+
+    .status-summary-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .status-summary-title {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .status-summary-card.green .status-summary-title { color: var(--green-bright); }
+    .status-summary-card.yellow .status-summary-title { color: var(--yellow); }
+    .status-summary-card.red .status-summary-title { color: var(--red-bright); }
+
+    .status-summary-note {
+      font-size: 11px;
+      color: var(--ink-3);
+      line-height: 1.4;
+      margin-top: 2px;
+      font-family: var(--mono);
+    }
+
     #resultsArea .tbl-scroll {
       border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
@@ -6146,17 +6234,32 @@ ${euRegulations}
       return opts.find(o => o.key === key) || opts.find(o => o.recommended) || opts[0] || originProfileByKey('unknown', item);
     }
 
-    function renderOriginPanel(item = {}, key) {
+    function renderOriginPanel(item = {}, key, idx = null) {
       const op = selectedOriginProfile(item, key);
       const qdproUrl = op.qdproUrl || item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
-      const confidence = op.confidence === 'high' ? 'висока' : op.confidence === 'medium' ? 'середня' : 'низька';
-      return `
-        <div class="origin-badges">
-          <span class="origin-badge rec">✓ ${escHtml(op.shortLabel || op.label)}</span>
-          <span class="origin-badge">Довіра: ${confidence}</span>
-          <span class="origin-badge">${escHtml(normalizeHsCode(item.uctzedCode) || 'код ?')}</span>
+      const conf = op.confidence || 'low';
+      const confLabel = conf === 'high' ? 'ВИСОКА' : conf === 'medium' ? 'СЕРЕДНЯ' : 'НИЗЬКА';
+      const statusIcon = conf === 'high' ? '✓' : conf === 'medium' ? '!' : '?';
+      const statusColor = conf === 'high' ? 'green' : conf === 'medium' ? 'yellow' : 'red';
+      const originLabel = op.label || op.country || 'Невідомо';
+      const conclusion = op.shortConclusion || op.basis || 'Походження потрібно підтвердити документами партії.';
+
+      const detailBtn = idx !== null
+        ? `<button class="origin-card-detail-btn" style="margin-top:7px;width:100%;justify-content:center" onclick="openOriginDetailCard(${idx}, '${escHtml(op.key)}')">Детальніше про походження →</button>`
+        : '';
+
+      const originStatusCard = `<div class="status-summary-card ${statusColor}" style="margin-bottom:8px">
+        <div class="status-summary-icon">${statusIcon}</div>
+        <div class="status-summary-content">
+          <div class="status-summary-title">Обране походження: ${escHtml(originLabel)} · <span class="origin-confidence ${conf}" style="font-size:9px;padding:1px 4px">${confLabel}</span></div>
+          <div class="status-summary-note">${escHtml(conclusion.substring(0, 120))}</div>
         </div>
-        <div class="origin-panel-note">${escHtml(op.basis || 'Походження потрібно підтвердити документами партії.')}</div>
+      </div>`;
+
+      return `
+        ${originStatusCard}
+        ${detailBtn}
+        <div class="origin-panel-note" style="margin-top:6px">${escHtml(op.basis || 'Походження потрібно підтвердити документами партії.')}</div>
         ${qdproModeHtml(item)}
         ${renderAccordionBlock('Ключові перевірки після вибору походження', `<div class="mini-check-list">${shortChecksHtml([...(op.euChecks || []), ...(op.uaChecks || [])], 5)}</div>`, { tone: 'info', open: false, countText: 'EU/UA' })}
         <div style="margin-top:8px"><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro goodinfo ↗</a></div>`;
@@ -6469,6 +6572,7 @@ ${euRegulations}
             </div>
             <div class="origin-detail-section">
               <div class="origin-detail-section-title">Перевірки для логіста та брокера</div>
+              ${renderStatusSummaryCards([...(op.euChecks || []), ...(op.uaChecks || []), ...(op.brokerChecks || [])], 'eu')}
               <div class="origin-detail-checks-grid">
                 ${checksGroupHtml(op.euChecks, 'Перевірки для транзиту через ЄС')}
                 ${checksGroupHtml(op.uaChecks, 'Перевірки для митного оформлення в Україні')}
@@ -6555,7 +6659,7 @@ ${euRegulations}
         ${aiNote}
         <div class="origin-cards-grid">${cardsHtml}</div>
         <div class="origin-select-all-note">AI визначив варіанти походження за наявними даними. Натисніть <b>Обрати</b> для вибору або <b>Детальніше</b> для перегляду повного аналізу. EU/UA блоки оновляться автоматично.</div>
-        <div class="origin-panel" id="originPanel-${idx}">${renderOriginPanel(item, selectedKey)}</div>
+        <div class="origin-panel" id="originPanel-${idx}">${renderOriginPanel(item, selectedKey, idx)}</div>
       </div>`;
     }
 
@@ -6595,6 +6699,56 @@ ${euRegulations}
         <div class="origin-select-all-note">Логіст/брокер має звірити вкладки Імпорт / Транзит / Експорт у QDPro goodinfo для поточного 10-значного коду, а походження підтвердити документами партії.</div>`;
     }
 
+    // Build status summary cards for EU/UA transit cells
+    function renderStatusSummaryCards(checks, region) {
+      if (!Array.isArray(checks) || !checks.length) return '';
+
+      const redCount = checks.filter(c => c.status === 'red').length;
+      const yellowCount = checks.filter(c => c.status === 'yellow').length;
+      const greenCount = checks.filter(c => c.status === 'green').length;
+
+      const cards = [];
+
+      if (region === 'eu') {
+        if (redCount > 0) {
+          cards.push({ status: 'red', icon: '✕', title: 'Високий ризик для транзиту через ЄС', note: `${redCount} критичн${redCount === 1 ? 'а' : 'их'} перевірк${redCount === 1 ? 'а' : 'и'} потребу${redCount === 1 ? 'є' : 'ють'} вирішення перед відправкою` });
+        }
+        if (yellowCount > 0) {
+          cards.push({ status: 'yellow', icon: '!', title: 'Потрібна додаткова перевірка документів', note: `${yellowCount} пункт${yellowCount === 1 ? '' : 'и'} потребу${yellowCount === 1 ? 'є' : 'ють'} уваги брокера / логіста` });
+        }
+        if (greenCount > 0 && redCount === 0 && yellowCount === 0) {
+          cards.push({ status: 'green', icon: '✓', title: 'Можна використовувати для транзиту через ЄС', note: 'Стандартні вимоги виконано — звірте 10-значний код у QDPro' });
+        } else if (greenCount > 0) {
+          cards.push({ status: 'green', icon: '✓', title: `${greenCount} стандартн${greenCount === 1 ? 'а' : 'их'} перевірк${greenCount === 1 ? 'а' : 'и'} пройдено`, note: 'Базові вимоги виконано' });
+        }
+      } else {
+        if (redCount > 0) {
+          cards.push({ status: 'red', icon: '✕', title: 'Є ризик затримки або відмови при митному оформленні', note: `${redCount} критичн${redCount === 1 ? 'а' : 'их'} перевірк${redCount === 1 ? 'а' : 'и'} — потрібне вирішення до подачі декларації` });
+        }
+        if (yellowCount > 0) {
+          cards.push({ status: 'yellow', icon: '!', title: 'Потрібно перевірити Certificate of Origin / Invoice / Packing List', note: `${yellowCount} пункт${yellowCount === 1 ? '' : 'и'} для уточнення — зверніться до брокера` });
+        }
+        if (greenCount > 0 && redCount === 0 && yellowCount === 0) {
+          cards.push({ status: 'green', icon: '✓', title: 'Документи виглядають достатніми для митного оформлення', note: 'Базовий пакет документів сформовано — звірте з брокером' });
+        } else if (greenCount > 0) {
+          cards.push({ status: 'green', icon: '✓', title: `${greenCount} пункт${greenCount === 1 ? '' : 'и'} підтверджено`, note: 'Частина вимог виконана' });
+        }
+      }
+
+      if (!cards.length) return '';
+
+      const cardsHtml = cards.map(c => `
+        <div class="status-summary-card ${c.status}">
+          <div class="status-summary-icon">${c.icon}</div>
+          <div class="status-summary-content">
+            <div class="status-summary-title">${c.title}</div>
+            <div class="status-summary-note">${c.note}</div>
+          </div>
+        </div>`).join('');
+
+      return `<div class="status-summary-cards">${cardsHtml}</div>`;
+    }
+
     function renderEuTransitCell(item = {}, idx = 0) {
       const hazardSafe = item.hazardAnalysis && /не\s*adr|безпеч|не класифікується/i.test(item.hazardAnalysis);
       const hazardTone = hazardSafe ? 'ok' : 'critical';
@@ -6604,23 +6758,26 @@ ${euRegulations}
       const storageBlock = item.storageRequirements
         ? renderAccordionBlock('Пакування / температура / сумісність', `<div class="info-card warn"><div class="info-card-body">${escHtml(item.storageRequirements)}</div></div>`, { tone: 'warning', open: false })
         : '';
-      return `${renderChecksList(logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'eu')), 'Немає даних про транзит ЄС')}${hazardBlock}${storageBlock}`;
+      const checks = logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'eu'));
+      const summaryCards = renderStatusSummaryCards(checks, 'eu');
+      return `${summaryCards}${renderChecksList(checks, 'Немає даних про транзит ЄС')}${hazardBlock}${storageBlock}`;
     }
 
     function renderUaTransitCell(item = {}, idx = 0) {
       const storageBlock = item.storageRequirements
         ? renderAccordionBlock('Доставка до України / умови вантажу', `<div class="info-card warn"><div class="info-card-body">${escHtml(item.storageRequirements)}</div></div>`, { tone: 'warning', open: false })
         : '';
-      return `${renderChecksList(logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'ua')), 'Немає даних про транзит/розмитнення UA')}${storageBlock}`;
+      const checks = logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'ua'));
+      const summaryCards = renderStatusSummaryCards(checks, 'ua');
+      return `${summaryCards}${renderChecksList(checks, 'Немає даних про транзит/розмитнення UA')}${storageBlock}`;
     }
 
     function handleOriginSelectChange(idx, key) {
       if (!lastAnalysisData || !Array.isArray(lastAnalysisData.items) || !lastAnalysisData.items[idx]) return;
       const item = lastAnalysisData.items[idx];
       item.selectedOriginKey = key;
-      const op = selectedOriginProfile(item, key);
       const panel = document.getElementById(`originPanel-${idx}`);
-      if (panel) panel.innerHTML = renderOriginPanel(item, key);
+      if (panel) panel.innerHTML = renderOriginPanel(item, key, idx);
       const euCell = document.getElementById(`euChecks-${idx}`);
       if (euCell) euCell.innerHTML = renderEuTransitCell(item, idx);
       const uaCell = document.getElementById(`uaChecks-${idx}`);
