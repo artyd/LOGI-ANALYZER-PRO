@@ -2834,25 +2834,27 @@
     }
 
     .origin-option-card {
-      flex: 1 1 140px;
-      min-width: 120px;
-      max-width: 220px;
+      flex: 1 1 160px;
+      min-width: 140px;
+      max-width: 260px;
       background: var(--surface-3);
       border: 1px solid var(--line-2);
       border-radius: 9px;
-      padding: 9px 11px;
-      cursor: pointer;
+      padding: 9px 11px 8px;
+      cursor: default;
       text-align: left;
-      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s, transform 0.14s;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .origin-option-card:hover {
       border-color: var(--amber);
       background: var(--amber-dim);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 16px -4px var(--amber-glow);
+      box-shadow: 0 2px 10px -4px var(--amber-glow);
     }
 
     .origin-option-card.active {
@@ -2861,15 +2863,74 @@
       box-shadow: 0 0 0 2px var(--amber-dim), 0 4px 14px -4px var(--amber-glow);
     }
 
-    .origin-option-card.recommended::before {
-      content: "✓";
-      position: absolute;
-      top: 6px;
-      right: 7px;
-      font-size: 10px;
+    .origin-option-card.recommended {
+      border-color: rgba(44,184,120,0.28);
+    }
+
+    .origin-card-rec-badge {
+      font-family: var(--mono);
+      font-size: 9px;
       font-weight: 700;
       color: var(--amber);
-      opacity: 0.85;
+      background: var(--amber-dim);
+      border: 1px solid rgba(44,184,120,0.25);
+      border-radius: 4px;
+      padding: 1px 5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-left: auto;
+    }
+
+    .origin-card-actions {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+    }
+
+    .origin-card-select-btn {
+      flex: 1;
+      background: var(--surface-raise);
+      border: 1px solid var(--line-2);
+      color: var(--ink-2);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      letter-spacing: 0.04em;
+    }
+
+    .origin-card-select-btn:hover {
+      background: var(--amber-dim);
+      border-color: var(--amber);
+      color: var(--amber-bright);
+    }
+
+    .origin-card-select-btn.selected {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: var(--bg);
+    }
+
+    .origin-card-detail-btn {
+      background: transparent;
+      border: 1px solid var(--line-2);
+      color: var(--ink-3);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .origin-card-detail-btn:hover {
+      border-color: var(--amber);
+      color: var(--amber-bright);
     }
 
     .origin-card-top {
@@ -6352,7 +6413,7 @@ ${euRegulations}
     }
 
     function renderOriginDetailModal(item, op, idx) {
-      const confidenceLabel = op.confidence === 'high' ? 'HIGH' : op.confidence === 'medium' ? 'MEDIUM' : 'LOW';
+      const confidenceLabel = op.confidence === 'high' ? 'ВИСОКА' : op.confidence === 'medium' ? 'СЕРЕДНЯ' : 'НИЗЬКА';
       const qdproUrl = op.qdproUrl || item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
 
       const evidenceHtml = Array.isArray(op.evidence) && op.evidence.length
@@ -6377,7 +6438,7 @@ ${euRegulations}
         : '<div class="origin-panel-note">Перелік документів не визначено</div>';
 
       const qdproBtn = qdproUrl && qdproUrl !== '#'
-        ? `<a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener" style="padding:9px 14px;font-size:12px">QDPro goodinfo ↗</a>`
+        ? `<a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener" style="padding:9px 14px;font-size:12px">Відкрити QDPro ↗</a>`
         : '';
 
       return `
@@ -6409,9 +6470,9 @@ ${euRegulations}
             <div class="origin-detail-section">
               <div class="origin-detail-section-title">Перевірки для логіста та брокера</div>
               <div class="origin-detail-checks-grid">
-                ${checksGroupHtml(op.euChecks, 'EU транзит')}
-                ${checksGroupHtml(op.uaChecks, 'UA митниця')}
-                ${checksGroupHtml(op.brokerChecks, 'Брокер')}
+                ${checksGroupHtml(op.euChecks, 'Перевірки для транзиту через ЄС')}
+                ${checksGroupHtml(op.uaChecks, 'Перевірки для митного оформлення в Україні')}
+                ${checksGroupHtml(op.brokerChecks, 'Перевірки для брокера')}
               </div>
             </div>
             <div class="origin-detail-section">
@@ -6436,12 +6497,15 @@ ${euRegulations}
       if (!lastAnalysisData || !Array.isArray(lastAnalysisData.items) || !lastAnalysisData.items[idx]) return;
       const item = lastAnalysisData.items[idx];
       item.selectedOriginKey = key;
-      // Re-render the origin card area
+      // Re-render the entire origin selector card (updates active states)
       const card = document.getElementById('originCard-' + idx);
-      if (card) card.outerHTML = renderOriginSelectorCard(item, idx);
-      // Update panel, EU/UA cells
-      const panel = document.getElementById('originPanel-' + idx);
-      if (panel) panel.innerHTML = renderOriginPanel(item, key);
+      if (card) {
+        const newCard = document.createElement('div');
+        newCard.innerHTML = renderOriginSelectorCard(item, idx);
+        const replacement = newCard.firstElementChild;
+        if (replacement) card.replaceWith(replacement);
+      }
+      // Update EU/UA cells
       const euCell = document.getElementById('euChecks-' + idx);
       if (euCell) euCell.innerHTML = renderEuTransitCell(item, idx);
       const uaCell = document.getElementById('uaChecks-' + idx);
@@ -6461,28 +6525,36 @@ ${euRegulations}
       const cardsHtml = opts.map(o => {
         const isActive = o.key === selectedKey;
         const conf = o.confidence || 'low';
-        const confLabel = conf === 'high' ? 'HIGH' : conf === 'medium' ? 'MED' : 'LOW';
-        return `<button
-          class="origin-option-card${isActive ? ' active' : ''}${o.recommended ? ' recommended' : ''}"
-          onclick="openOriginDetailCard(${idx}, '${escHtml(o.key)}')"
-          title="${escHtml(o.basis || o.label)}"
-        >
+        const confLabel = conf === 'high' ? 'ВИСОКА' : conf === 'medium' ? 'СЕРЕДНЯ' : 'НИЗЬКА';
+        const recBadge = o.recommended ? '<span class="origin-card-rec-badge">Рекомендовано</span>' : '';
+        return `<div class="origin-option-card${isActive ? ' active' : ''}${o.recommended ? ' recommended' : ''}" id="originOptionCard-${idx}-${escHtml(o.key)}">
           <div class="origin-card-top">
-            <span class="origin-country">${escHtml(o.shortLabel || o.label)}</span>
+            <span class="origin-country">${escHtml(o.label || o.shortLabel || '—')}</span>
             <span class="origin-confidence ${conf}">${confLabel}</span>
+            ${recBadge}
           </div>
-          <div class="origin-short">${escHtml((o.shortConclusion || o.label || '').substring(0, 60))}</div>
-          <div class="origin-basis-card">${escHtml((o.basis || '').substring(0, 80))}</div>
-        </button>`;
+          <div class="origin-short">${escHtml((o.shortConclusion || o.basis || o.label || '').substring(0, 72))}</div>
+          <div class="origin-basis-card">${escHtml((o.basis || '').substring(0, 90))}</div>
+          <div class="origin-card-actions">
+            <button class="origin-card-select-btn${isActive ? ' selected' : ''}" onclick="handleOriginCardSelect(${idx}, '${escHtml(o.key)}'); event.stopPropagation();">${isActive ? '✓ Обрано' : 'Обрати'}</button>
+            <button class="origin-card-detail-btn" onclick="openOriginDetailCard(${idx}, '${escHtml(o.key)}'); event.stopPropagation();">Детальніше →</button>
+          </div>
+        </div>`;
       }).join('');
+
+      // Show loading state if AI enrichment pending
+      const aiNote = item._needsAIOrigin !== false
+        ? '<div class="origin-ai-loading">AI аналізує походження...</div>'
+        : '';
 
       return `<div class="origin-selector-card" id="originCard-${idx}">
         <div class="origin-selector-head">
           <div class="origin-selector-title">AI · Можливі походження</div>
           <a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro ↗</a>
         </div>
+        ${aiNote}
         <div class="origin-cards-grid">${cardsHtml}</div>
-        <div class="origin-select-all-note">AI визначив варіанти походження за наявними даними. Клікніть на картку для деталей та вибору. EU/UA блоки оновляться автоматично.</div>
+        <div class="origin-select-all-note">AI визначив варіанти походження за наявними даними. Натисніть <b>Обрати</b> для вибору або <b>Детальніше</b> для перегляду повного аналізу. EU/UA блоки оновляться автоматично.</div>
         <div class="origin-panel" id="originPanel-${idx}">${renderOriginPanel(item, selectedKey)}</div>
       </div>`;
     }
@@ -6636,7 +6708,12 @@ ${euRegulations}
         item._needsAIOrigin = false;
         // Re-render the origin selector card
         const card = document.getElementById('originCard-' + idx);
-        if (card) card.outerHTML = renderOriginSelectorCard(item, idx);
+        if (card) {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = renderOriginSelectorCard(item, idx);
+          const repl = tmp.firstElementChild;
+          if (repl) card.replaceWith(repl);
+        }
         // Update EU/UA cells
         const euCell = document.getElementById('euChecks-' + idx);
         if (euCell) euCell.innerHTML = renderEuTransitCell(item, idx);
