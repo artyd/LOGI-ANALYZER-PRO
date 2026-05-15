@@ -3474,10 +3474,38 @@
       openrouter: { label: 'OpenRouter', model: 'openai/gpt-4o', placeholder: 'sk-or-...', url: 'https://openrouter.ai/keys', urlLabel: 'openrouter.ai → Keys' }
     };
 
-    let currentProvider = localStorage.getItem('lap_provider') || 'openai';
-    let providerKeys = JSON.parse(localStorage.getItem('lap_provider_keys') || '{}');
-    let keyHistory = JSON.parse(localStorage.getItem('lap_key_history') || '[]');
-    let archive = JSON.parse(localStorage.getItem('lap_archive') || '[]');
+    function safeStorageGet(key, fallback = '') {
+      try {
+        const value = window.localStorage ? localStorage.getItem(key) : null;
+        return value === null || value === undefined ? fallback : value;
+      } catch (e) {
+        console.warn('localStorage get failed:', key, e);
+        return fallback;
+      }
+    }
+
+    function safeStorageSet(key, value) {
+      try {
+        if (window.localStorage) localStorage.setItem(key, value);
+      } catch (e) {
+        console.warn('localStorage set failed:', key, e);
+      }
+    }
+
+    function safeJsonParse(value, fallback) {
+      try {
+        const parsed = JSON.parse(value);
+        return parsed === null || parsed === undefined ? fallback : parsed;
+      } catch (e) {
+        console.warn('JSON parse failed, using fallback:', e);
+        return fallback;
+      }
+    }
+
+    let currentProvider = safeStorageGet('lap_provider', 'openai') || 'openai';
+    let providerKeys = safeJsonParse(safeStorageGet('lap_provider_keys', '{}'), {});
+    let keyHistory = safeJsonParse(safeStorageGet('lap_key_history', '[]'), []);
+    let archive = safeJsonParse(safeStorageGet('lap_archive', '[]'), []);
     let archiveFilter = 'all';
     let uploadedFileData = null;
     let uploadedFileName = null;
@@ -3495,10 +3523,15 @@
     }
 
     function setApiOnline(provider) {
-      document.getElementById('keyBanner').classList.add('hidden');
-      document.getElementById('apiDot').classList.add('ok');
-      document.getElementById('apiStatusTxt').textContent = PROVIDER_META[provider].label + ' ONLINE';
-      document.getElementById('apiChipChange').style.display = 'inline';
+      const meta = PROVIDER_META[provider] || PROVIDER_META.openai;
+      const keyBanner = document.getElementById('keyBanner');
+      const apiDot = document.getElementById('apiDot');
+      const apiStatusTxt = document.getElementById('apiStatusTxt');
+      const apiChipChange = document.getElementById('apiChipChange');
+      if (keyBanner) keyBanner.classList.add('hidden');
+      if (apiDot) apiDot.classList.add('ok');
+      if (apiStatusTxt) apiStatusTxt.textContent = meta.label + ' ONLINE';
+      if (apiChipChange) apiChipChange.style.display = 'inline';
     }
 
     function akcSelectProv(p) {
@@ -3516,7 +3549,7 @@
     }
 
     function init() {
-      const savedTheme = localStorage.getItem('lap_theme');
+      const savedTheme = safeStorageGet('lap_theme', 'dark');
       if (savedTheme === 'light') document.documentElement.classList.add('theme-light');
       if (getActiveKey()) setApiOnline(currentProvider);
       seedKnowledgeBaseMemory();
@@ -3525,7 +3558,7 @@
 
     function toggleTheme() {
       const isLight = document.documentElement.classList.toggle('theme-light');
-      localStorage.setItem('lap_theme', isLight ? 'light' : 'dark');
+      safeStorageSet('lap_theme', isLight ? 'light' : 'dark');
     }
 
     // Banner provider selection handled by akcSelectProv / akcFlipBack
@@ -3535,20 +3568,20 @@
       if (!v) { alert('Вставте API ключ'); return; }
       _persistKey(bannerProvider, v);
       currentProvider = bannerProvider;
-      localStorage.setItem('lap_provider', currentProvider);
+      safeStorageSet('lap_provider', currentProvider);
       setApiOnline(currentProvider);
     }
 
     function _persistKey(provider, key) {
       providerKeys[provider] = key;
-      localStorage.setItem('lap_provider_keys', JSON.stringify(providerKeys));
+      safeStorageSet('lap_provider_keys', JSON.stringify(providerKeys));
       // Save to history
       keyHistory.unshift({
         provider,
         key: maskKey(key),
         savedAt: new Date().toLocaleString('uk-UA')
       });
-      localStorage.setItem('lap_key_history', JSON.stringify(keyHistory.slice(0, 30)));
+      safeStorageSet('lap_key_history', JSON.stringify(keyHistory.slice(0, 30)));
     }
 
     // ===== KEY MANAGEMENT MODAL =====
@@ -3622,7 +3655,7 @@
       if (!v) { alert('Вставте API ключ'); return; }
       _persistKey(kmSelectedProvider, v);
       currentProvider = kmSelectedProvider;
-      localStorage.setItem('lap_provider', currentProvider);
+      safeStorageSet('lap_provider', currentProvider);
       setApiOnline(currentProvider);
       _kmRenderCurrentKey();
       _kmRenderHistory();
@@ -3702,8 +3735,17 @@
     function showPage(name, btn) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('page-' + name).classList.add('active');
+      const page = document.getElementById('page-' + name);
+      if (!page) {
+        console.warn('Page not found:', name);
+        return;
+      }
+      page.classList.add('active');
       if (btn) btn.classList.add('active');
+      if (!btn) {
+        const navBtn = document.querySelector(`.nav-btn[onclick*="showPage('${name}'"]`);
+        if (navBtn) navBtn.classList.add('active');
+      }
       if (name === 'arch') renderArchive();
     }
 
@@ -6238,7 +6280,7 @@ ${euRegulations}
           selectedSheetName: s.selectedSheetName || '',
           data: d
         });
-        localStorage.setItem('lap_archive', JSON.stringify(archive.slice(0, 50)));
+        safeStorageSet('lap_archive', JSON.stringify(archive.slice(0, 50)));
       }
     }
 
@@ -7186,12 +7228,12 @@ ${euRegulations}
       };
       let shouldWrite = true;
       try {
-        const existing = JSON.parse(localStorage.getItem(KB_STORAGE_KEY) || 'null');
+        const existing = safeJsonParse(safeStorageGet(KB_STORAGE_KEY, 'null'), null);
         shouldWrite = !existing || existing.version !== KB_STORAGE_VERSION || !Array.isArray(existing.topics);
       } catch (e) {
         shouldWrite = true;
       }
-      if (shouldWrite) localStorage.setItem(KB_STORAGE_KEY, JSON.stringify(payload));
+      if (shouldWrite) safeStorageSet(KB_STORAGE_KEY, JSON.stringify(payload));
       const status = document.getElementById('kbMemoryStatus');
       if (status) {
         status.style.display = 'block';
@@ -7201,7 +7243,7 @@ ${euRegulations}
 
     function loadStoredKnowledgeTopics() {
       try {
-        const payload = JSON.parse(localStorage.getItem(KB_STORAGE_KEY) || 'null');
+        const payload = safeJsonParse(safeStorageGet(KB_STORAGE_KEY, 'null'), null);
         if (payload && Array.isArray(payload.topics)) return payload.topics;
       } catch (e) {}
       return buildLogisticsOriginKnowledgeTopics();
@@ -7421,10 +7463,44 @@ ${batchData}`;
       const el = document.getElementById('termId');
       if (el) el.textContent = `LAP-01 · ${hh}:${mm} UTC`;
     }
-    setInterval(updateClock, 10000);
-    updateClock();
+    // Explicitly expose functions used by inline onclick handlers.
+    // This makes the buttons reliable on static hosting such as GitHub Pages.
+    Object.assign(window, {
+      showPage,
+      toggleTheme,
+      openKeyModal,
+      closeKeyModal,
+      kmOverlayClick,
+      kmSelectProvider,
+      kmSaveKey,
+      akcSelectProv,
+      akcFlipBack,
+      saveKey,
+      runAudit,
+      handleFileUpload,
+      toggleLogiAccordion,
+      downloadReport,
+      setArchiveFilter,
+      handleOriginSelectChange,
+      openZed,
+      closeZed
+    });
 
-    init();
+    function startLogiAnalyzer() {
+      try {
+        updateClock();
+        setInterval(updateClock, 10000);
+        init();
+      } catch (e) {
+        console.error('LOGI-ANALYZER startup failed:', e);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startLogiAnalyzer);
+    } else {
+      startLogiAnalyzer();
+    }
   </script>
 
   <!-- ============ KEY MANAGEMENT MODAL ============ -->
