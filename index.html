@@ -2825,6 +2825,421 @@
       box-shadow: 0 0 0 2px var(--amber-dim);
     }
 
+    /* ===== ORIGIN CARDS GRID ===== */
+    .origin-cards-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 8px 0 6px;
+    }
+
+    .origin-option-card {
+      flex: 1 1 140px;
+      min-width: 120px;
+      max-width: 220px;
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      border-radius: 9px;
+      padding: 9px 11px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s, transform 0.14s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .origin-option-card:hover {
+      border-color: var(--amber);
+      background: var(--amber-dim);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px -4px var(--amber-glow);
+    }
+
+    .origin-option-card.active {
+      border-color: var(--amber);
+      background: linear-gradient(135deg, rgba(44,184,120,0.13) 0%, var(--surface-3) 100%);
+      box-shadow: 0 0 0 2px var(--amber-dim), 0 4px 14px -4px var(--amber-glow);
+    }
+
+    .origin-option-card.recommended::before {
+      content: "✓";
+      position: absolute;
+      top: 6px;
+      right: 7px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--amber);
+      opacity: 0.85;
+    }
+
+    .origin-card-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .origin-country {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+
+    .origin-confidence {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .origin-confidence.high {
+      background: rgba(44,184,120,0.18);
+      color: var(--green-bright);
+      border: 1px solid rgba(44,184,120,0.3);
+    }
+
+    .origin-confidence.medium {
+      background: rgba(229,181,58,0.16);
+      color: var(--yellow);
+      border: 1px solid rgba(229,181,58,0.3);
+    }
+
+    .origin-confidence.low {
+      background: rgba(239,74,74,0.12);
+      color: var(--red-bright);
+      border: 1px solid rgba(239,74,74,0.25);
+    }
+
+    .origin-short {
+      font-size: 10px;
+      color: var(--ink-2);
+      line-height: 1.4;
+      margin-bottom: 2px;
+    }
+
+    .origin-basis-card {
+      font-size: 9px;
+      color: var(--ink-3);
+      line-height: 1.4;
+      font-family: var(--mono);
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    /* ===== ORIGIN DETAIL MODAL ===== */
+    .origin-detail-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: rgba(0,0,0,0.68);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .origin-detail-overlay.open {
+      display: flex;
+      animation: fade-in 0.22s ease;
+    }
+
+    .origin-detail-modal {
+      position: relative;
+      width: 70vw;
+      max-width: 1100px;
+      max-height: 70vh;
+      min-width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 80px -12px rgba(0,0,0,0.6), 0 0 0 1px var(--line);
+    }
+
+    @media (max-width: 700px) {
+      .origin-detail-modal {
+        width: 94vw;
+        max-height: 88vh;
+      }
+    }
+
+    .origin-detail-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--surface-2), var(--surface));
+      flex-shrink: 0;
+    }
+
+    .origin-detail-head-left {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .origin-detail-item-name {
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .origin-detail-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .origin-detail-hs {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-3);
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      border-radius: 5px;
+      padding: 2px 6px;
+    }
+
+    .origin-detail-country-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--bg);
+      background: var(--amber);
+      border-radius: 5px;
+      padding: 2px 8px;
+      letter-spacing: 0.04em;
+    }
+
+    .origin-detail-close {
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      color: var(--ink-2);
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .origin-detail-close:hover {
+      background: var(--red-dim);
+      color: var(--red-bright);
+      border-color: rgba(239,74,74,0.35);
+    }
+
+    .origin-detail-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 22px 10px;
+    }
+
+    .origin-detail-section {
+      margin-bottom: 16px;
+    }
+
+    .origin-detail-section-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--amber);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 7px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .origin-detail-conclusion {
+      font-size: 13px;
+      color: var(--ink);
+      line-height: 1.6;
+      background: var(--amber-dim);
+      border-left: 3px solid var(--amber);
+      border-radius: 0 7px 7px 0;
+      padding: 10px 13px;
+    }
+
+    .origin-detail-basis {
+      font-size: 12px;
+      color: var(--ink-2);
+      line-height: 1.6;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px 13px;
+    }
+
+    .origin-detail-evidence-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .origin-detail-evidence-list li {
+      font-size: 11px;
+      color: var(--ink-2);
+      font-family: var(--mono);
+      padding: 4px 8px;
+      background: var(--surface-2);
+      border-radius: 5px;
+      border-left: 2px solid var(--amber);
+    }
+
+    .origin-detail-risk-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .origin-detail-risk-list li {
+      font-size: 11px;
+      color: var(--yellow);
+      font-family: var(--mono);
+      padding: 4px 8px;
+      background: var(--yellow-dim);
+      border-radius: 5px;
+      border-left: 2px solid var(--yellow);
+    }
+
+    .origin-detail-checks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 8px;
+    }
+
+    .origin-detail-check-group {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 9px 11px;
+    }
+
+    .origin-detail-check-group-title {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 7px;
+    }
+
+    .origin-detail-docs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .origin-detail-doc-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-2);
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      border-radius: 5px;
+      padding: 3px 8px;
+    }
+
+    .origin-detail-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px 22px 16px;
+      border-top: 1px solid var(--line);
+      background: var(--surface-2);
+      flex-shrink: 0;
+    }
+
+    .origin-detail-btn-primary {
+      background: var(--amber);
+      color: var(--bg);
+      border: none;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    .origin-detail-btn-primary:hover {
+      background: var(--amber-bright);
+      box-shadow: 0 4px 14px -4px var(--amber-glow);
+    }
+
+    .origin-detail-btn-secondary {
+      background: var(--surface-3);
+      color: var(--ink-2);
+      border: 1px solid var(--line-2);
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .origin-detail-btn-secondary:hover {
+      background: var(--surface-raise);
+      border-color: var(--line-3);
+    }
+
+    .origin-ai-loading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--amber);
+    }
+
+    .origin-ai-loading::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--amber-dim);
+      border-top-color: var(--amber);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     .origin-panel {
       margin-top: 9px;
       padding-top: 9px;
@@ -5753,20 +6168,321 @@ ${euRegulations}
       </div>`;
     }
 
+    // ===== AI-BASED ORIGIN INFERENCE =====
+
+    // Fallback: detect origin from item text fields without API
+    function inferOriginFallback(item = {}) {
+      const text = [
+        item.name, item.description, item.rawDescription,
+        item.manufacturer, item.supplier, item.shipper, item.exporter,
+        item.country, item.originCountry, item.dispatchCountry,
+        item.category, item.applications
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      const countryPatterns = [
+        { key: 'china', label: 'Китай', shortLabel: 'CN', country: 'China', patterns: [/china|chinese|cn\b|guangdong|shanghai|beijing|shenzhen|zhejiang|jiangsu|made in china|кита[йі]/i] },
+        { key: 'india', label: 'Індія', shortLabel: 'IN', country: 'India', patterns: [/india|indian|mumbai|chennai|hyderabad|pune|gujarat|made in india|інді[яі]/i] },
+        { key: 'germany', label: 'Німеччина', shortLabel: 'DE', country: 'Germany', patterns: [/germany|german|deutschland|gmbh|bavari|hamburg|frankfurt|berlin|made in germany|німеч/i] },
+        { key: 'netherlands', label: 'Нідерланди', shortLabel: 'NL', country: 'Netherlands', patterns: [/netherlands|holland|dutch|rotterdam|amsterdam|нідерлан/i] },
+        { key: 'poland', label: 'Польща', shortLabel: 'PL', country: 'Poland', patterns: [/poland|polish|sp\. z o\.o|warszawa|кракі|польщ/i] },
+        { key: 'ukraine', label: 'Україна', shortLabel: 'UA', country: 'Ukraine', patterns: [/ukraine|ukrainian|україн/i] },
+        { key: 'turkey', label: 'Туреччина', shortLabel: 'TR', country: 'Turkey', patterns: [/turkey|turkish|türk|istanbul|ankara|туреч/i] },
+        { key: 'egypt', label: 'Єгипет', shortLabel: 'EG', country: 'Egypt', patterns: [/egypt|egyptian|cairo|єгипет/i] },
+        { key: 'usa', label: 'США', shortLabel: 'US', country: 'USA', patterns: [/\busa\b|united states|\bamerican\b|inc\.|llc\b|corp\b|сша/i] },
+        { key: 'eu', label: 'ЄС (загально)', shortLabel: 'EU', country: 'EU', patterns: [/european union|\beu\b|made in eu|єс\b/i] },
+      ];
+
+      const found = [];
+      for (const cp of countryPatterns) {
+        if (cp.patterns.some(p => p.test(text))) {
+          found.push({ key: cp.key, label: cp.label, shortLabel: cp.shortLabel, country: cp.country });
+        }
+      }
+
+      // Dispatch country hint
+      const dc = (item.country || item.dispatchCountry || '').toLowerCase();
+      if (dc && !found.find(f => f.country.toLowerCase() === dc)) {
+        const dcMatch = countryPatterns.find(cp => cp.patterns.some(p => p.test(dc)));
+        if (dcMatch) found.push({ key: dcMatch.key, label: dcMatch.label, shortLabel: dcMatch.shortLabel, country: dcMatch.country, fromDispatch: true });
+      }
+
+      // Deduplicate
+      const seen = new Set();
+      const unique = found.filter(f => { if (seen.has(f.key)) return false; seen.add(f.key); return true; });
+
+      if (!unique.length) {
+        return [{
+          key: 'unknown',
+          label: 'Невідомо',
+          shortLabel: '?',
+          country: 'Unknown',
+          recommended: true,
+          confidence: 'low',
+          basis: 'Недостатньо даних для визначення походження. Запросіть документи у постачальника.',
+          shortConclusion: 'Походження не визначено. Потрібне підтвердження документами.',
+          evidence: ['Не знайдено ознак конкретного походження в доступних полях'],
+          riskFlags: ['Запросити Certificate of Origin у постачальника', 'Перевірити маркування та Invoice'],
+          euChecks: [{ status: 'yellow', item: 'Походження не підтверджено', note: 'Запросити CoO у постачальника перед транзитом ЄС' }],
+          uaChecks: [{ status: 'yellow', item: 'Походження не підтверджено', note: 'Необхідний CoO для митного оформлення в UA' }],
+          brokerChecks: [{ status: 'yellow', item: 'Підтвердити походження', note: 'Запросити CoO, Invoice з зазначенням країни виробника' }],
+          documentsToCheck: ['Certificate of Origin', 'Invoice', 'Packing List']
+        }];
+      }
+
+      return unique.map((f, i) => {
+        const isFirst = i === 0;
+        const fromDispatch = f.fromDispatch;
+        const confidence = isFirst && !fromDispatch ? 'medium' : 'low';
+        return {
+          key: f.key,
+          label: f.label,
+          shortLabel: f.shortLabel,
+          country: f.country,
+          recommended: isFirst,
+          confidence,
+          basis: fromDispatch
+            ? `Країна відправлення (${f.country}) вказує на вірогідне походження`
+            : `Ключові слова в назві/описі/виробнику вказують на ${f.country}`,
+          shortConclusion: `Вірогідне походження: ${f.label}. ${confidence === 'medium' ? 'Підтвердити Certificate of Origin.' : 'Низька впевненість — потрібна документальна перевірка.'}`,
+          evidence: [
+            fromDispatch ? `Країна відправлення: ${f.country}` : `Знайдено маркер походження: ${f.country} у полях товару`
+          ],
+          riskFlags: [
+            'Підтвердити Certificate of Origin',
+            confidence === 'low' ? 'Низька впевненість AI — обов\'язкова перевірка документів' : 'Перевірити маркування на упаковці'
+          ],
+          euChecks: [
+            { status: confidence === 'high' ? 'green' : 'yellow', item: `Транзит ЄС: перевірити правила для ${f.label}`, note: 'Звірити санкційні списки та NCTS Phase 5' }
+          ],
+          uaChecks: [
+            { status: confidence === 'high' ? 'green' : 'yellow', item: `Митне оформлення UA: походження ${f.label}`, note: 'Перевірити ставки мита та пільги за CoO' }
+          ],
+          brokerChecks: [
+            { status: 'yellow', item: 'Запросити CoO у постачальника', note: `Підтвердити походження: ${f.label}` }
+          ],
+          documentsToCheck: ['Certificate of Origin', 'Invoice', 'Packing List', 'SDS/MSDS']
+        };
+      });
+    }
+
+    // AI-powered origin inference (uses existing callAI, falls back gracefully)
+    async function inferOriginProfilesByAI(item = {}) {
+      // Build context text
+      const fields = {
+        name: item.name,
+        description: item.description || item.rawDescription,
+        manufacturer: item.manufacturer,
+        supplier: item.supplier,
+        shipper: item.shipper,
+        exporter: item.exporter,
+        country: item.country,
+        originCountry: item.originCountry,
+        dispatchCountry: item.dispatchCountry,
+        hsCode: item.uctzedCode,
+        category: item.category,
+        applications: item.applications || item.applicationContext
+      };
+      const fieldLines = Object.entries(fields).filter(([, v]) => v && String(v).trim() && String(v).trim() !== '—').map(([k, v]) => `${k}: ${String(v).trim()}`).join('\n');
+
+      if (!getActiveKey()) {
+        return inferOriginFallback(item);
+      }
+
+      const systemPrompt = `Ти аналізуєш товарну позицію для логіста та митного брокера. Визнач найбільш вірогідне походження товару на основі назви, опису, виробника, постачальника, експортера, країни відправлення та інших текстових даних. НЕ визначай походження тільки по HS/УКТЗЕД-коду. Код — лише додатковий контекст. Поверни ТІЛЬКИ валідний JSON без markdown та коментарів.`;
+
+      const userPrompt = `Дані товарної позиції:\n${fieldLines}\n\nПоверни JSON з масивом originOptions (1-3 варіанти). Якщо даних замало — ключ "unknown", confidence "low". Формат СТРОГО:\n{"originOptions":[{"key":"china","label":"Китай","shortLabel":"CN","country":"China","recommended":true,"confidence":"high","basis":"...","shortConclusion":"...","evidence":["..."],"riskFlags":["..."],"euChecks":[{"status":"yellow","item":"...","note":"..."}],"uaChecks":[{"status":"yellow","item":"...","note":"..."}],"brokerChecks":[{"status":"yellow","item":"...","note":"..."}],"documentsToCheck":["Certificate of Origin","Invoice","Packing List"]}]}`;
+
+      try {
+        const raw = await callAI(systemPrompt, userPrompt, 1800, true);
+        let parsed;
+        try {
+          const clean = raw.replace(/```json|```/g, '').trim();
+          parsed = JSON.parse(clean);
+        } catch (e) {
+          console.warn('Origin AI JSON parse failed, fallback:', e);
+          return inferOriginFallback(item);
+        }
+        if (!parsed || !Array.isArray(parsed.originOptions) || !parsed.originOptions.length) {
+          return inferOriginFallback(item);
+        }
+        // Ensure at least one recommended
+        const hasRec = parsed.originOptions.some(o => o.recommended);
+        if (!hasRec) parsed.originOptions[0].recommended = true;
+        return parsed.originOptions;
+      } catch (e) {
+        console.warn('inferOriginProfilesByAI failed, fallback:', e);
+        return inferOriginFallback(item);
+      }
+    }
+
+    // ===== ORIGIN DETAIL MODAL =====
+
+    let _originDetailCurrentIdx = null;
+    let _originDetailCurrentKey = null;
+
+    function openOriginDetailCard(idx, originKey) {
+      if (!lastAnalysisData || !Array.isArray(lastAnalysisData.items)) return;
+      const item = lastAnalysisData.items[idx];
+      if (!item) return;
+      _originDetailCurrentIdx = idx;
+      _originDetailCurrentKey = originKey;
+      const opts = Array.isArray(item.originOptions) ? item.originOptions : [];
+      const profile = opts.find(o => o.key === originKey) || opts.find(o => o.recommended) || opts[0];
+      if (!profile) return;
+      const overlay = document.getElementById('originDetailOverlay');
+      if (!overlay) return;
+      overlay.innerHTML = renderOriginDetailModal(item, profile, idx);
+      overlay.classList.add('open');
+      document.addEventListener('keydown', _originDetailEscHandler);
+    }
+
+    function closeOriginDetailCard() {
+      const overlay = document.getElementById('originDetailOverlay');
+      if (overlay) overlay.classList.remove('open');
+      document.removeEventListener('keydown', _originDetailEscHandler);
+    }
+
+    function _originDetailEscHandler(e) {
+      if (e.key === 'Escape') closeOriginDetailCard();
+    }
+
+    function selectOriginFromModal(idx, key) {
+      handleOriginCardSelect(idx, key);
+      closeOriginDetailCard();
+    }
+
+    function renderOriginDetailModal(item, op, idx) {
+      const confidenceLabel = op.confidence === 'high' ? 'HIGH' : op.confidence === 'medium' ? 'MEDIUM' : 'LOW';
+      const qdproUrl = op.qdproUrl || item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
+
+      const evidenceHtml = Array.isArray(op.evidence) && op.evidence.length
+        ? `<ul class="origin-detail-evidence-list">${op.evidence.map(e => `<li>${escHtml(e)}</li>`).join('')}</ul>`
+        : '<div class="origin-panel-note">Немає деталей</div>';
+
+      const riskHtml = Array.isArray(op.riskFlags) && op.riskFlags.length
+        ? `<ul class="origin-detail-risk-list">${op.riskFlags.map(r => `<li>⚠ ${escHtml(r)}</li>`).join('')}</ul>`
+        : '<div class="origin-panel-note">Суттєвих ризиків не виявлено</div>';
+
+      function checksGroupHtml(checks, title) {
+        if (!Array.isArray(checks) || !checks.length) return '';
+        const items = checks.map(c => {
+          const st = c.status || 'yellow';
+          return `<div class="mini-check ${st}"><i></i><div><b>${escHtml(c.item || '—')}</b>${c.note ? `<span>${escHtml(c.note)}</span>` : ''}</div></div>`;
+        }).join('');
+        return `<div class="origin-detail-check-group"><div class="origin-detail-check-group-title">${title}</div><div class="mini-check-list">${items}</div></div>`;
+      }
+
+      const docsHtml = Array.isArray(op.documentsToCheck) && op.documentsToCheck.length
+        ? `<div class="origin-detail-docs">${op.documentsToCheck.map(d => `<span class="origin-detail-doc-tag">📄 ${escHtml(d)}</span>`).join('')}</div>`
+        : '<div class="origin-panel-note">Перелік документів не визначено</div>';
+
+      const qdproBtn = qdproUrl && qdproUrl !== '#'
+        ? `<a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener" style="padding:9px 14px;font-size:12px">QDPro goodinfo ↗</a>`
+        : '';
+
+      return `
+        <div class="origin-detail-modal" role="dialog" aria-modal="true">
+          <div class="origin-detail-head">
+            <div class="origin-detail-head-left">
+              <div class="origin-detail-item-name">${escHtml(item.name || '—')}</div>
+              <div class="origin-detail-meta">
+                <span class="origin-detail-hs">УКТЗЕД ${escHtml(item.uctzedCode || '?')}</span>
+                <span class="origin-detail-country-badge">${escHtml(op.label || op.country || '—')}</span>
+                <span class="origin-confidence ${op.confidence || 'low'}">${confidenceLabel}</span>
+              </div>
+            </div>
+            <button class="origin-detail-close" onclick="closeOriginDetailCard()" aria-label="Закрити">✕</button>
+          </div>
+          <div class="origin-detail-body">
+            <div class="origin-detail-section">
+              <div class="origin-detail-section-title">Короткий висновок</div>
+              <div class="origin-detail-conclusion">${escHtml(op.shortConclusion || op.basis || 'Походження потрібно підтвердити документами.')}</div>
+            </div>
+            <div class="origin-detail-section">
+              <div class="origin-detail-section-title">Підстава AI-аналізу</div>
+              <div class="origin-detail-basis">${escHtml(op.basis || 'Аналіз полів товарної позиції.')}</div>
+            </div>
+            <div class="origin-detail-section">
+              <div class="origin-detail-section-title">Докази / ознаки</div>
+              ${evidenceHtml}
+            </div>
+            <div class="origin-detail-section">
+              <div class="origin-detail-section-title">Перевірки для логіста та брокера</div>
+              <div class="origin-detail-checks-grid">
+                ${checksGroupHtml(op.euChecks, 'EU транзит')}
+                ${checksGroupHtml(op.uaChecks, 'UA митниця')}
+                ${checksGroupHtml(op.brokerChecks, 'Брокер')}
+              </div>
+            </div>
+            <div class="origin-detail-section">
+              <div class="origin-detail-section-title">Необхідні документи</div>
+              ${docsHtml}
+            </div>
+            <div class="origin-detail-section">
+              <div class="origin-detail-section-title">Ризики</div>
+              ${riskHtml}
+            </div>
+          </div>
+          <div class="origin-detail-actions">
+            <button class="origin-detail-btn-primary" onclick="selectOriginFromModal(${idx}, '${escHtml(op.key)}')">Обрати це походження</button>
+            <button class="origin-detail-btn-secondary" onclick="closeOriginDetailCard()">Закрити</button>
+            ${qdproBtn}
+          </div>
+        </div>`;
+    }
+
+    // Handle card click (select origin + update panels)
+    function handleOriginCardSelect(idx, key) {
+      if (!lastAnalysisData || !Array.isArray(lastAnalysisData.items) || !lastAnalysisData.items[idx]) return;
+      const item = lastAnalysisData.items[idx];
+      item.selectedOriginKey = key;
+      // Re-render the origin card area
+      const card = document.getElementById('originCard-' + idx);
+      if (card) card.outerHTML = renderOriginSelectorCard(item, idx);
+      // Update panel, EU/UA cells
+      const panel = document.getElementById('originPanel-' + idx);
+      if (panel) panel.innerHTML = renderOriginPanel(item, key);
+      const euCell = document.getElementById('euChecks-' + idx);
+      if (euCell) euCell.innerHTML = renderEuTransitCell(item, idx);
+      const uaCell = document.getElementById('uaChecks-' + idx);
+      if (uaCell) uaCell.innerHTML = renderUaTransitCell(item, idx);
+      refreshOpenAccordions(document);
+    }
+
+    // ===== ORIGIN SELECTOR CARD (cards instead of select) =====
+
     function renderOriginSelectorCard(item = {}, idx = 0) {
       const opts = Array.isArray(item.originOptions) && item.originOptions.length
         ? item.originOptions
         : buildOriginOptionsForItem(item, codeBasedOriginProfile(item.uctzedCode, item));
-      const selectedKey = item.selectedOriginKey || chooseRecommendedOriginKey(item, opts, codeBasedOriginProfile(item.uctzedCode, item));
+      const selectedKey = item.selectedOriginKey || (opts.find(o => o.recommended) || opts[0] || {}).key;
       const qdproUrl = item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
-      const optionsHtml = opts.map(o => `<option value="${escHtml(o.key)}" ${o.key === selectedKey ? 'selected' : ''}>${o.recommended ? '✓ ' : ''}${escHtml(o.label)}</option>`).join('');
+
+      const cardsHtml = opts.map(o => {
+        const isActive = o.key === selectedKey;
+        const conf = o.confidence || 'low';
+        const confLabel = conf === 'high' ? 'HIGH' : conf === 'medium' ? 'MED' : 'LOW';
+        return `<button
+          class="origin-option-card${isActive ? ' active' : ''}${o.recommended ? ' recommended' : ''}"
+          onclick="openOriginDetailCard(${idx}, '${escHtml(o.key)}')"
+          title="${escHtml(o.basis || o.label)}"
+        >
+          <div class="origin-card-top">
+            <span class="origin-country">${escHtml(o.shortLabel || o.label)}</span>
+            <span class="origin-confidence ${conf}">${confLabel}</span>
+          </div>
+          <div class="origin-short">${escHtml((o.shortConclusion || o.label || '').substring(0, 60))}</div>
+          <div class="origin-basis-card">${escHtml((o.basis || '').substring(0, 80))}</div>
+        </button>`;
+      }).join('');
+
       return `<div class="origin-selector-card" id="originCard-${idx}">
         <div class="origin-selector-head">
-          <div class="origin-selector-title">Усі можливі походження</div>
+          <div class="origin-selector-title">AI · Можливі походження</div>
           <a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro ↗</a>
         </div>
-        <select class="origin-select" onchange="handleOriginSelectChange(${idx}, this.value)">${optionsHtml}</select>
-        <div class="origin-select-all-note">Система автоматично додає всі можливі походження за УКТЗЕД/QDPro-описом, назвою та ключовими словами. Виберіть реальне походження з документів постачальника — EU/UA блоки перебудуються під логіста та брокера.</div>
+        <div class="origin-cards-grid">${cardsHtml}</div>
+        <div class="origin-select-all-note">AI визначив варіанти походження за наявними даними. Клікніть на картку для деталей та вибору. EU/UA блоки оновляться автоматично.</div>
         <div class="origin-panel" id="originPanel-${idx}">${renderOriginPanel(item, selectedKey)}</div>
       </div>`;
     }
@@ -5895,12 +6611,40 @@ ${euRegulations}
       item.uaChecks = mergeChecks(item.uaChecks, profile.uaChecks);
       item.qdproUrl = buildQdProGoodInfoUrl(finalCode);
       item.qdproChapterNote = getQdProChapterNote(finalCode);
-      item.originOptions = buildOriginOptionsForItem(item, profile);
-      item.selectedOriginKey = chooseRecommendedOriginKey(item, item.originOptions, profile);
+      // Use code-based origin as initial fallback; AI will override async after render
+      if (!Array.isArray(item.originOptions) || !item.originOptions.length) {
+        item.originOptions = buildOriginOptionsForItem(item, profile);
+      }
+      item.selectedOriginKey = item.selectedOriginKey || chooseRecommendedOriginKey(item, item.originOptions, profile);
       const selectedProfile = selectedOriginProfile(item, item.selectedOriginKey);
       mergeOriginProfileIntoItem(item, selectedProfile);
       item.possibleOriginLabels = (item.originOptions || []).map(o => o.label).join(' | ');
+      // Mark for AI inference (will be updated async after render)
+      item._needsAIOrigin = true;
       return item;
+    }
+
+    // Async post-render AI origin enrichment
+    async function enrichItemOriginAsync(item, idx) {
+      try {
+        const aiOpts = await inferOriginProfilesByAI(item);
+        if (!aiOpts || !aiOpts.length) return;
+        item.originOptions = aiOpts;
+        item.selectedOriginKey = (aiOpts.find(o => o.recommended) || aiOpts[0] || {}).key;
+        mergeOriginProfileIntoItem(item, selectedOriginProfile(item, item.selectedOriginKey));
+        item.possibleOriginLabels = aiOpts.map(o => o.label).join(' | ');
+        item._needsAIOrigin = false;
+        // Re-render the origin selector card
+        const card = document.getElementById('originCard-' + idx);
+        if (card) card.outerHTML = renderOriginSelectorCard(item, idx);
+        // Update EU/UA cells
+        const euCell = document.getElementById('euChecks-' + idx);
+        if (euCell) euCell.innerHTML = renderEuTransitCell(item, idx);
+        const uaCell = document.getElementById('uaChecks-' + idx);
+        if (uaCell) uaCell.innerHTML = renderUaTransitCell(item, idx);
+      } catch (e) {
+        console.warn('Async origin AI enrichment failed for idx', idx, e);
+      }
     }
 
 
@@ -6259,6 +7003,15 @@ ${euRegulations}
     </div>`;
 
       refreshOpenAccordions(document.getElementById('resultsArea'));
+      // Async AI origin enrichment — runs after render
+      if (Array.isArray(d.items)) {
+        d.items.forEach((item, idx) => {
+          if (item._needsAIOrigin !== false) {
+            // Small stagger so UI isn't blocked
+            setTimeout(() => enrichItemOriginAsync(item, idx), idx * 120);
+          }
+        });
+      }
       const hasHigh = (d.items || []).some(i => i.risk === 'Критичний');
       const hasMed = (d.items || []).some(i => i.risk === 'Середній');
       const total = fmt((s.totalCustomsValue || 0) + (s.totalDuty || 0) + (s.totalVAT || 0));
@@ -7482,6 +8235,10 @@ ${batchData}`;
       downloadReport,
       setArchiveFilter,
       handleOriginSelectChange,
+      openOriginDetailCard,
+      closeOriginDetailCard,
+      selectOriginFromModal,
+      handleOriginCardSelect,
       openZed,
       closeZed
     });
@@ -7544,6 +8301,9 @@ ${batchData}`;
         <div id="kmHistList"></div>
       </div>
     </div>
+  </div>
+  <!-- ============ ORIGIN DETAIL MODAL ============ -->
+  <div class="origin-detail-overlay" id="originDetailOverlay" onclick="if(event.target===this)closeOriginDetailCard()">
   </div>
 </body>
 
