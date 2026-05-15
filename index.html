@@ -3716,9 +3716,274 @@
 
 
     /* ============================================
-       v2.16 · PRODUCT-COLUMN ACCORDIONS
-       Product name/code blocks now use the same animated grouping as transit checks.
+       FLAT CARD BLOCKS — no accordions
        ============================================ */
+
+    /* Flat section block replacing accordion */
+    .flat-block {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      overflow: hidden;
+    }
+
+    .flat-block.critical { border-left: 3px solid var(--red); }
+    .flat-block.warning  { border-left: 3px solid var(--yellow); }
+    .flat-block.ok       { border-left: 3px solid var(--green); }
+    .flat-block.info     { border-left: 3px solid var(--amber); }
+
+    .flat-block-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .flat-block-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .flat-block.critical .flat-block-dot { background: var(--red-bright); box-shadow: 0 0 6px var(--red); }
+    .flat-block.warning  .flat-block-dot { background: var(--yellow);     box-shadow: 0 0 6px var(--yellow); }
+    .flat-block.ok       .flat-block-dot { background: var(--green-bright);box-shadow: 0 0 6px var(--green); }
+    .flat-block.info     .flat-block-dot { background: var(--amber-bright);box-shadow: 0 0 6px var(--amber); }
+
+    .flat-block-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-2);
+      flex: 1;
+    }
+
+    .flat-block-count {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-4);
+    }
+
+    .flat-block-inner {
+      padding: 8px 10px;
+    }
+
+    /* Clickable check card */
+    .check-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 9px 11px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.14s, border-color 0.14s, transform 0.1s;
+      text-align: left;
+      width: 100%;
+    }
+
+    .check-card:hover {
+      background: var(--surface-3);
+      border-color: var(--line-2);
+      transform: translateY(-1px);
+    }
+
+    .check-card.green { border-left: 2px solid var(--green); }
+    .check-card.yellow { border-left: 2px solid var(--yellow); }
+    .check-card.red { border-left: 2px solid var(--red); }
+
+    .check-card-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .check-card.green .check-card-dot  { background: var(--green-bright); box-shadow: 0 0 6px var(--green); }
+    .check-card.yellow .check-card-dot { background: var(--yellow);        box-shadow: 0 0 6px var(--yellow); }
+    .check-card.red .check-card-dot    { background: var(--red-bright);    box-shadow: 0 0 6px var(--red); }
+
+    .check-card-body { flex: 1; min-width: 0; }
+
+    .check-card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.4;
+      margin-bottom: 2px;
+    }
+
+    .check-card-note {
+      font-size: 11px;
+      color: var(--ink-3);
+      line-height: 1.4;
+    }
+
+    .check-card-arrow {
+      font-size: 11px;
+      color: var(--ink-4);
+      flex-shrink: 0;
+      margin-top: 3px;
+      transition: color 0.14s;
+    }
+
+    .check-card:hover .check-card-arrow { color: var(--amber); }
+
+    .check-cards-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    /* Flat product info sections */
+    .product-section {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 9px 11px;
+    }
+
+    .product-section-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-3);
+      margin-bottom: 6px;
+    }
+
+    /* Check detail modal */
+    .check-detail-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9100;
+      background: rgba(0,0,0,0.68);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .check-detail-overlay.open {
+      display: flex;
+      animation: fade-in 0.2s ease;
+    }
+
+    .check-detail-modal {
+      position: relative;
+      width: 70vw;
+      max-width: 860px;
+      max-height: 70vh;
+      min-width: 300px;
+      background: var(--surface);
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 80px -12px rgba(0,0,0,0.6);
+    }
+
+    @media (max-width: 700px) {
+      .check-detail-modal { width: 94vw; max-height: 88vh; }
+    }
+
+    .check-detail-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--surface-2), var(--surface));
+      flex-shrink: 0;
+    }
+
+    .check-detail-status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .check-detail-head.green .check-detail-status-dot { background: var(--green-bright); box-shadow: 0 0 8px var(--green); }
+    .check-detail-head.yellow .check-detail-status-dot { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+    .check-detail-head.red .check-detail-status-dot { background: var(--red-bright); box-shadow: 0 0 8px var(--red); }
+
+    .check-detail-head-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .check-detail-close {
+      background: var(--surface-3);
+      border: 1px solid var(--line-2);
+      color: var(--ink-2);
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.14s, color 0.14s;
+    }
+
+    .check-detail-close:hover { background: var(--red-dim); color: var(--red-bright); }
+
+    .check-detail-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .check-detail-section-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--amber);
+      margin-bottom: 5px;
+    }
+
+    .check-detail-text {
+      font-size: 13px;
+      color: var(--ink-2);
+      line-height: 1.6;
+    }
+
+    .check-detail-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .check-detail-status-badge.green  { background: rgba(44,184,120,0.15);  color: var(--green-bright); }
+    .check-detail-status-badge.yellow { background: rgba(229,181,58,0.14);  color: var(--yellow); }
+    .check-detail-status-badge.red    { background: rgba(239,74,74,0.12);   color: var(--red-bright); }
+
+    /* Product column stack */
     .product-block-stack {
       display: grid;
       gap: 7px;
@@ -5224,43 +5489,119 @@ ${euRegulations}
       });
     }
 
+    // Global store for check card data (avoid JSON.stringify in onclick)
+    const _checkCardStore = {};
+    let _checkCardIdCounter = 0;
+
+    function storeCheckCard(c) {
+      const id = '_ck' + (++_checkCardIdCounter);
+      _checkCardStore[id] = c;
+      return id;
+    }
+
     function checksItemsHtml(checks = []) {
       const validStatuses = { green: 'green', yellow: 'yellow', red: 'red' };
       return (checks || []).map(c => {
         const status = validStatuses[c.status] || 'yellow';
         const title = escHtml(c.item || '—');
         const note = escHtml(c.note || '');
-        return `<div class="check-item ${status}">
-          <div class="check-light ${status}"></div>
-          <div class="check-content">
-            <div class="check-title">${title}</div>
-            ${note ? `<div class="check-note">${note}</div>` : ''}
+        const id = storeCheckCard(c);
+        return `<button class="check-card ${status}" onclick="openCheckDetailModal('${id}')" type="button">
+          <div class="check-card-dot"></div>
+          <div class="check-card-body">
+            <div class="check-card-title">${title}</div>
+            ${note ? `<div class="check-card-note">${note}</div>` : ''}
           </div>
-        </div>`;
+          <div class="check-card-arrow">›</div>
+        </button>`;
       }).join('');
+    }
+
+    function openCheckDetailModal(id) {
+      const c = _checkCardStore[id];
+      if (!c) return;
+      const overlay = document.getElementById('checkDetailOverlay');
+      if (!overlay) return;
+      const status = c.status || 'yellow';
+      const statusLabel = status === 'red' ? 'Критично' : status === 'yellow' ? 'Увага' : 'Стандартно';
+      const statusBadge = `<span class="check-detail-status-badge ${status}">${statusLabel}</span>`;
+      overlay.innerHTML = `<div class="check-detail-modal">
+        <div class="check-detail-head ${status}">
+          <div class="check-detail-status-dot"></div>
+          <div class="check-detail-head-title">${escHtml(c.item || '—')}</div>
+          <button class="check-detail-close" onclick="closeCheckDetailModal()">✕</button>
+        </div>
+        <div class="check-detail-body">
+          <div>
+            <div class="check-detail-section-label">Статус перевірки</div>
+            ${statusBadge}
+          </div>
+          ${c.note ? `<div>
+            <div class="check-detail-section-label">Деталі</div>
+            <div class="check-detail-text">${escHtml(c.note)}</div>
+          </div>` : ''}
+          ${c.item ? `<div>
+            <div class="check-detail-section-label">Що потрібно перевірити</div>
+            <div class="check-detail-text">${escHtml(c.item)}</div>
+          </div>` : ''}
+          <div>
+            <div class="check-detail-section-label">Рекомендація</div>
+            <div class="check-detail-text">${
+              status === 'red'
+                ? 'Критичне питання — необхідно вирішити до відправки вантажу. Зверніться до митного брокера або логіста для усунення.'
+                : status === 'yellow'
+                  ? 'Потрібна додаткова перевірка. Уточніть у брокера або постачальника перед транзитом.'
+                  : 'Стандартна вимога виконана. Звірте відповідні документи перед відправкою.'
+            }</div>
+          </div>
+        </div>
+      </div>`;
+      overlay.classList.add('open');
+      document.addEventListener('keydown', _checkDetailEscHandler);
+    }
+
+    function closeCheckDetailModal() {
+      const overlay = document.getElementById('checkDetailOverlay');
+      if (overlay) overlay.classList.remove('open');
+      document.removeEventListener('keydown', _checkDetailEscHandler);
+    }
+
+    function _checkDetailEscHandler(e) {
+      if (e.key === 'Escape') closeCheckDetailModal();
     }
 
     function renderChecksList(checks, fallbackText) {
       if (typeof checks === 'string') {
-        return renderAccordionBlock('Коментар для логіста / брокера', `<div style="font-size:13px;color:var(--ink-2);line-height:1.55">${escHtml(checks)}</div>`, { tone: 'info', open: true });
+        return `<div class="flat-block info"><div class="flat-block-inner"><div style="font-size:13px;color:var(--ink-2);line-height:1.55">${escHtml(checks)}</div></div></div>`;
       }
       if (!Array.isArray(checks) || checks.length === 0) {
-        return `<div style="font-size:13px;color:var(--ink-3);font-style:italic">${fallbackText || '—'}</div>`;
+        return `<div style="font-size:12px;color:var(--ink-3);font-style:italic;padding:6px 2px">${fallbackText || '—'}</div>`;
       }
       const orderedChecks = sortChecksByImportance(checks);
       const red = orderedChecks.filter(c => (c.status || 'yellow') === 'red');
       const yellow = orderedChecks.filter(c => (c.status || 'yellow') === 'yellow');
       const green = orderedChecks.filter(c => (c.status || 'yellow') === 'green');
-      const legend = `<div class="checks-legend">
-        <span><i style="background:#ff6161"></i>Критично</span>
-        <span><i style="background:#e5b53a"></i>Увага</span>
-        <span><i style="background:#3fd18c"></i>Ок</span>
-      </div>`;
-      const blocks = [];
-      if (red.length) blocks.push(renderAccordionBlock('Критично · до відправки / до кордону', `<div class="checks-list">${checksItemsHtml(red)}</div>`, { tone: 'critical', open: true, countText: `${red.length}` }));
-      if (yellow.length) blocks.push(renderAccordionBlock('Увага · перевірити перед транзитом', `<div class="checks-list">${checksItemsHtml(yellow)}</div>`, { tone: 'warning', open: !red.length, countText: `${yellow.length}` }));
-      if (green.length) blocks.push(renderAccordionBlock('Стандартно · документи / контроль', `<div class="checks-list">${checksItemsHtml(green)}</div>`, { tone: 'ok', open: !red.length && !yellow.length, countText: `${green.length}` }));
-      return legend + blocks.join('');
+
+      let html = '';
+      if (red.length) {
+        html += `<div class="flat-block critical" style="margin-bottom:6px">
+          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Критично · до відправки</div><div class="flat-block-count">${red.length}</div></div>
+          <div class="flat-block-inner"><div class="check-cards-group">${checksItemsHtml(red)}</div></div>
+        </div>`;
+      }
+      if (yellow.length) {
+        html += `<div class="flat-block warning" style="margin-bottom:6px">
+          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Увага · перевірити</div><div class="flat-block-count">${yellow.length}</div></div>
+          <div class="flat-block-inner"><div class="check-cards-group">${checksItemsHtml(yellow)}</div></div>
+        </div>`;
+      }
+      if (green.length) {
+        html += `<div class="flat-block ok" style="margin-bottom:6px">
+          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Стандартно · ок</div><div class="flat-block-count">${green.length}</div></div>
+          <div class="flat-block-inner"><div class="check-cards-group">${checksItemsHtml(green)}</div></div>
+        </div>`;
+      }
+      return html || `<div style="font-size:12px;color:var(--ink-3);font-style:italic;padding:6px 2px">${fallbackText || '—'}</div>`;
     }
 
     // ===== DOWNLOAD XLSX REPORT =====
@@ -6245,24 +6586,25 @@ ${euRegulations}
       const conclusion = op.shortConclusion || op.basis || 'Походження потрібно підтвердити документами партії.';
 
       const detailBtn = idx !== null
-        ? `<button class="origin-card-detail-btn" style="margin-top:7px;width:100%;justify-content:center" onclick="openOriginDetailCard(${idx}, '${escHtml(op.key)}')">Детальніше про походження →</button>`
+        ? `<button class="origin-card-detail-btn" style="margin-top:7px;width:100%;justify-content:center;text-align:center" onclick="openOriginDetailCard(${idx}, '${escHtml(op.key)}')">Детальніше про походження →</button>`
         : '';
 
-      const originStatusCard = `<div class="status-summary-card ${statusColor}" style="margin-bottom:8px">
+      const keyChecks = [...(op.euChecks || []), ...(op.uaChecks || [])].slice(0, 4);
+      const miniChecksHtml = keyChecks.length ? `<div class="check-cards-group" style="margin-top:8px">${checksItemsHtml(keyChecks)}</div>` : '';
+
+      const qdproModes = getQdProModeBadges(item.uctzedCode).map(m => `<span class="qdpro-mode-badge" title="${escHtml(m.note)}">${escHtml(m.label)}</span>`).join('');
+
+      return `<div class="status-summary-card ${statusColor}" style="margin-bottom:8px">
         <div class="status-summary-icon">${statusIcon}</div>
         <div class="status-summary-content">
-          <div class="status-summary-title">Обране походження: ${escHtml(originLabel)} · <span class="origin-confidence ${conf}" style="font-size:9px;padding:1px 4px">${confLabel}</span></div>
-          <div class="status-summary-note">${escHtml(conclusion.substring(0, 120))}</div>
+          <div class="status-summary-title">Обране: ${escHtml(originLabel)} · <span class="origin-confidence ${conf}" style="font-size:9px;padding:1px 4px">${confLabel}</span></div>
+          <div class="status-summary-note">${escHtml(conclusion.substring(0, 130))}</div>
         </div>
-      </div>`;
-
-      return `
-        ${originStatusCard}
-        ${detailBtn}
-        <div class="origin-panel-note" style="margin-top:6px">${escHtml(op.basis || 'Походження потрібно підтвердити документами партії.')}</div>
-        ${qdproModeHtml(item)}
-        ${renderAccordionBlock('Ключові перевірки після вибору походження', `<div class="mini-check-list">${shortChecksHtml([...(op.euChecks || []), ...(op.uaChecks || [])], 5)}</div>`, { tone: 'info', open: false, countText: 'EU/UA' })}
-        <div style="margin-top:8px"><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro goodinfo ↗</a></div>`;
+      </div>
+      ${detailBtn}
+      ${miniChecksHtml}
+      ${qdproModes ? `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${qdproModes}</div>` : ''}
+      <div style="margin-top:8px"><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro goodinfo ↗</a></div>`;
     }
 
 
@@ -6284,51 +6626,37 @@ ${euRegulations}
       const name = escHtml(item.name || '—');
       const hs = escHtml(item.uctzedCode || '—');
       const qdproUrl = item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
-      const originSummary = renderStaticOriginSummary(item);
       const originSelector = renderOriginSelectorCard(item, idx);
-      const categoryHtml = item.category ? `<span class="td-category">${escHtml(item.category)}</span>` : '<div class="origin-panel-note">Категорію не визначено: брокеру потрібно звірити опис, CAS/склад і 10-значний код.</div>';
       const apps = item.applications || item.applicationContext || '';
-      const appsHtml = apps ? `<div class="td-apps">${escHtml(String(apps).substring(0, 420))}${String(apps).length > 420 ? '…' : ''}</div>` : '<div class="origin-panel-note">Застосування не вказано: потрібно підтвердити use/application у постачальника або клієнта.</div>';
       const selected = selectedOriginProfile(item, item.selectedOriginKey) || {};
-      const possible = (item.originOptions || []).map(o => o.shortLabel || o.label).filter(Boolean).join(' · ') || 'потрібно підтвердити документами';
 
       const precursorBadge = item.precursorRisk
-        ? `<div style="margin-top:6px;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:600;background:var(--red-dim);color:var(--red-bright);border:1px solid rgba(239,74,74,0.3);letter-spacing:0.04em;">⚠ ПРЕКУРСОР / КОНТРОЛЬОВАНА РЕЧОВИНА</div>`
+        ? `<div style="margin-top:5px;padding:3px 7px;border-radius:5px;font-size:11px;font-weight:600;background:var(--red-dim);color:var(--red-bright);border:1px solid rgba(239,74,74,0.3);letter-spacing:0.04em;display:inline-block">⚠ ПРЕКУРСОР / КОНТРОЛЬОВАНА РЕЧОВИНА</div>`
         : '';
-      const identityHtml = `<div class="product-id-card">
-        <div class="product-kv"><b>Товар</b><span>${name}</span></div>
-        <div class="product-kv"><b>Код</b><span>${hs}</span></div>
-        <div class="product-kv"><b>Ризик</b><span>${escHtml(item.risk || '—')} ${item.riskNote ? '· ' + escHtml(item.riskNote) : ''}</span></div>
-        ${item.dutyRateBasis ? `<div class="product-kv" style="font-size:11px;color:var(--ink-3)"><b>Мито</b><span>${escHtml(item.dutyRateBasis)}</span></div>` : ''}
-        ${precursorBadge}
-      </div>`;
 
-      const originHtml = `<div class="product-origin-wrap">
-        ${originSummary}
-        ${originSelector}
-      </div>`;
-
-      const contextHtml = `<div class="product-context-card">
-        ${categoryHtml}
-        ${appsHtml}
-      </div>`;
-
-      const docHtml = `<div class="product-doc-card">
-        <div class="product-kv"><b>QDPro</b><span><a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">Довідка по товару ↗</a></span></div>
-        <div class="product-kv"><b>Режим</b><span>Звірити Імпорт / Транзит / Експорт для поточного 10-значного коду.</span></div>
-        <div class="product-kv"><b>Варіанти</b><span>${escHtml(possible)}</span></div>
-        <div class="product-kv"><b>Обрано</b><span>${escHtml(selected.label || item.originType || '—')}</span></div>
-      </div>`;
+      const riskColor = item.risk === 'Критичний' ? 'var(--red-bright)' : item.risk === 'Середній' ? 'var(--yellow)' : 'var(--green-bright)';
 
       return `<div class="product-block-stack">
         <div class="product-title-card">
           <div class="td-name">${name}${item.precursorRisk ? ' <span style="font-size:10px;padding:1px 5px;background:var(--red-dim);color:var(--red-bright);border-radius:3px;vertical-align:middle;font-family:var(--mono)">ПРЕКУРСОР</span>' : ''}</div>
           <div class="td-code">УКТЗЕД · ${hs}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;align-items:center">
+            <span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--surface-3);border:1px solid var(--line-2);color:var(--ink-3)">Ризик: <span style="color:${riskColor};font-weight:700">${escHtml(item.risk || '—')}</span></span>
+            ${item.dutyRatePercent != null ? `<span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--surface-3);border:1px solid var(--line-2);color:var(--ink-3)">Мито: ${item.dutyRatePercent}%</span>` : ''}
+            ${item.category ? `<span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--amber-dim);border:1px solid rgba(44,184,120,0.2);color:var(--amber)">${escHtml(item.category)}</span>` : ''}
+          </div>
+          ${precursorBadge}
         </div>
-        ${renderAccordionBlock('Найменування / код', identityHtml, { tone: 'info', open: true, countText: 'товар' })}
-        ${renderAccordionBlock('Походження / QDPro', originHtml, { tone: 'warning', open: true, countText: 'origin' })}
-        ${renderAccordionBlock('Категорія / застосування', contextHtml, { tone: 'ok', open: false, countText: 'контекст' })}
-        ${renderAccordionBlock('Документи для брокера', docHtml, { tone: 'info', open: false, countText: 'QDPro' })}
+        ${apps ? `<div class="product-section"><div class="product-section-label">Застосування</div><div style="font-size:11px;color:var(--ink-2);line-height:1.45">${escHtml(String(apps).substring(0, 300))}${String(apps).length > 300 ? '…' : ''}</div></div>` : ''}
+        <div class="product-section" style="border-left:3px solid var(--amber)">
+          <div class="product-section-label">Документи</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener" style="font-size:11px">QDPro довідка ↗</a>
+            <span style="font-size:10px;color:var(--ink-3);font-family:var(--mono)">Обране: ${escHtml(selected.label || item.originType || '—')}</span>
+          </div>
+          ${item.codeBasis ? `<div style="font-size:10px;color:var(--ink-4);font-family:var(--mono);margin-top:4px">${escHtml(item.codeBasis)}</div>` : ''}
+        </div>
+        ${originSelector}
       </div>`;
     }
 
@@ -6750,26 +7078,36 @@ ${euRegulations}
     }
 
     function renderEuTransitCell(item = {}, idx = 0) {
-      const hazardSafe = item.hazardAnalysis && /не\s*adr|безпеч|не класифікується/i.test(item.hazardAnalysis);
-      const hazardTone = hazardSafe ? 'ok' : 'critical';
-      const hazardBlock = item.hazardAnalysis
-        ? renderAccordionBlock('ADR / SDS / маршрут ЄС', `<div class="info-card ${hazardSafe ? 'safe' : 'danger'}"><div class="info-card-body">${escHtml(item.hazardAnalysis)}</div></div>`, { tone: hazardTone, open: !hazardSafe, countText: hazardSafe ? 'non-DG?' : 'DG?' })
-        : '';
-      const storageBlock = item.storageRequirements
-        ? renderAccordionBlock('Пакування / температура / сумісність', `<div class="info-card warn"><div class="info-card-body">${escHtml(item.storageRequirements)}</div></div>`, { tone: 'warning', open: false })
-        : '';
       const checks = logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'eu'));
       const summaryCards = renderStatusSummaryCards(checks, 'eu');
-      return `${summaryCards}${renderChecksList(checks, 'Немає даних про транзит ЄС')}${hazardBlock}${storageBlock}`;
+
+      const hazardSafe = item.hazardAnalysis && /не\s*adr|безпеч|не класифікується/i.test(item.hazardAnalysis);
+      const hazardCard = item.hazardAnalysis ? `
+        <div class="flat-block ${hazardSafe ? 'ok' : 'critical'}" style="margin-top:6px">
+          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">ADR / SDS / маршрут ЄС</div><div class="flat-block-count">${hazardSafe ? 'non-DG' : 'DG!'}</div></div>
+          <div class="flat-block-inner"><div style="font-size:11.5px;color:var(--ink-2);line-height:1.5">${escHtml(item.hazardAnalysis)}</div></div>
+        </div>` : '';
+
+      const storageCard = item.storageRequirements ? `
+        <div class="flat-block warning" style="margin-top:6px">
+          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Пакування / температура</div></div>
+          <div class="flat-block-inner"><div style="font-size:11.5px;color:var(--ink-2);line-height:1.5">${escHtml(item.storageRequirements)}</div></div>
+        </div>` : '';
+
+      return `${summaryCards}${renderChecksList(checks, 'Немає даних про транзит ЄС')}${hazardCard}${storageCard}`;
     }
 
     function renderUaTransitCell(item = {}, idx = 0) {
-      const storageBlock = item.storageRequirements
-        ? renderAccordionBlock('Доставка до України / умови вантажу', `<div class="info-card warn"><div class="info-card-body">${escHtml(item.storageRequirements)}</div></div>`, { tone: 'warning', open: false })
-        : '';
       const checks = logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, selectedOriginProfile(item, item.selectedOriginKey), 'ua'));
       const summaryCards = renderStatusSummaryCards(checks, 'ua');
-      return `${summaryCards}${renderChecksList(checks, 'Немає даних про транзит/розмитнення UA')}${storageBlock}`;
+
+      const storageCard = item.storageRequirements ? `
+        <div class="flat-block warning" style="margin-top:6px">
+          <div class="flat-block-head"><div class="flat-block-dot"></div><div class="flat-block-title">Доставка до України / умови</div></div>
+          <div class="flat-block-inner"><div style="font-size:11.5px;color:var(--ink-2);line-height:1.5">${escHtml(item.storageRequirements)}</div></div>
+        </div>` : '';
+
+      return `${summaryCards}${renderChecksList(checks, 'Немає даних про транзит/розмитнення UA')}${storageCard}`;
     }
 
     function handleOriginSelectChange(idx, key) {
@@ -8473,6 +8811,8 @@ ${batchData}`;
       closeOriginDetailCard,
       selectOriginFromModal,
       handleOriginCardSelect,
+      openCheckDetailModal,
+      closeCheckDetailModal,
       openZed,
       closeZed
     });
@@ -8536,6 +8876,10 @@ ${batchData}`;
       </div>
     </div>
   </div>
+  <!-- ============ CHECK DETAIL MODAL ============ -->
+  <div class="check-detail-overlay" id="checkDetailOverlay" onclick="if(event.target===this)closeCheckDetailModal()">
+  </div>
+
   <!-- ============ ORIGIN DETAIL MODAL ============ -->
   <div class="origin-detail-overlay" id="originDetailOverlay" onclick="if(event.target===this)closeOriginDetailCard()">
   </div>
