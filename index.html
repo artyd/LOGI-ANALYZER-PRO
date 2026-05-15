@@ -4280,7 +4280,14 @@ ${euRegulations}
   {"item": "Оплата мита + ПДВ 20%", "status": "green", "note": "Автоматичний розрахунок."}
 ]
 
-ВАЖЛИВО: Надай ПОВНИЙ список всіх перевірок у euChecks та uaChecks для кожного товару (без обмежень по кількості). Аналіз має бути ТІЛЬКИ для логістів і брокерів: маршрут, T1/NCTS, BCP/TRACES, фіто/ветконтроль, митна лабораторія, ADR/SDS, пакування, маркування, температура, документи та ризик затримки. Не пиши закупівельні/комерційні висновки. Нотатки (note) мають бути конкретними: 1-2 речення з поясненням статусу.
+ВАЖЛИВО: Для кожного товару надай 4-8 НАЙБІЛЬШ РЕЛЕВАНТНИХ перевірок у euChecks та uaChecks.
+НЕ дублюй стандартні процедури для всіх товарів однаково — враховуй КАТЕГОРІЮ:
+- "Допоміжна речовина": НЕ потрібна реєстрація МОЗ, НЕ потрібен GMP АФІ
+- "Харчова добавка": потрібен висновок МОЗ, але НЕ ліцензія Держлікслужби
+- "АФІ": реєстрація МОЗ + ліцензія імпортера + GMP — обов'язково
+- "Промислова хімія": SDS/ADR/REACH — так, але НЕ фармацевтичні регулятори
+Аналіз ТІЛЬКИ для логістів і брокерів: маршрут, T1/NCTS, BCP/TRACES, фіто/ветконтроль, митна лабораторія, ADR/SDS, пакування, маркування, температура, документи та ризик затримки.
+Нотатки (note) мають бути конкретними: 1-2 речення з поясненням статусу. НЕ пиши фінансових висновків.
 
 КРИТИЧНО ВАЖЛИВО - КЛАСИФІКАЦІЯ ТОВАРІВ:
 
@@ -4318,13 +4325,11 @@ ${euRegulations}
    - Для будь-якого УКТЗЕД-коду не ставити одне походження автоматично, якщо код/QDPro-опис допускає кілька варіантів. Для 3913 це природні або модифіковані природні полімери; для 29xx/30xx/35xx/38xx також можливі синтетичне, ферментаційне, рослинне, тваринне або змішане походження залежно від речовини.
    - 28xx: неорганічне/мінеральне походження; склад, концентрація, домішки, SDS/ADR.
 
-СТАВКИ МИТА для фармацевтики та хімії (dutyRatePercent):
-- Фармацевтичні субстанції (АФІ, HS 2933-2942): 0-5%
-- Хімічні реактиви (HS 2800-2900): 5-6.5%
-- МКЦ (мікрокристалічна целюлоза, HS 3912): 6.5%
-- Небезпечні хімікати (ADR): 6.5%
-- Косметична сировина: 5-6.5%
-- Харчові добавки: 5-10%
+СТАВКИ МИТА (dutyRatePercent) — система перевизначить точну ставку з таблиці УКТЗЕД автоматично.
+Для AI: вкажи ТІЛЬКИ якщо знаєш точний код — система сама замінить правильною ставкою.
+Орієнтовно: Гл.29 (орган.хімія) = 0%; Гл.30 (готові ліки) = 0%; 2936 (вітаміни) = 0%;
+2941 (антибіотики) = 0%; 3503 (желатин) = 6.5%; 3912 (МКЦ) = 6.5%; 3507 (ензими) = 6.5%;
+Гл.28 (неорганіка) = 5-6.5%; 3824 (суміші excipients) = 6.5%. Якщо сумніваєшся — постав 0.
 
 ПРАВИЛА РОЗРАХУНКУ РИЗИКУ (risk):
 - "Критичний": наявні слова "МСДС", "НЮАНСЫ", "опасник", "ADR", є піктограми небезпеки, або потрібен дозвіл на подвійне призначення.
@@ -4666,7 +4671,159 @@ ${euRegulations}
         .replace(/'/g, '&#039;');
     }
 
-    function normalizeHsCode(value) {
+    // ============================================================
+    // DETERMINISTIC DUTY RATE TABLE (UA import duty %)
+    // Priority: exact 10-digit > 6-digit > 4-digit heading > 2-digit chapter
+    // ============================================================
+    const HS_DUTY_TABLE = {
+      // Chapter 28 — Inorganic chemicals
+      '2806': 5.0,  // HCl, chlorosulfuric acid
+      '2807': 5.0,  // H2SO4, oleum
+      '2808': 5.0,  // HNO3
+      '2811': 5.0,  // other inorganic acids
+      '2815': 6.5,  // NaOH, KOH
+      '2816': 5.0,  // Mg hydroxide
+      '2817': 5.0,  // ZnO, ZnO2
+      '2819': 5.0,  // Cr oxides
+      '2823': 5.0,  // TiO2
+      '2825': 5.0,  // hydrazine, hydroxylamine
+      '2827': 5.0,  // chlorides
+      '2833': 5.0,  // sulfates
+      '2835': 5.0,  // phosphates
+      '2836': 5.0,  // carbonates
+      '2841': 5.0,  // KMnO4 (precursor!)
+      '2842': 5.0,  // other inorganic salts
+      '2850': 5.0,  // hydrides, nitrides
+      // Chapter 29 — Organic chemistry — mostly 0%
+      '29': 0.0,    // default for all chapter 29
+      '2905': 6.5,  // alcohols (ethanol, propanol — exceptions for industrial)
+      '2914': 5.0,  // ketones (acetone — precursor table 2)
+      '2902': 5.0,  // cyclic hydrocarbons (toluene — precursor)
+      '2915': 5.0,  // saturated acyclic monocarboxylic acids
+      '2916': 0.0,  // unsaturated monocarb. acids (ibuprofen)
+      '2917': 0.0,  // polycarboxylic acids (citric, fumaric, maleic)
+      '2918': 0.0,  // acids with OH (lactic, citric)
+      '2921': 0.0,  // amine-function compounds (amino acids from synth.)
+      '2922': 0.0,  // amino-alcohols, amino-acids (L-Trp, L-Met, Glu)
+      '2923': 0.0,  // quaternary ammonium (choline, betaine)
+      '2924': 0.0,  // amides (paracetamol, urea)
+      '2925': 0.0,  // imines (metformin)
+      '2926': 0.0,  // nitrile-function
+      '2932': 0.0,  // heterocyclic O
+      '2933': 0.0,  // heterocyclic N (ciprofloxacin, omeprazole)
+      '2934': 0.0,  // nucleic acids (acyclovir)
+      '2935': 0.0,  // sulfonamides
+      '2936': 0.0,  // vitamins (all)
+      '2937': 0.0,  // hormones
+      '2938': 0.0,  // glycosides (senna, digoxin)
+      '2939': 0.0,  // alkaloids (codeine — ДСКН!)
+      '2940': 0.0,  // sugars
+      '2941': 0.0,  // antibiotics (all)
+      '2942': 0.0,  // other organic (melatonin, diclofenac)
+      // Chapter 30 — Pharma — 0%
+      '30': 0.0,
+      '3001': 0.0,
+      '3002': 0.0,
+      '3003': 0.0,
+      '3004': 0.0,
+      '3006': 0.0,
+      // Chapter 31 — Fertilizers
+      '31': 6.5,
+      // Chapter 32 — Dyes
+      '32': 6.5,
+      // Chapter 33 — Perfumery
+      '33': 6.5,
+      // Chapter 34 — Soap/detergents
+      '34': 6.5,
+      // Chapter 35 — Proteins, enzymes
+      '35': 6.5,
+      '3501': 6.5,  // casein (animal)
+      '3502': 6.5,  // albumins (animal)
+      '3503': 6.5,  // gelatin (animal, TSE/BSE!)
+      '3504': 6.5,  // peptones
+      '3505': 6.5,  // starch glues
+      '3507': 6.5,  // enzymes (fermentation)
+      // Chapter 38 — Chemical products
+      '38': 6.5,
+      '3822': 6.5,  // diagnostic reagents
+      '3824': 6.5,  // chemical mixtures/excipients
+      '3826': 6.5,  // biodiesel
+      // Chapter 39 — Plastics
+      '39': 6.5,
+      '3912': 6.5,  // cellulose esters (MCC, CMC)
+      '391211': 6.5, // MCC — 3912 11 00
+      '391231': 6.5, // CMC
+      '3913': 6.5,  // natural polymers (hyaluronic, chitosan)
+      // Chapter 13 — Plant extracts
+      '13': 5.0,
+      '1302': 5.0,  // vegetable saps/extracts
+      // Chapter 15 — Fats/oils
+      '15': 5.0,
+      // Chapter 21 — Food preparations
+      '21': 5.0,
+    };
+
+    // ============================================================
+    // PRECURSOR WATCH LIST (name fragments → risk level)
+    // Based on UN Tables 1-4 + EU Reg.111/2005 + ДСКН Ukraine
+    // ============================================================
+    const PRECURSOR_WATCH = [
+      // Table 1 — highest control
+      { name: /ephedrine|ефедрин/i, code: /^2939[34]/, table: 1, note: 'Таблиця 1 ООН/ДСКН · Попередник амфетамінів · Дозвіл ДСКН обов'язковий' },
+      { name: /pseudoephedrine|псевдоефедрин/i, code: /^29394/, table: 1, note: 'Таблиця 1 ООН/ДСКН · Список I · Дозвіл на кожну операцію' },
+      { name: /ergotamine|ерготамін/i, code: /^293962/, table: 1, note: 'Таблиця 1 · Алкалоїд споринний · Дозвіл МОЗ+ДСКН' },
+      { name: /ergometrine|ергометрин/i, code: /^293961/, table: 1, note: 'Таблиця 1 · Медичне застосування тільки · ДСКН' },
+      { name: /norephedrine|норефедрин|phenylpropanolamine/i, code: /^293944/, table: 1, note: 'Таблиця 1 · Список I ЄС/UA · Контроль' },
+      { name: /lysergic|лізергін/i, code: /^293963/, table: 1, note: 'Таблиця 1 · Попередник LSD · Заборона без дозволу ДСКН' },
+      { name: /1-phenyl-2-propanone|p2p|phenylacetone|фенілацетон/i, code: /^291431/, table: 1, note: 'Таблиця 1 ЄС Reg.111/2005 · Попередник амфетаміну' },
+      { name: /pmk|3,4-mdp|piperonylmethylketone|піперонілметилкетон/i, code: /^293292/, table: 1, note: 'Таблиця 1 ЄС · Попередник MDMA · Заборона без дозволу' },
+      { name: /safrole|сафрол/i, code: /^293219/, table: 1, note: 'Таблиця 1 · Попередник MDMA · Суворий контроль' },
+      // Table 2 — enhanced monitoring
+      { name: /acetic anhydride|оцтовий ангідрид/i, code: /^291524/, table: 2, note: 'Таблиця 2 · Попередник героїну · Ліцензія >1 л · Огляд 100%' },
+      { name: /potassium permanganate|перманганат калію/i, code: /^284161/, table: 2, note: 'Таблиця 2 · Попередник кокаїну · ДСКН-ліцензія' },
+      { name: /acetone|ацетон/i, code: /^291411/, table: 2, note: 'Таблиця 2 · Ліцензія від 2 кг · Підтвердити призначення' },
+      { name: /toluene|толуол/i, code: /^290230/, table: 2, note: 'Таблиця 2 · Розчинник-прекурсор · Non-precursor statement' },
+      { name: /methyl ethyl ketone|mek|бутанон/i, code: /^291412/, table: 2, note: 'Таблиця 2 · MEK · Ліцензія >5 л' },
+      { name: /hydrochloric acid|хлористоводнева|соляна кислота/i, code: /^280610/, table: 2, note: 'Таблиця 2 · HCl >20% · Підтвердити призначення (ADR Кл.8)' },
+      { name: /sulfuric acid|сірчана кислота/i, code: /^280700/, table: 2, note: 'Таблиця 2 · H₂SO₄ · Ліцензія промислові обсяги · ADR Кл.8' },
+      { name: /piperonal|піперонал/i, code: /^293219/, table: 2, note: 'Таблиця 2 · Heliotropin · Попередник MDMA' },
+      // Narcotics / controlled substances (not precursors, but regulated)
+      { name: /codeine|кодеїн/i, code: /^293911/, table: 0, note: 'Наркотичний: Список II ДСКН · Ліцензія обов'язкова · Суворий облік' },
+      { name: /morphine|морфін/i, code: /^293911/, table: 0, note: 'Наркотичний: Список I ДСКН · Тільки для медичних цілей' },
+      { name: /cocaine|кокаїн/i, code: /^293919/, table: 0, note: 'Наркотичний: Список I · Імпорт заборонений без ДСКН-дозволу' },
+      { name: /fentanyl|фентаніл/i, code: /^293399/, table: 0, note: 'Наркотичний: Список I · Суворий облік · Тільки для медицини' },
+      { name: /oxycodone|оксикодон/i, code: /^293399/, table: 0, note: 'Наркотичний: Список I · Міжнародний дозвіл INCB' },
+    ];
+
+    function lookupDutyRate(hsCode) {
+      if (!hsCode) return null;
+      const digits = String(hsCode).replace(/\D/g, '');
+      if (!digits || digits.length < 4) return null;
+      // Try most specific first: 10, 8, 6, 4 digits, then 2-digit chapter
+      for (const len of [10, 8, 6, 4]) {
+        const key = digits.slice(0, len);
+        if (HS_DUTY_TABLE[key] !== undefined) return HS_DUTY_TABLE[key];
+      }
+      // 2-digit chapter fallback
+      const ch = digits.slice(0, 2);
+      if (HS_DUTY_TABLE[ch] !== undefined) return HS_DUTY_TABLE[ch];
+      return null;
+    }
+
+    function checkPrecursorRisk(name, hsCode) {
+      const n = String(name || '').toLowerCase();
+      const c = String(hsCode || '').replace(/\D/g, '');
+      for (const p of PRECURSOR_WATCH) {
+        const nameMatch = p.name.test(n);
+        const codeMatch = !c || p.code.test(c);
+        if (nameMatch || (c && codeMatch)) {
+          if (nameMatch) return p; // name match is strongest
+        }
+      }
+      return null;
+    }
+
+        function normalizeHsCode(value) {
       if (value == null) return '';
       let digits = String(value).replace(/[^0-9]/g, '');
       if (!digits) return '';
@@ -5514,10 +5671,15 @@ ${euRegulations}
       const selected = selectedOriginProfile(item, item.selectedOriginKey) || {};
       const possible = (item.originOptions || []).map(o => o.shortLabel || o.label).filter(Boolean).join(' · ') || 'потрібно підтвердити документами';
 
+      const precursorBadge = item.precursorRisk
+        ? `<div style="margin-top:6px;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:600;background:var(--red-dim);color:var(--red-bright);border:1px solid rgba(239,74,74,0.3);letter-spacing:0.04em;">⚠ ПРЕКУРСОР / КОНТРОЛЬОВАНА РЕЧОВИНА</div>`
+        : '';
       const identityHtml = `<div class="product-id-card">
         <div class="product-kv"><b>Товар</b><span>${name}</span></div>
         <div class="product-kv"><b>Код</b><span>${hs}</span></div>
         <div class="product-kv"><b>Ризик</b><span>${escHtml(item.risk || '—')} ${item.riskNote ? '· ' + escHtml(item.riskNote) : ''}</span></div>
+        ${item.dutyRateBasis ? `<div class="product-kv" style="font-size:11px;color:var(--ink-3)"><b>Мито</b><span>${escHtml(item.dutyRateBasis)}</span></div>` : ''}
+        ${precursorBadge}
       </div>`;
 
       const originHtml = `<div class="product-origin-wrap">
@@ -5539,7 +5701,7 @@ ${euRegulations}
 
       return `<div class="product-block-stack">
         <div class="product-title-card">
-          <div class="td-name">${name}</div>
+          <div class="td-name">${name}${item.precursorRisk ? ' <span style="font-size:10px;padding:1px 5px;background:var(--red-dim);color:var(--red-bright);border-radius:3px;vertical-align:middle;font-family:var(--mono)">ПРЕКУРСОР</span>' : ''}</div>
           <div class="td-code">УКТЗЕД · ${hs}</div>
         </div>
         ${renderAccordionBlock('Найменування / код', identityHtml, { tone: 'info', open: true, countText: 'товар' })}
@@ -5647,8 +5809,40 @@ ${euRegulations}
       item.codeBasis = tableCode
         ? 'Код взято з вихідної таблиці; має пріоритет над AI.'
         : aiCode
-          ? 'Код запропоновано AI; обов’язково перевірити брокером.'
-          : 'Код не знайдено; потрібна класифікація брокером.';
+          ? "Код запропоновано AI; обов'язково перевірити брокером."
+          : "Код не знайдено; потрібна класифікація брокером.";
+      // Deterministic duty rate override
+      const _detDuty = lookupDutyRate(finalCode || item.uctzedCode);
+      if (_detDuty !== null) {
+        item.dutyRatePercent = _detDuty;
+        item.dutyRateBasis = 'Ставка з довідника UA УКТЗЕД (точна)';
+      } else {
+        item.dutyRateBasis = item.dutyRatePercent > 0
+          ? 'Ставка запропонована AI — перевірити брокером'
+          : 'Ставку не визначено — уточнити у брокера';
+      }
+      // Precursor / controlled substance detection
+      const _precRisk = checkPrecursorRisk(item.name, finalCode || item.uctzedCode);
+      if (_precRisk) {
+        item.precursorRisk = _precRisk;
+        const _pStat = _precRisk.table <= 1 ? 'red' : 'yellow';
+        item.euChecks = item.euChecks || [];
+        item.uaChecks = item.uaChecks || [];
+        item.euChecks.unshift({
+          item: _precRisk.table === 1 ? 'ПРЕКУРСОР Табл.1 · EU Reg.111/2005' : _precRisk.table === 2 ? 'Прекурсор Табл.2 · Enhanced monitoring EU' : 'Controlled substance · INCB permit required',
+          status: _pStat, note: _precRisk.note
+        });
+        item.uaChecks.unshift({
+          item: _precRisk.table <= 1 ? 'ПРЕКУРСОР Табл.1 · Дозвіл ДСКН обов'язковий' : _precRisk.table === 2 ? 'Прекурсор Табл.2 · Підвищений нагляд ДСКН' : 'Контрольована речовина · Ліцензія ДСКН',
+          status: _pStat, note: _precRisk.note
+        });
+        if (_precRisk.table <= 1 && item.risk !== 'Критичний') {
+          item.risk = 'Критичний';
+          item.riskNote = (_precRisk.note || '') + (item.riskNote ? ' · ' + item.riskNote : '');
+        } else if (_precRisk.table === 2 && item.risk === 'Низький') {
+          item.risk = 'Середній';
+        }
+      }
       item.originType = item.originType || profile.originType;
       item.productionMethod = item.productionMethod || profile.productionMethod;
       item.originShortNote = profile.originShortNote || item.originShortNote;
@@ -6571,10 +6765,281 @@ ${euRegulations}
           }
         ]
       }
+      // ─── 9 ───
+      {
+        ico: "🏷️", topic: "УКТЗЕД · Повна довідка АФІ та хімії", short: "Точні коди для фарми, вітамінів, антибіотиків, допоміжних речовин",
+        sections: [
+          {
+            title: "Глава 29 · Органічна хімія (АФІ синтетичні)", rows: [
+              ["2916 / 2917", "Органічні кислоти (лимонна 2917 11, яблучна 2918 13, молочна 2918 11): ставка 0% UA. Часто food/pharma grade"],
+              ["2921", "Аміносполуки: GABA 2921 19, L-DOPA 2921 49. Уточнити призначення: pharma vs industrial"],
+              ["2922", "Амінокислоти: L-Tryptophan 2922 41 00, L-Methionine 2922 49 85, Glutamine 2922 49. Ставки 0%"],
+              ["2923", "Четвертинні амонієві: Choline 2923 10 00, Betaine 2923 90. Часто feed/food grade"],
+              ["2924", "Аміди: Paracetamol 2924 29 98, Urea 2924 10. Парацетамол: ставка 0% UA як АФІ"],
+              ["2925 / 2926", "Імінопохідні, нітрили: Metformin 2925 29, Lidocaine 2924 29 98"],
+              ["2932 / 2933", "Гетероцикли: Omeprazole 2933 99, Ciprofloxacin 2933 49, Ibuprofen 2916 39, Diclofenac 2942 00"],
+              ["2934", "Нуклеїнові: Acyclovir 2934 99. Перевірити ADR-клас для розчинників синтезу"],
+              ["2935", "Сульфаніламіди: Sulfamethoxazole 2935 90. Антибактеріальні — контроль МОЗ UA"],
+              ["2936", "Вітаміни: Ascorbic Acid 2936 27, Vit B2 2936 28, Vit B12 2936 26, Vit D3 2936 22. Ставки 0%"],
+              ["2937", "Гормони: Testosterone 2937 23, Progesterone 2937 21, Dexamethasone 2937 22. Контроль прекурсорів"],
+              ["2938 / 2939", "Глікозиди (2938), алкалоїди (2939): Codeine 2939 11, Caffeine 2939 79. Список ДСКН!"],
+              ["2941", "Антибіотики: Amoxicillin 2941 10, Erythromycin 2941 30, Tetracycline 2941 40. Ставка 0%"],
+              ["2942", "Інші орг. сполуки: Melatonin 2942 00, більшість нестандартних АФІ"]
+            ]
+          },
+          {
+            title: "Глава 30 · Фармацевтика · Глава 38 · Біотех", rows: [
+              ["3001", "Тваринне походження: залози, органи, сироватки. TRACES + vet certificate обов'язково"],
+              ["3002", "Кров, вакцини, токсини: Albumin 3002 90, Heparin 3002 12. Біологічний контроль"],
+              ["3003/3004", "Готові ЛЗ: 0% мито UA+ЄС. Реєстрація МОЗ обов'язкова. Вкажи INN у маніфесті"],
+              ["3006", "Фармацевтичні товари: хірургічний цемент, контрасти, ізотопи"],
+              ["3822", "Реактиви діагностичні: CoA + специфікація. Не потребують реєстрації якщо in vitro"],
+              ["3824", "Хімічні суміші/препарати: excipients, допоміжні. Ставка 6.5% UA якщо не класифіковано інше"],
+              ["3826", "Біодизель: HS 3826. CBAM вплив з 2027"],
+              ["3002 / 3822", "ІФА-набори, буфери, ензими: часто 3822. Уточнити призначення для UA контролю"]
+            ]
+          },
+          {
+            title: "Глава 35 · Білки · Глава 39 · Полімери (excipients)", rows: [
+              ["3501", "Казеїн: тваринне, TRACES, vet. Харчовий/технічний grade — різні ставки"],
+              ["3502", "Альбуміни: Egg albumin 3502 11, Milk albumin 3502 20. Тваринне, vet/food check"],
+              ["3503", "Желатин 3503 00: тваринне (bovine/porcine). TSE/BSE, TRACES. Ставка 6.5% UA"],
+              ["3504", "Пептони/білкові гідролізати: тваринне або рослинне. Підтвердити source"],
+              ["3507", "Ферменти: Amylase, Protease, Lipase, Cellulase. Ферментаційне. food/feed/pharma grade"],
+              ["3912 11", "МКЦ (Microcrystalline Cellulose): рослинне, 6.5% UA. Основний excipient таблеток"],
+              ["3912 20", "Cellulose nitrates: небезпечні (Клас 4.1 ADR). Ставка 6.5%"],
+              ["3912 31/39", "Carboxymethylcellulose (CMC): рослинне. Thickener pharma/food"],
+              ["3913", "Природні полімери: Hyaluronic Acid 3913 90, Chitosan 3913 90, Heparin-like 3913 90"],
+              ["3916/3917", "Плівки, трубки: packaging. Для фарм — GMP-упаковка, відповідність USP/Ph.Eur."]
+            ]
+          }
+        ]
+      },
+      // ─── 10 ───
+      {
+        ico: "⚠️", topic: "Прекурсори · Подвійне призначення · ДСКН", short: "Списки ООН · Reg.111/2005 · Таблиці 1-4 · Контроль UA/ЄС",
+        sections: [
+          {
+            title: "Прекурсори наркотиків · Таблиця 1 ООН (суворий контроль)", rows: [
+              ["Ephedrine", "2939 41 00 · Список I ДСКН. Потрібен дозвіл на кожну операцію. Попередник амфетамінів"],
+              ["Pseudoephedrine", "2939 42 00 · Список I. Комерційне ввезення майже неможливе без ліцензії"],
+              ["Ergometrine / Ergotamine", "2939 61/62 · Список I. Алкалоїди споринні — медичне застосування тільки"],
+              ["Norephedrine (Phenylpropanolamine)", "2939 44 00 · Список I. Контроль по всій ЄС та UA"],
+              ["Lysergic acid", "2939 63 00 · Список I. Попередник LSD. Дозвіл ДСКН обов'язковий"],
+              ["1-Phenyl-2-propanone (P2P)", "2914 31 00 · Список I ЄС Reg.111/2005. Синтез амфетаміну"],
+              ["3,4-MDP-2-P (PMK)", "2932 92 00 · Список I ЄС. Попередник MDMA. Заборона ввезення без спец. дозволу"]
+            ]
+          },
+          {
+            title: "Прекурсори · Таблиця 2 ООН (підвищений нагляд)", rows: [
+              ["Acetic Anhydride", "2915 24 00 · Таблиця 2. Для синтезу героїну. Потрібна ліцензія >1 л. Огляд 100%"],
+              ["Potassium Permanganate", "2841 61 00 · Таблиця 2. Синтез кокаїну. ДСКН-ліцензія для промислових обсягів"],
+              ["Acetone", "2914 11 00 · Таблиця 2. Ліцензія від 2 кг. SDS + мета використання — обов'язково"],
+              ["Hydrochloric Acid (>20%)", "2806 10 00 · Таблиця 2. Промислова хімія, але декларант підтверджує призначення"],
+              ["Sulfuric Acid (>15%)", "2807 00 10 · Таблиця 2. Ліцензія при промисловому обсязі. ADR Кл.8"],
+              ["Toluene", "2902 30 00 · Таблиця 2. Розчинник, але прекурсор. SDS + non-precursor statement"],
+              ["Methyl Ethyl Ketone (MEK)", "2914 12 00 · Таблиця 2. Розчинник-прекурсор. Ліцензія >5 л"]
+            ]
+          },
+          {
+            title: "Подвійне призначення · Reg. 2021/821 ЄС", rows: [
+              ["Dual-Use визначення", "Товари що можуть мати і цивільне, і військове застосування. Додаток I до Reg.2021/821"],
+              ["Хімічна зброя (КЗЗ)", "CWC Annexes: тіодигліколь, O-ізопропіл, прекурсори зарину/VX — 100% заборона"],
+              ["Код 1C350", "Контрольні хімічні прекурсори: Thiodiglycol, Chloroethanol, Pinacolyl alcohol"],
+              ["Біологічні агенти 1C351", "Селективні агенти, патогени: ліцензія Держсекретаря навіть для дослідних зразків"],
+              ["Export Licence UA", "Дозвіл МЕРТ/ДАСУ для dual-use товарів. Строк розгляду 10 раб. днів"],
+              ["End-user certificate", "EUC (кінцевий сертифікат використання): підписується покупцем + держава призначення"],
+              ["Catch-all clause", "Навіть не контрольований товар може вимагати дозволу якщо відомо про військ. призначення"]
+            ]
+          }
+        ]
+      },
+      // ─── 11 ───
+      {
+        ico: "🚢", topic: "Маршрути · Порти ЄС · КПП · Часи", short: "Hamburg · Rotterdam · Gdańsk · Констанца → UA кордон",
+        sections: [
+          {
+            title: "Порти ЄС → Польські КПП (найпопулярніший маршрут)", rows: [
+              ["Hamburg → Gdańsk → Ягодин", "Автомобільний. Час від порту до UA кордону: 2–3 доби. Черга Ягодин: 12–48 год"],
+              ["Hamburg → Варшава → Медика/Шегині", "Більше черг, але можна Tir+T1. Середня черга 24–72 год. Радіаційна перевірка"],
+              ["Rotterdam → Terespol (залізн.)", "Залізниця через Берлін–Варшаву. +6–12 год перевантаження колії. Зручно для важких вантажів"],
+              ["Gdańsk порт → Гданськ митниця", "GC1 порт: розмитнення або T1 → далі авто. Польська митниця: суворий контроль ADR/фарма"],
+              ["Hamburg → Краківець (PL/UA)", "Альтернатива Ягодину. Менша черга для авто <7.5т. Фарма без ADR — рекомендовано"],
+              ["NCTS: PL → UA", "Транзит закривається на UA КПП. MRN-сканування. Звірка товарів і пломб по T1"]
+            ]
+          },
+          {
+            title: "Румунський маршрут (Констанца / Сірет)", rows: [
+              ["Констанца порт → Паромна лінія", "Паром Констанца–Чорноморськ: 14–16 год. Менша черга ніж автомобільні КПП. Корисно для великих LCL"],
+              ["Констанца → Сірет/Порубне (RO/UA)", "Автомобільний: рентген 100% вантажівок. Черга 8–24 год. Менша завантаженість ніж Польща"],
+              ["Румунія: ветконтроль", "BCP Albița, Giurgiu: ветеринарний контроль для тваринної продукції. Pre-alert за 24 год"],
+              ["TRACES для RO→UA", "Тваринне/рослинне: pre-notification через TRACES NT. Мова RO+EN обов'язково"],
+              ["Перевага маршруту", "Менша черга для фарма без ADR; reefer-вантажі — краще через Констанца паром"],
+              ["Ризик маршруту", "Румунія суворіше перевіряє REACH/SDS ніж Польща. Для хімії — підготувати SDS RO мовою"]
+            ]
+          },
+          {
+            title: "Критичні перевірки на кордоні UA", rows: [
+              ["Single Window UA", "Попереднє повідомлення: за 2 год для авто, за 4 год для залізниці. Через портал ДФС"],
+              ["Радіаційний контроль", "100% вантажів на UA КПП. Сертифікат радіаційної безпеки (ДСНС) — обов'язково"],
+              ["Митна лабораторія", "Відбір проб: хімія, фарма, харчові — до 15 робочих днів. Вантаж на СВХ під час перевірки"],
+              ["е-Черга UA", "Реєстрація у "е-Черга" за 48–72 год до перетину. Без реєстрації — відмова у в'їзді"],
+              ["Максимальне навантаження", "Ваговий контроль: макс 40т UA (з 2024 для міжнародних ТЗ). Понад — штраф або розвантаження"],
+              ["Воєнний стан", "Особливі перевірки: документи на вантаж + водія. Заборона руху вночі на деяких маршрутах"]
+            ]
+          }
+        ]
+      },
+      // ─── 12 ───
+      {
+        ico: "🌡️", topic: "Температурні режими · GDP · Cold Chain", short: "Конкретні субстанції · Реєстратори · Відхилення",
+        sections: [
+          {
+            title: "Субстанції за температурним режимом", rows: [
+              ["< -15°C (заморожені)", "Деякі вакцини, плазма крові, рекомбінантні білки, деякі ферменти. Dry Ice UN1845 (ADR Кл.9)"],
+              ["+2…+8°C (холодовий)", "Insulin API, Erythropoietin, деякі пробіотики, Calcitonin, Oxytocin, більшість БАЛ"],
+              ["+2…+25°C (контрольована)", "Bagatory антибіотиків (Amoxicillin, Ciprofloxacin), Heparin, Albumin, Dexamethasone"],
+              ["15–25°C (кімнатна)", "Більшість синтетичних АФІ: Paracetamol, Ibuprofen, Metformin, Omeprazole, вітаміни"],
+              ["≤30°C (тепла кімнатна)", "Деякі рослинні екстракти, полімери, допоміжні речовини"],
+              ["Захист від світла", "Riboflavin (B2), Nifedipine, Chlorpromazine, Doxycycline — темна упаковка + закриті ящики"],
+              ["Захист від вологи", "Більшість порошкоподібних АФІ: RH <60%. Силікагель в упаковці. Контроль на КПП"]
+            ]
+          },
+          {
+            title: "Вимоги до холодового ланцюга (EU GDP 2013/C 68/01)", rows: [
+              ["Pre-cooling", "Reefer: охолодити за 2 год до завантаження. Температура ±0.5°C від цільової"],
+              ["Data Logger", "Тип: calibrated (ISO 17025). Розміщення: мінімум 2 точки (верх/низ). Звіт — частина партії"],
+              ["Temperature Excursion", "Будь-яке відхилення → MKT-оцінка → рішення QP про придатність партії"],
+              ["Thermal Mapping", "Склад/транспорт: щорічна валідація температурного розподілу за ISPE/GDP"],
+              ["Qualification", "IQ/OQ/PQ для рефрижератора та складу. Документація 5 років"],
+              ["Паромна лінія", "Констанца–Чорноморськ: рефрижераторні відсіки є. Бронювання за 3–5 днів. Моніторинг власний"]
+            ]
+          },
+          {
+            title: "Документи cold chain для митниці", rows: [
+              ["Temperature Report", "Роздруківка data logger: кожна точка по годинах. До T1 і CMR в якості додатку"],
+              ["Dry Ice statement", "UN1845 + кількість кг + маркування 'Carbon Dioxide, Solid'. Ventilated vehicle обов'язково"],
+              ["Qualified Person (QP)", "Для ЄС-транзиту: QP підтверджує що партія відповідає специфікації після відхилення"],
+              ["Time-Temperature Indicator", "TTI-наліпки (напр. Checkpoint C) — візуальний доказ дотримання режиму, легко читається митником"],
+              ["Страхування cold chain", "ICC (A) + additional cold chain rider: компенсація за відхилення температури"],
+              ["Зберігання на СВХ UA", "Якщо митна лабораторія затримала — вантаж на СВХ. Температурний контроль СВХ — підтвердити заздалегідь"]
+            ]
+          }
+        ]
+      },
+      // ─── 13 ───
+      {
+        ico: "🔬", topic: "Детальні ставки мита · UA УКТЗЕД", short: "Точні ставки для фарми, хімії, вітамінів, excipients",
+        sections: [
+          {
+            title: "Ставки ввізного мита UA (актуальні 2025–2026)", rows: [
+              ["Гл. 29 (синтетичні АФІ)", "Більшість позицій: 0%. Винятки: 2905 (спирти) — 6.5%; 2915 (кислоти пром.) — 5–6.5%"],
+              ["Гл. 30 (готові ліки)", "0% незалежно від підпозиції. Але потрібна реєстрація МОЗ + ліцензія імпортера"],
+              ["2936 (вітаміни)", "0%: Vit C (2936 27), Vit B12 (2936 26), Vit D3 (2936 22), B-комплекс"],
+              ["2941 (антибіотики)", "0% для всіх підпозицій: Amoxicillin, Erythromycin, Tetracycline, Azithromycin"],
+              ["3503 (желатин)", "6.5%. Тваринне: TRACES + vet cert. Харчовий vs фармацевтичний grade — різна документація"],
+              ["3507 (ферменти)", "6.5%. Ферментаційне. Для food/feed/pharma — різний регуляторний контроль в UA"],
+              ["3912 (целюлоза/МКЦ)", "6.5%: MCC (3912 11 00), CMC (3912 31). Рослинне. CoA + spec. обов'язково"],
+              ["3824 (суміші хімічні)", "6.5%. Якщо це excipient — підтвердити призначення для пільгової ставки"],
+              ["Гл. 28 (неорганіка)", "5–6.5%: HCl (2806), H2SO4 (2807), NaOH (2815). ADR Кл.8 для концентрованих"],
+              ["Вільна торгівля з ЄС", "DCFTA: 0% мито для ЄС-товарів при наявності EUR.1 або REX-заяви"],
+              ["GSP (Індія)", "Система GSP+ призупинена для UA з 2024. Стандартна ставка для індійських АФІ"],
+              ["Form A (Китай)", "Certificate of Origin Form A (GSP). Перевірити актуальний статус GSP для UA-КНР"]
+            ]
+          },
+          {
+            title: "ПДВ · Акциз · Збори при ввезенні в UA", rows: [
+              ["ПДВ стандарт", "20% від (митна вартість + мито). База: CIF-вартість × 1.1 (freight multiplier)"],
+              ["ПДВ 0% — пільги", "Ліки (Кл.30) + вироби медичного призначення: 0% ПДВ при наявності реєстрації МОЗ"],
+              ["Акциз АФІ", "АФІ та субстанції: без акцизу. Акциз тільки для спирту, тютюну, палива"],
+              ["Митний збір", "0.1–0.35% від митної вартості. Мінімум 25 євро. Максимум 2500 євро на одну ДТ"],
+              ["МТСБУ (страхування)", "Обов'язкове страхування авто 3-ї сторони при ввезенні авто. До вантажів не застосовується"],
+              ["Плата за митне оформлення", "Брокерські послуги: 0.2–0.5% від вартості партії. Не мито, але включається в логістичні витрати"]
+            ]
+          }
+        ]
+      },
+      // ─── 14 ───
+      {
+        ico: "🧫", topic: "Ветеринарний та фітосанітарний контроль", short: "TRACES · BCP · ДПСС · IPPC · CITES · Документи",
+        sections: [
+          {
+            title: "Ветеринарний контроль ЄС → UA (TRACES)", rows: [
+              ["TRACES NT", "EU Trade Control and Expert System New Technology. Обов'язковий для тваринних продуктів"],
+              ["BCP (Border Control Post)", "Пункт прикордонного контролю. Для тварин/тваринних продуктів: тільки через BCP"],
+              ["Pre-notification", "За 24 год до прибуття: TRACES CHED-PP або CHED-A. Без цього — відмова у в'їзді"],
+              ["Health Certificate (HC)", "Ветеринарний сертифікат: стандартна форма ЄС. Мова EN + мова транзитної країни"],
+              ["TSE/BSE risk", "Велика рогата худоба, вівці: перевірка Annex XI Reg.999/2001. Стандарт ЄС"],
+              ["UA ДПСС", "Держпродспоживслужба: перевірка на UA кордоні. Форма UA ветсвідоцтва: обов'язково"],
+              ["Виробники з КНР/Індії", "Список затверджених виробників ЄС: TRACES EU approved establishments. Перевірити перед відправкою"]
+            ]
+          },
+          {
+            title: "Фітосанітарний контроль", rows: [
+              ["Фітосанітарний сертифікат", "Видається владою країни-відправника. Мова EN. Обов'язково для рослинної сировини"],
+              ["IPPC/ISPM 15", "Дерев'яна упаковка (піддони, ящики): маркування IPPC, фумігація або термообробка"],
+              ["Карантинні об'єкти", "Список КО МІНАГРО UA: наявність у вантажі → затримка до 30 днів"],
+              ["MRL (пестициди)", "Maximum Residue Limits: для рослинних екстрактів food/feed — перевірка EU Reg.396/2005"],
+              ["CITES", "Конвенція про міжнародну торгівлю видами під загрозою зникнення. Для екзотичних рослин/тварин"],
+              ["КНР рослинна сировина", "Китайські рослинні субстанції: GB стандарти не завжди рівнозначні Ph.Eur. Запросити додатковий CoA"]
+            ]
+          },
+          {
+            title: "Санітарний контроль · Харчові добавки UA", rows: [
+              ["МОЗ висновок", "Санітарно-епідеміологічний висновок МОЗ для харчових добавок: термін 5–10 робочих днів"],
+              ["E-номери UA", "Перелік дозволених харчових добавок: Наказ МОЗ №4 від 2023. Перевірити перед ввезенням"],
+              ["Нові продукти (novel food)", "EU Reg.2015/2283: дозвіл для нових харчових інгредієнтів. Аналог UA — МОЗ висновок"],
+              ["Алергени", "14 основних алергенів EU Reg.1169/2011: маркування або declaration required"],
+              ["GMO-перевірка", "UA: Закон 1813-IX. ГМО в харчових добавках: декларація + контрольне тестування"],
+              ["Харчові ферменти", "EU Reg.1332/2008: перелік дозволених ферментів. UA — аналогічний контроль через МОЗ"]
+            ]
+          }
+        ]
+      },
+      // ─── 15 ───
+      {
+        ico: "📋", topic: "Чекліст брокера · Документи для T1 та ВМД", short: "Повний перелік документів для кожного типу вантажу",
+        sections: [
+          {
+            title: "Базовий пакет (всі вантажі)", rows: [
+              ["Invoice (рахунок-фактура)", "EN + UA/RU: назва, кількість, ціна, відправник/одержувач, Інкотермс, країна походження"],
+              ["Packing List", "Детальний перелік місць: вага брутто/нетто, розміри, маркування кожного місця"],
+              ["CMR / AWB / B/L", "Транспортна накладна: CMR (авто), B/L (море), AWB (авіа). MRN T1 = окремий документ"],
+              ["T1 (NCTS5)", "Транзитна декларація: MRN, HsCode, опис EN, вага, відправник/одержувач, гарантія"],
+              ["Certificate of Origin", "EUR.1 (ЄС), Form A (GSP), ST-1 (СНД), або загальний CoO. Для пільгових ставок мита"],
+              ["Insurance Certificate", "ICC (A) мінімум. Для CIF: мінімум 110% від вартості. Номер полісу в інвойсі"],
+              ["Radiation Safety Cert.", "ДСНС-сертифікат: обов'язково для всіх вантажів в UA. Видається в Китаї/Індії на партію"]
+            ]
+          },
+          {
+            title: "Додаткові документи за типом вантажу", rows: [
+              ["АФІ фармацевтичні", "CoA + Batch Certificate + GMP Certificate виробника + дозвіл Держлікслужби ЛЗ-2"],
+              ["Антибіотики (Гл.2941)", "CoA + microbiological test report + GMP + reєстрація МОЗ (якщо для UA ринку)"],
+              ["Вітаміни (2936)", "CoA з assay, heavy metals, residual solvents + специфікація USP/Ph.Eur./BP"],
+              ["ADR-вантаж", "SDS (16 розд.) + Tremcard + ADR-сертифікат водія + свідоцтво ТЗ + DGD (якщо мультимодал)"],
+              ["Тваринне походження", "Health/Vet Certificate + TRACES CHED + TSE/BSE declaration + temperature log"],
+              ["Рослинна сировина", "Phytosanitary Certificate + IPPC-маркування піддонів + CoA з ідентифікацією"],
+              ["Прекурсори (Табл.2)", "Ліцензія ДСКН + дозвіл на ввезення + кінцевий сертифікат використання (EUC)"],
+              ["Dual-Use товари", "Дозвіл МЕРТ/ДАСУ + EUC + підтвердження кінцевого використання"]
+            ]
+          },
+          {
+            title: "Типові помилки що зупиняють вантаж", rows: [
+              ["SDS застаріла", "SDS старше 5 років або не відповідає CLP 2015+ — затримка 24–72 год на EU митниці"],
+              ["CoA без batch", "CoA без номера партії або дати виробництва — митна лабораторія UA: відбір проб"],
+              ["Різні назви", "Назва в інвойсі ≠ назва в CoA ≠ назва в T1 — класичний привід для детального огляду"],
+              ["IPPC піддони", "Дерев'яні піддони без маркування IPPC → фітоконтроль, фумігація за рахунок декларанта"],
+              ["Вага +/- 0.5%", "Фактична вага відрізняється від CMR/T1 більше ніж на 0.5% — штраф або повторне оформлення"],
+              ["Пломба порушена", "Будь-яке пошкодження пломби контейнера → повний фізичний огляд. +24–48 год затримки"],
+              ["Курс НБУ", "Митна вартість розраховується на дату подачі МД, а не дату купівлі — контролювати курс"]
+            ]
+          }
+        ]
+      }
     ];
 
-    const KB_STORAGE_KEY = 'lap_knowledge_origin_transit_rules_v1';
-    const KB_STORAGE_VERSION = '2026-05-11-origin-transit-broker-v1';
+    const KB_STORAGE_KEY = 'lap_knowledge_origin_transit_rules_v3';
+    const KB_STORAGE_VERSION = '2026-05-15-uktzed-full-precursor-adr-v3';
 
     function buildLogisticsOriginKnowledgeTopics() {
       return [
