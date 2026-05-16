@@ -11,6 +11,21 @@
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap"
     rel="stylesheet">
   <style>
+
+    /* ── PORT SELECTOR ── */
+    .port-selector { display:flex; align-items:center; gap:8px; margin:0 0 18px; flex-wrap:wrap; }
+    .port-selector-label { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-right:4px; }
+    .port-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 14px; border-radius:20px;
+      font-family:var(--mono); font-size:11px; font-weight:500;
+      border:1.5px solid var(--line-2); background:var(--surface-2); color:var(--ink-2);
+      cursor:pointer; transition:all .15s;
+    }
+    .port-btn:hover { border-color:var(--line-3); color:var(--ink); }
+    .port-btn.active { background:var(--amber-dim); border-color:var(--amber); color:var(--amber); }
+    .port-btn .port-flag { font-size:13px; }
+
     /* ============================================
    LOGI-ANALYZER PRO · CONTROL ROOM EDITION
    Palette: deep graphite + signal amber
@@ -6465,6 +6480,273 @@
 
     ]; // END PRODUCT_ORIGIN_KB
 
+    // ============================================================
+    //  MANUFACTURER KNOWLEDGE BASE
+    //  ~100 відомих виробників → originType, GMP, країна
+    // ============================================================
+    const MANUFACTURER_KB = [
+      // ── КИТАЙСЬКІ ВИРОБНИКИ АНТИБІОТИКІВ (ферментація) ──
+      { keys: ['hebei shengxue','shengxue dacheng'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (GMP виробник Колістин / антибіотики)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['hubei hongyuan','hongyuan pharmaceutical'],
+        originType: 'синтетичне', productionMethod: 'хімічний синтез (Метронідазол / хімфарма)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['yancheng dafeng','tiansheng joint pharmaceutical'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (Окситетрациклін)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['chengdu biopurify','biopurify'],
+        originType: 'ферментаційне або рослинне', productionMethod: 'ферментація / екстракція стандартів', gmpStatus: 'ISO', country: 'China' },
+      { keys: ['north china pharmaceutical','ncpc'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (пеніциліни, вітаміни, амінокислоти)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['zhejiang medicine','zmc'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (Вітамін C, E, антибіотики)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['dsm nutritional','dsm china'],
+        originType: 'синтетичне або ферментаційне', productionMethod: 'DSM — вітаміни, ферментація/синтез', gmpStatus: 'GMP', country: 'China/Switzerland' },
+      { keys: ['hebei jiuzhou','jiuzhou pharmaceutical'],
+        originType: 'ферментаційне або синтетичне', productionMethod: 'ферментація / синтез (антибіотики, АФІ)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['ningxia eppen','eppen biotech'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (L-Лізин, кормові амінокислоти)', gmpStatus: 'ISO', country: 'China' },
+      { keys: ['evonik','degussa'],
+        originType: 'синтетичне', productionMethod: 'хімічний синтез (DL-Метіонін, аміно)', gmpStatus: 'GMP', country: 'Germany/China' },
+      { keys: ['cj cheiljedang','cj bio'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (L-Лізин, L-Треонін, L-Триптофан)', gmpStatus: 'GMP', country: 'South Korea' },
+      { keys: ['global bio-chem','global bio'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (L-Лізин, кормові амінокислоти)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['fufeng group','fufeng'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (L-Глутамат, амінокислоти)', gmpStatus: 'ISO', country: 'China' },
+      { keys: ['meihua holdings','meihua'],
+        originType: 'ферментаційне', productionMethod: 'ферментація (амінокислоти, глутамат)', gmpStatus: 'ISO', country: 'China' },
+      // ── ЕКСЦИПІЄНТИ / ПОЛІМЕРИ ──
+      { keys: ['boai nky','boai nky pharmaceuticals'],
+        originType: 'синтетичне', productionMethod: 'полімеризація (ПВП, ПВА)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['henan chuange','jinhe industry'],
+        originType: 'синтетичне', productionMethod: 'полімеризація (ПЕГ, Макрогол)', gmpStatus: 'ISO', country: 'China' },
+      { keys: ['ashland','ashland specialty'],
+        originType: 'синтетичне або рослинне', productionMethod: 'ексципієнти (ГПМЦ, целюлоза, полімери)', gmpStatus: 'GMP', country: 'USA' },
+      { keys: ['dow chemical','dow'],
+        originType: 'синтетичне', productionMethod: 'полімерна хімія (ПЕГ, МКЦ)', gmpStatus: 'GMP', country: 'USA' },
+      { keys: ['jrs pharma','jrs'],
+        originType: 'рослинне', productionMethod: 'МКЦ, целюлозні ексципієнти', gmpStatus: 'GMP', country: 'Germany' },
+      { keys: ['mingtai chemical','mingtai'],
+        originType: 'рослинне', productionMethod: 'МКЦ', gmpStatus: 'GMP', country: 'Taiwan' },
+      // ── ТВАРИННА СИРОВИНА ──
+      { keys: ['aoxin','aoxin glucosamine'],
+        originType: 'тваринне', productionMethod: 'Глюкозамін гхл — гідроліз хітину (ракоподібні)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['hengjie','hengjie chondroitin'],
+        originType: 'тваринне', productionMethod: 'Хондроїтин сульфат — екстракція хрящів ВРХ/свиней', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['shandong focuschem','focuschem'],
+        originType: 'тваринне або рослинне', productionMethod: 'колаген, гіалуронова кислота (ферментація або тваринне)', gmpStatus: 'GMP', country: 'China' },
+      { keys: ['bloomage biotechnology','bloomage'],
+        originType: 'ферментаційне', productionMethod: 'Гіалуронова кислота — ферментація', gmpStatus: 'GMP', country: 'China' },
+      // ── МІНЕРАЛИ / НЕОРГАНІКА ──
+      { keys: ['hebei liwellso','liwellso biotech'],
+        originType: 'синтетичне', productionMethod: 'Магнію гліцинат — хімічна реакція MgO + гліцин', gmpStatus: 'ISO', country: 'China' },
+      { keys: ['jiangsu kolod','kolod food'],
+        originType: 'синтетичне', productionMethod: 'Магнію цитрат — реакція MgCO₃ + лимонна кислота', gmpStatus: 'ISO', country: 'China' },
+      { keys: ['prosperity','prosperity chemical'],
+        originType: 'синтетичне', productionMethod: 'мінеральні солі (цитрати, глюконати, фосфати)', gmpStatus: 'ISO', country: 'China' },
+      // ── РОСЛИННІ ЕКСТРАКТИ ──
+      { keys: ['natural remedy','natural remedy llp'],
+        originType: 'рослинне', productionMethod: 'екстракція рослинної сировини (Ашваганда, Силімарин)', gmpStatus: 'ISO', country: 'India' },
+      { keys: ['sabinsa','sabinsa corporation'],
+        originType: 'рослинне', productionMethod: 'стандартизовані рослинні екстракти', gmpStatus: 'GMP', country: 'India' },
+      { keys: ['naturex','givaudan naturex'],
+        originType: 'рослинне', productionMethod: 'рослинні екстракти (стандартизовані)', gmpStatus: 'GMP', country: 'France' },
+      { keys: ['india glycols','india glycols ltd'],
+        originType: 'рослинне або синтетичне', productionMethod: 'ПЕГ з рослинного (цукрова тростина) або нафтохімії', gmpStatus: 'GMP', country: 'India' },
+      // ── ІНДІЙСЬКІ ВИРОБНИКИ АФІ ──
+      { keys: ['cipla','cipla limited'],
+        originType: 'синтетичне або ферментаційне', productionMethod: 'фармацевтичний синтез / ферментація', gmpStatus: 'GMP/WHO', country: 'India' },
+      { keys: ['sun pharma','sun pharmaceutical'],
+        originType: 'синтетичне', productionMethod: 'фармацевтичний синтез', gmpStatus: 'GMP/USFDA', country: 'India' },
+      { keys: ['aurobindo','aurobindo pharma'],
+        originType: 'синтетичне або ферментаційне', productionMethod: 'синтез / ферментація', gmpStatus: 'GMP/USFDA', country: 'India' },
+      { keys: ['divi\'s laboratories','divis lab'],
+        originType: 'синтетичне', productionMethod: 'фармацевтичний хімічний синтез', gmpStatus: 'GMP/USFDA', country: 'India' },
+      { keys: ['wuhan grand hoyo','grand hoyo'],
+        originType: 'синтетичне або ферментаційне', productionMethod: 'амінокислоти / хімфарма синтез', gmpStatus: 'ISO', country: 'China' },
+    ];
+
+    function lookupManufacturerKB(manufacturer) {
+      if (!manufacturer || typeof manufacturer !== 'string') return null;
+      const norm = manufacturer.toLowerCase();
+      let best = null, bestScore = 0;
+      for (const entry of MANUFACTURER_KB) {
+        for (const kw of entry.keys) {
+          if (norm.includes(kw)) {
+            const score = kw.length;
+            if (score > bestScore) { bestScore = score; best = entry; }
+          }
+        }
+      }
+      return best;
+    }
+
+    // ============================================================
+    //  ADR SUBSTANCE DATABASE
+    //  Точні UN-номери, клас ADR, група пакування
+    //  Перевіряємо за назвою — не залежимо від тексту в таблиці
+    // ============================================================
+    const ADR_SUBSTANCE_DB = [
+      // ── КЛАС 4.1 — Легкозаймисті тверді ──
+      { keys: ['камфора','camphor','камфара'], un: 'UN2717', class: '4.1', pg: 'III', label: 'Легкозаймиста тверда речовина', desc: 'Камфора — UN2717, Кл.4.1, PG III. Горить при нагріванні. Потрібне маркування мішань ADR.' },
+      { keys: ['нафталін','naphthalene'], un: 'UN1334', class: '4.1', pg: 'III', label: 'Легкозаймиста тверда речовина', desc: 'Нафталін — UN1334, Кл.4.1, PG III. Горючий порошок.' },
+      // ── КЛАС 5.1 — Окислювачі ──
+      { keys: ['перекис водню','hydrogen peroxide','пероксид водню'], un: 'UN2014', class: '5.1', pg: 'II', label: 'Окислювач', desc: 'Перекис водню (>8% до 60%) — UN2014, Кл.5.1, PG II. Сильний окислювач, корозійний.' },
+      { keys: ['калію перманганат','potassium permanganate'], un: 'UN1490', class: '5.1', pg: 'II', label: 'Окислювач', desc: 'Перманганат калію — UN1490, Кл.5.1, PG II. Сильний окислювач.' },
+      { keys: ['натрію нітрат','sodium nitrate'], un: 'UN1498', class: '5.1', pg: 'III', label: 'Окислювач', desc: 'Натрію нітрат — UN1498, Кл.5.1, PG III. Окислювач.' },
+      { keys: ['калію нітрат','potassium nitrate'], un: 'UN1486', class: '5.1', pg: 'III', label: 'Окислювач', desc: 'Калію нітрат — UN1486, Кл.5.1, PG III. Окислювач.' },
+      // ── КЛАС 6.1 — Токсичні речовини ──
+      { keys: ['олаквіндокс','olaquindox','олаквиндокс'], un: 'UN2811', class: '6.1', pg: 'III', label: 'Токсична тверда органічна речовина', desc: 'Олаквіндокс — UN2811, Кл.6.1, PG III. Токсична тверда органічна речовина. Потрібен повний пакет ADR: SDS, маркування, ADR-перевізник.' },
+      { keys: ['фіпроніл','fipronil'], un: 'UN3077', class: '9', pg: 'III', label: 'Екологічно небезпечна речовина', desc: 'Фіпроніл — UN3077, Кл.9, PG III. Екологічно небезпечна речовина, потенційно Кл.6.1. Потрібен SDS, перевірка класифікації.' },
+      { keys: ['ацетамиприд','acetamiprid'], un: 'UN3077', class: '9', pg: 'III', label: 'Екологічно небезпечна речовина', desc: 'Ацетамиприд — UN3077, Кл.9, PG III. Пестицид, екологічно небезпечна речовина.' },
+      { keys: ['дельтаметрин','deltamethrin'], un: 'UN3077', class: '9', pg: 'III', label: 'Екологічно небезпечна речовина', desc: 'Дельтаметрин — UN3077, Кл.9, PG III. Пестицид, екологічно небезпечна речовина.' },
+      { keys: ['циперметрин','cypermethrin'], un: 'UN3077', class: '9', pg: 'III', label: 'Екологічно небезпечна речовина', desc: 'Циперметрин — UN3077, Кл.9, PG III. Пестицид.' },
+      { keys: ['перметрин','permethrin'], un: 'UN3077', class: '9', pg: 'III', label: 'Екологічно небезпечна речовина', desc: 'Перметрин — UN3077, Кл.9, PG III. Пестицид.' },
+      { keys: ['фенолфталеїн','phenolphthalein','фенолфталеин'], un: 'UN3077', class: '9', pg: 'III', label: 'Екологічно небезпечна речовина', desc: 'Фенолфталеїн — UN3077, Кл.9, PG III. Можлива канцерогенність. Перевірити SDS.' },
+      // ── КЛАС 8 — Корозійні ──
+      { keys: ['формальдегід','formaldehyde','formalin','формалін'], un: 'UN2209', class: '8', pg: 'III', label: 'Корозійна речовина (розчин)', desc: 'Формальдегід розчин (37%/Формалін) — UN2209, Кл.8, PG III. Також Кл.3 (легкозаймистий). Потрібен SDS, ADR перевізник.' },
+      { keys: ['глутаральдегід','glutaraldehyde'], un: 'UN3457', class: '8', pg: 'III', label: 'Корозійна речовина', desc: 'Глутаральдегід — UN3457, Кл.8, PG III. Корозійна та токсична речовина. SDS обов\'язковий.' },
+      { keys: ['цирконій оксихлорид','zirconium oxychloride','zirconyl chloride','циркония оксихлорид'], un: 'UN3260', class: '8', pg: 'III', label: 'Корозійна тверда кисла речовина', desc: 'Цирконій оксихлорид — UN3260, Кл.8, PG III. Корозійна тверда кисла неорганічна речовина. SDS обов\'язковий, маркування ADR.' },
+      // ── КЛАС 9 — Різні небезпечні ──
+      { keys: ['цинку сульфат','zinc sulfate'], un: 'UN3077', class: '9', pg: 'III', label: 'Екологічно небезпечна речовина', desc: 'Цинку сульфат — UN3077, Кл.9, PG III. Небезпечний для водного середовища. Перевірити форму (моногідрат/гептагідрат) та SDS.' },
+      { keys: ['залізо сульфат','ferrous sulfate','iron sulfate'], un: 'UN3077', class: '9', pg: 'III', label: 'Екологічно небезпечна речовина', desc: 'Залізо сульфат — потенційно UN3077, Кл.9. Перевірити SDS, деякі форми не підлягають ADR.' },
+    ];
+
+    function lookupADR(name) {
+      if (!name) return null;
+      const norm = String(name).toLowerCase()
+        .replace(/[^а-яёa-z0-9\-\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+      let best = null, bestScore = 0;
+      for (const entry of ADR_SUBSTANCE_DB) {
+        for (const kw of entry.keys) {
+          if (norm.includes(kw)) {
+            const score = kw.length;
+            if (score > bestScore) { bestScore = score; best = entry; }
+          }
+        }
+      }
+      return best;
+    }
+
+    // ============================================================
+    //  UKTZED CODE DICTIONARY
+    //  Точні 10-значні коди для найпоширеніших речовин
+    // ============================================================
+    const UKTZED_CODE_DB = [
+      // ── АНТИБІОТИКИ (2941) ──
+      { keys: ['амоксицилін','амоксицилин','amoxicillin'], code: '2941100000', name: 'Амоксицилін' },
+      { keys: ['ампіцилін','ампициллин','ampicillin'], code: '2941100000', name: 'Ампіцилін' },
+      { keys: ['окситетрациклін','окситетрациклин','oxytetracycline'], code: '2941300000', name: 'Окситетрациклін' },
+      { keys: ['хлортетрациклін','хлортетрациклин','chlortetracycline'], code: '2941300000', name: 'Хлортетрациклін' },
+      { keys: ['доксициклін','доксициклин','doxycycline'], code: '2941300000', name: 'Доксициклін' },
+      { keys: ['тетрациклін','тетрациклин','tetracycline'], code: '2941300000', name: 'Тетрациклін' },
+      { keys: ['еритроміцин','эритромицин','erythromycin'], code: '2941500000', name: 'Еритроміцин' },
+      { keys: ['лінкоміцин','линкомицин','lincomycin'], code: '2941900000', name: 'Лінкоміцин' },
+      { keys: ['неоміцин','неомицин','neomycin'], code: '2941200000', name: 'Неоміцин' },
+      { keys: ['стрептоміцин','стрептомицин','streptomycin'], code: '2941100000', name: 'Стрептоміцин' },
+      { keys: ['колістин','колистин','colistin'], code: '2941909000', name: 'Колістин' },
+      { keys: ['тилозин','tylosin'], code: '2941909000', name: 'Тилозин' },
+      { keys: ['тіамулін','тиамулин','tiamulin'], code: '2941909000', name: 'Тіамулін' },
+      { keys: ['тилміцин','tilmicosin'], code: '2941909000', name: 'Тилміцин' },
+      { keys: ['флорфенікол','florfenicol'], code: '2941909000', name: 'Флорфенікол' },
+      { keys: ['хлорамфенікол','хлорамфеникол','chloramphenicol','левоміцетин','левомицетин'], code: '2941400000', name: 'Хлорамфенікол' },
+      { keys: ['цефтіофур','цефтиофур','ceftiofur'], code: '2941909000', name: 'Цефтіофур' },
+      // ── ВІТАМІНИ (2936) ──
+      { keys: ['аскорбінова кислота','аскорбиновая кислота','vitamin c','аскорбінка'], code: '2936270000', name: 'Вітамін C' },
+      { keys: ['вітамін d3','витамин д3','cholecalciferol','холекальциферол'], code: '2936299000', name: 'Вітамін D3' },
+      { keys: ['вітамін b1','тіамін','thiamine'], code: '2936210000', name: 'Вітамін B1' },
+      { keys: ['вітамін b2','рибофлавін','рибофлавин','riboflavin'], code: '2936220000', name: 'Вітамін B2' },
+      { keys: ['вітамін b6','піридоксин','pyridoxine'], code: '2936240000', name: 'Вітамін B6' },
+      { keys: ['вітамін b12','ціанокобаламін','cyanocobalamin'], code: '2936291000', name: 'Вітамін B12' },
+      { keys: ['декспантенол','d-пантенол','dexpanthenol','panthenol'], code: '2936500000', name: 'D-Пантенол' },
+      { keys: ['фолієва кислота','folic acid'], code: '2936290000', name: 'Фолієва кислота' },
+      { keys: ['біотин','biotin'], code: '2936290000', name: 'Біотин' },
+      { keys: ['вітамін a','ретинол ацетат','retinol acetate'], code: '2936100000', name: 'Вітамін A' },
+      { keys: ['вітамін e','токоферол','tocopherol'], code: '2936280000', name: 'Вітамін E' },
+      { keys: ['вітамін k3','менадіон','menadione'], code: '2936290000', name: 'Вітамін K3' },
+      { keys: ['вітамін b3','ніацин','niacin','нікотинамід','nicotinamide'], code: '2936230000', name: 'Вітамін B3' },
+      // ── ОРГАНІЧНА ХІМІЯ (2922, 2923, 2924, 2925, 2930, 2937) ──
+      { keys: ['глюкозамін','glucosamine hcl','glucosamine hydrochloride'], code: '2922494500', name: 'Глюкозамін гхл' },
+      { keys: ['аспарагінова кислота','аспарагиновая','dl-aspartic','аспарагінка'], code: '2922498500', name: 'Аспарагінова кислота' },
+      { keys: ['аргінін','arginine'], code: '2925191000', name: 'L-Аргінін' },
+      { keys: ['карнітин','carnitine'], code: '2923900000', name: 'Карнітин' },
+      { keys: ['таурін','taurine'], code: '2930400000', name: 'Таурін' },
+      { keys: ['холін хлорид','choline chloride'], code: '2923100000', name: 'Холін хлорид' },
+      { keys: ['бетаїн','бетаин','betaine'], code: '2923900000', name: 'Бетаїн' },
+      { keys: ['метронідазол','метронидазол','metronidazole'], code: '2933299090', name: 'Метронідазол' },
+      { keys: ['фенбендазол','fenbendazole'], code: '2933990000', name: 'Фенбендазол' },
+      { keys: ['альбендазол','albendazole'], code: '2933990000', name: 'Альбендазол' },
+      { keys: ['олаквіндокс','olaquindox','олаквиндокс'], code: '2933390000', name: 'Олаквіндокс' },
+      { keys: ['енрофлоксацин','enrofloxacin'], code: '2935900000', name: 'Енрофлоксацин' },
+      { keys: ['ципрофлоксацин','ciprofloxacin'], code: '2935900000', name: 'Ципрофлоксацин' },
+      { keys: ['метронідазол'], code: '2933299090', name: 'Метронідазол' },
+      { keys: ['паracетамол','парацетамол','paracetamol'], code: '2924299890', name: 'Парацетамол' },
+      { keys: ['анестезин','бензокаїн','benzocaine'], code: '2922290000', name: 'Бензокаїн' },
+      { keys: ['новокаїн','прокаїн','procaine','новокаин'], code: '2922290000', name: 'Прокаїн' },
+      { keys: ['аналгін','метамізол','metamizole'], code: '2933119000', name: 'Метамізол (Аналгін)' },
+      { keys: ['аспірин','ацетилсаліцилова','aspirin'], code: '2918220000', name: 'Ацетилсаліцилова кислота' },
+      { keys: ['саліцилова кислота','salicylic acid'], code: '2918210000', name: 'Саліцилова кислота' },
+      { keys: ['метилсаліцилат','methyl salicylate','метилсалицилат'], code: '2918230000', name: 'Метилсаліцилат' },
+      { keys: ['лимонна кислота','citric acid'], code: '2918140000', name: 'Лимонна кислота' },
+      { keys: ['кальцію глюконат','calcium gluconate'], code: '2918160000', name: 'Кальцію глюконат' },
+      { keys: ['магнію цитрат','magnesium citrate','магния цитрат'], code: '2918150000', name: 'Магнію цитрат' },
+      { keys: ['магнію гліцинат','magnesium glycinate','магния глицерат'], code: '2922490000', name: 'Магнію гліцинат' },
+      { keys: ['камфора','camphor'], code: '2914290000', name: 'Камфора' },
+      { keys: ['івермектин','ивермектин','ivermectin'], code: '2941909000', name: 'Івермектин' },
+      { keys: ['сукралоза','sucralose'], code: '2940000000', name: 'Сукралоза' },
+      // ── ХОНДРОПРОТЕКТОРИ (3001) ──
+      { keys: ['хондроїтин сульфат','хондроитин сульфат','хондроитина сульфат','chondroitin'], code: '3001909100', name: 'Хондроїтин сульфат' },
+      // ── ПОЛІМЕРИ / ЕКСЦИПІЄНТИ (3905, 3907, 3912) ──
+      { keys: ['пвп','pvp','поліvinilpyrrolidone','повідон','поливинилпирролидон'], code: '3905909000', name: 'ПВП' },
+      { keys: ['пег','peg','поліетиленгліколь','полиэтиленгликоль','макрогол','macrogol','полиэтиленоксид'], code: '3907200000', name: 'ПЕГ / Макрогол' },
+      { keys: ['мікрокристалічна целюлоза','мкц','microcrystalline cellulose','mcc'], code: '3912310000', name: 'МКЦ' },
+      { keys: ['гіпромелоза','hypromellose','hpmc'], code: '3912310000', name: 'ГПМЦ' },
+      { keys: ['ксантан','xanthan gum'], code: '3913900000', name: 'Ксантан' },
+      // ── НЕОРГАНІКА (2817, 2826, 2827) ──
+      { keys: ['цинку оксид','zinc oxide'], code: '2817000000', name: 'Цинку оксид' },
+      { keys: ['цирконій оксихлорид','zirconium oxychloride','циркония оксихлорид'], code: '2827399000', name: 'Цирконій оксихлорид' },
+      { keys: ['тальк','talc'], code: '2526200000', name: 'Тальк' },
+      { keys: ['цинку сульфат','zinc sulfate'], code: '2833290000', name: 'Цинку сульфат' },
+      // ── РОЗЧИННИКИ (2924) ──
+      { keys: ['1-метил-2-піролідон','nmp','n-methyl-2-pyrrolidone','1-метил-2-пиролидон'], code: '2924210000', name: 'N-Метилпіролідон' },
+      { keys: ['фенолфталеїн','phenolphthalein','фенолфталеин'], code: '2914390000', name: 'Фенолфталеїн' },
+    ];
+
+    function lookupUktzedCode(name) {
+      if (!name) return null;
+      const norm = String(name).toLowerCase()
+        .replace(/[^а-яёa-z0-9\-\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+      let best = null, bestScore = 0;
+      for (const entry of UKTZED_CODE_DB) {
+        for (const kw of entry.keys) {
+          if (norm.includes(kw)) {
+            const score = kw.length;
+            if (score > bestScore) { bestScore = score; best = entry; }
+          }
+        }
+      }
+      return best;
+    }
+
+    // ── Selected transit port (global) ────────────────────────────
+    let _selectedPort = 'gdansk'; // default
+
+    function setTransitPort(port) {
+      _selectedPort = port;
+      document.querySelectorAll('.port-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById('portBtn-' + port);
+      if (btn) btn.classList.add('active');
+      // Re-render dots if results are shown
+      if (lastAnalysisData && Array.isArray(lastAnalysisData.items)) {
+        lastAnalysisData.items.forEach((item, idx) => {
+          const euCell = document.getElementById('euChecks-' + idx);
+          if (euCell) euCell.innerHTML = renderDotsCell(item, idx, 'eu');
+        });
+      }
+    }
+    Object.assign(window, { setTransitPort });
+
+
+
     // ────────────────────────────────────────────────────────────────
     //  Функція пошуку в Knowledge Base за назвою товару
     // ────────────────────────────────────────────────────────────────
@@ -6489,6 +6771,38 @@
         }
       }
       return bestMatch;
+    }
+
+
+    // ── PRICE ANOMALY DETECTOR ────────────────────────────────────
+    function applyPriceAnomalyCheck(item, rowMeta) {
+      // Extract previous price from raw row data
+      const header = rowMeta.header || [];
+      const row    = rowMeta.row || [];
+      const prevPriceIdx = header.findIndex(h =>
+        /прошл|попередн|previous|минул|last.price|old.price/i.test(String(h || ''))
+      );
+      if (prevPriceIdx < 0) return item;
+
+      const rawPrev = parseFloat(String(row[prevPriceIdx] || '').replace(',', '.'));
+      const curr = item.buyPricePerKg;
+
+      if (!rawPrev || !curr || isNaN(rawPrev) || isNaN(curr)) return item;
+
+      const deviation = Math.abs(curr - rawPrev) / rawPrev;
+      if (deviation >= 0.25) {
+        const pct = (deviation * 100).toFixed(0);
+        const direction = curr > rawPrev ? 'зросла' : 'впала';
+        const checkText = `Ціна ${direction} на ${pct}% vs попередня закупівля (${rawPrev} → ${curr} USD/кг)`;
+        const noteText = `Значне відхилення ціни може призвести до оскарження митної вартості. Рекомендовано підготувати пояснення та підтвердження ціноутворення (contract, price list, bank transfer).`;
+        item.euChecks = item.euChecks || [];
+        item.uaChecks = item.uaChecks || [];
+        const priceCheck = { item: checkText, status: deviation >= 0.5 ? 'red' : 'yellow', note: noteText };
+        item.euChecks = [priceCheck, ...item.euChecks];
+        item.uaChecks = [priceCheck, ...item.uaChecks];
+        item._priceAnomaly = { prev: rawPrev, curr, deviation, pct, direction };
+      }
+      return item;
     }
 
     // ────────────────────────────────────────────────────────────────
@@ -6932,7 +7246,8 @@ ${euRegulations}
 - Номенклатура - назва товару  
 - Кол-ва/Вес нетто, кг - кількість в кг
 - Цена закупки / цена - ціна за кг в USD
-- Производитель - виробник
+- Прошлая цена закупки / попередня ціна - ВАЖЛИВО: витягни це поле і порівняй з поточною ціною
+- Производитель - виробник — ВАЖЛИВО: виробник є додатковим сигналом для originType. Наприклад Hebei Shengxue = ферментація (Колістин), Hubei Hongyuan = синтез (Метронідазол), Boai NKY = синтез (ПВП)
 - МСДС / НЮАНСЫ - інформація про небезпеку товару (ADR класи, опасник тощо)
 - код / код ТНВЭД / УКТЗЕД / HS Code - код товару для митниці; цей код є окремим джерелом аналізу походження і способу виробництва
 
@@ -7199,7 +7514,7 @@ ${euRegulations}
 - Якщо є поле "цена" або "Цена закупки" - використовуй його як buyPricePerKg
 - Якщо є "Кол-ва, кг" або "Вес нетто, кг" - використовуй його як qtyKg
 - Якщо є код УКТЗЕД/HS у рядку — НЕ замінюй його припущенням по назві; поверни саме цей код.
-- У euChecks та uaChecks обов’язково додай перевірки, які випливають з коду, всіх можливих походжень, застосування та вкладок QDPro goodinfo Імпорт / Транзит / Експорт. Порядок важливості: спочатку red/критичні, потім yellow/увага, потім green/стандартні.
+- У euChecks та uaChecks обов\u0027язково додай перевірки, які випливають з коду, всіх можливих походжень, застосування та вкладок QDPro goodinfo Імпорт / Транзит / Експорт. Порядок важливості: спочатку red/критичні, потім yellow/увага, потім green/стандартні.
 - НЕ РАХУЙ customsValue/duty/vat - ти повертаєш тільки qtyKg, buyPricePerKg, dutyRatePercent
 - УСІ ТЕКСТИ УКРАЇНСЬКОЮ МОВОЮ
 - ⚠️ АБСОЛЮТНО КРИТИЧНО: ТИ ПОВИНЕН ОПРАЦЮВАТИ УСІ 100% РЯДКІВ/ТОВАРІВ З ТАБЛИЦІ. НЕ СКОРОЧУЙ, НЕ ВИДАЛЯЙ І НЕ ГРУПУЙ ТОВАРИ. СКІЛЬКИ ТОВАРІВ У ТАБЛИЦІ (АБО ЗВЕДЕНОМУ СПИСКУ), СТІЛЬКИ МАЄ БУТИ ОБ\'ЄКТІВ В МАСИВІ "items".`;
@@ -7243,9 +7558,16 @@ ${euRegulations}
           const raw = nomIdx >= 0 ? String(dr.row[nomIdx] || '').trim() : '';
           const key = normalizeItemName(raw);
           if (!key) return;
+          // Also extract manufacturer and previous price for KB enrichment
+          const mfrIdx = dr.header.findIndex(h => /виробник|производитель|manufacturer|maker/i.test(h || ''));
+          const prevPriceIdx = dr.header.findIndex(h => /прошл|попередн|previous.*price|минул/i.test(h || ''));
           rowMetaByName.set(key, {
             uktzedCode: dr.uktzedCode || extractHsCodeFromRow(dr.header, dr.row),
-            sheetName: dr.sheetName
+            sheetName: dr.sheetName,
+            manufacturer: mfrIdx >= 0 ? String(dr.row[mfrIdx] || '').trim() : '',
+            prevPrice: prevPriceIdx >= 0 ? parseFloat(String(dr.row[prevPriceIdx] || '').replace(',', '.')) || 0 : 0,
+            header: dr.header,
+            row: dr.row
           });
         });
 
@@ -7253,6 +7575,7 @@ ${euRegulations}
           const key = normalizeItemName(item.name || '');
           item = enrichItemWithCodeOrigin(item, rowMetaByName.get(key) || {});
           item = applyKBOriginToItem(item); // Knowledge Base override
+          item = applyPriceAnomalyCheck(item, rowMetaByName.get(key) || {});
           return item;
         });
 
@@ -8227,7 +8550,7 @@ ${euRegulations}
       const heading = hs.slice(0, 4);
       const map = {
         '01': 'QDPro goodinfo: розділ I; живі тварини — тваринне походження, vet/health/TRACES/BCP.',
-        '02': 'QDPro goodinfo: м’ясо та їстівні субпродукти — тваринне походження, vet/health/TRACES/BCP.',
+        '02': 'QDPro goodinfo: м\u0027ясо та їстівні субпродукти — тваринне походження, vet/health/TRACES/BCP.',
         '03': 'QDPro goodinfo: риба/морепродукти — тваринне/морське походження, BCP/TRACES і температурний режим.',
         '04': 'QDPro goodinfo: молочні продукти, яйця, мед — тваринне походження, vet/health документи.',
         '05': 'QDPro goodinfo: інші продукти тваринного походження — перевірити species/source/TSE-BSE.',
@@ -8236,12 +8559,12 @@ ${euRegulations}
         '08': 'QDPro goodinfo: плоди/горіхи/шкірки — рослинне походження, фіто/карантин.',
         '09': 'QDPro goodinfo: кава/чай/прянощі — рослинне походження, фіто/санітарні показники.',
         '10': 'QDPro goodinfo: зернові — рослинне походження, фіто/карантин.',
-        '11': 'QDPro goodinfo: продукція борошномельно-круп’яної промисловості — рослинне походження.',
+        '11': 'QDPro goodinfo: продукція борошномельно-круп\u0027яної промисловості — рослинне походження.',
         '12': 'QDPro goodinfo: насіння, плоди, лікарські рослини — рослинне походження, фіто/MRL/CITES.',
         '13': 'QDPro goodinfo: камеді, смоли, соки та екстракти рослинного походження — botanical source/MRL.',
         '14': 'QDPro goodinfo: інші рослинні матеріали — рослинне походження, фіто/карантин.',
         '15': 'QDPro goodinfo: жири й олії — можливе рослинне, тваринне, мікробне або змішане походження.',
-        '16': 'QDPro goodinfo: готові продукти з м’яса/риби — тваринне або змішане походження.',
+        '16': 'QDPro goodinfo: готові продукти з м\u0027яса/риби — тваринне або змішане походження.',
         '17': 'QDPro goodinfo: цукор і кондитерські вироби — переважно рослинне, можливе змішане походження.',
         '18': 'QDPro goodinfo: какао — рослинне або змішане походження.',
         '19': 'QDPro goodinfo: продукти із зерна/борошна/крохмалю/молока — рослинне, тваринне або змішане походження.',
@@ -8292,7 +8615,7 @@ ${euRegulations}
         '64': 'QDPro goodinfo: взуття — тваринне/рослинне/синтетичне/змішане за матеріалами.',
         '65': 'QDPro goodinfo: головні убори — тваринне/рослинне/синтетичне/змішане за матеріалами.',
         '66': 'QDPro goodinfo: парасолі/палиці — рослинне/металеве/синтетичне/змішане за матеріалами.',
-        '67': 'QDPro goodinfo: пір’я/штучні квіти/волосся — тваринне, рослинне, синтетичне або змішане.',
+        '67': 'QDPro goodinfo: пір\u0027я/штучні квіти/волосся — тваринне, рослинне, синтетичне або змішане.',
         '68': 'QDPro goodinfo: камінь, гіпс, цемент, слюда — мінеральне походження.',
         '69': 'QDPro goodinfo: кераміка — мінеральне походження.',
         '70': 'QDPro goodinfo: скло — мінеральне походження.',
@@ -8425,7 +8748,7 @@ ${euRegulations}
             originCheck('Ферментація: ДПСС/фарм контроль', 'yellow', 'Для кормового, ветеринарного або фарм-використання можливий додатковий контроль.')
           ],
           transitChecks: [
-            originCheck('Біотех: data logger', 'yellow', 'Якщо є температурний режим — обов’язково погодити data logger і допустимі excursions.'),
+            originCheck('Біотех: data logger', 'yellow', 'Якщо є температурний режим — обов\u0027язково погодити data logger і допустимі excursions.'),
             originCheck('Біотех: не змішувати з odor cargo', 'yellow', 'У збірному вантажі уникати сусідства з пахучими, токсичними або пиловими товарами.'),
             originCheck('Біотех: lot traceability', 'green', 'Batch/lot у всіх документах має повністю збігатися для трасування партії.')
           ]
@@ -8437,7 +8760,7 @@ ${euRegulations}
           euChecks: [
             originCheck('Рослинне: phytosanitary', 'red', 'Перевірити наявність фітосанітарного сертифіката, латинської назви, частини рослини та країни походження.'),
             originCheck('Рослинне: pesticides/MRL', 'yellow', 'Для food/pharma/herbal використання підготувати pesticides, heavy metals, microbiology, aflatoxins за потреби.'),
-            originCheck('Рослинне: CITES/карантин', 'yellow', 'Перевірити CITES, карантинні шкідники, дерев’яну упаковку/IPPC і ризики огляду.')
+            originCheck('Рослинне: CITES/карантин', 'yellow', 'Перевірити CITES, карантинні шкідники, дерев\u0027яну упаковку/IPPC і ризики огляду.')
           ],
           uaChecks: [
             originCheck('Рослинне: фітосанітарний сертифікат', 'red', 'Для України потрібна коректна форма фітосанітарного сертифіката і збіг даних з Invoice/PL.'),
@@ -9149,12 +9472,53 @@ ${euRegulations}
       return decorateTransitChecksForRegion(transit, region);
     }
 
+    // Port-specific check profiles
+    const PORT_CHECKS = {
+      gdansk: [
+        { item: 'Гданськ (BCT/DCT): 100% рентген-сканування', status: 'yellow', note: 'Порт Гданськ — обов\u0027язкове 100% сканування контейнерів. Час: 4–8 год. DCT термінал — найбільший в Балтиці, висока пропускна здатність, але посилений контроль товарів з Китаю.' },
+        { item: 'Гданськ → Варшава → Медика (KPP): сухопутний транзит', status: 'green', note: 'Транзит через Польщу під T1/NCTS Phase 5. CMR + T1 + Packing List мають збігатися.' },
+      ],
+      hamburg: [
+        { item: 'Гамбург (HHLA): 100% рентген-сканування', status: 'yellow', note: 'Порт Гамбург — обов\u0027язкове 100% сканування. Час: 6–12 год. Найбільший порт ЄС для хімічних вантажів, дуже суворий контроль ADR та Dual-Use.' },
+        { item: 'Гамбург: підвищений контроль хімічних вантажів', status: 'yellow', note: 'Для фарм/хімічних товарів з Китаю: ризик поглибленої перевірки 20-30%. Підготуйте повний пакет CoA, SDS, маніфест.' },
+        { item: 'Гамбург → Варшава (транзит Польща/Чехія)', status: 'green', note: 'Транзит під T1/NCTS Phase 5. CMR оформлюється у порту.' },
+      ],
+      rotterdam: [
+        { item: 'Роттердам (ECT): сканування + ризик-селекція', status: 'yellow', note: 'Роттердам — найбільший порт ЄС. 100% рентген не гарантований, але висока ризик-селекція. Для товарів з Китаю ризик огляду ~25%.' },
+        { item: 'Роттердам: TRACES/BCP для тваринних/рослинних', status: 'yellow', note: 'Для тваринного/рослинного походження — обов\u0027язково BCP Rotterdam (Maasvlakte). Ветконтроль/фітоконтроль перед T1.' },
+        { item: 'Роттердам → Польща → Україна: довгий транзит', status: 'green', note: 'Транзит через Бельгію/Германію/Польщу. T1/NCTS Phase 5 + CMR. Час 2-4 доби.' },
+      ],
+      koper: [
+        { item: 'Копер (Словенія): сканування + митний контроль', status: 'yellow', note: 'Порт Копер — активно розвивається для UA-транзиту. 100% сканування контейнерів. Час: 4–8 год. Зручний маршрут для Зах. України.' },
+        { item: 'Копер → Угорщина/Словаччина → Захарони/Чоп', status: 'green', note: 'Короткий транзит через Словенію, Угорщину або Австрію. T1/NCTS Phase 5. Актуально для Закарпатського напрямку.' },
+      ],
+    };
+
     function buildRegionalDisplayChecks(item = {}, originProfile = null, region = 'eu') {
       const op = originProfile || selectedOriginProfile(item, item.selectedOriginKey);
       const base = region === 'ua'
         ? mergeChecks(item.uaChecks, op.uaChecks || [])
         : mergeChecks(item.euChecks, op.euChecks || []);
-      return mergeChecks(base, buildRegionalTransitChecks(item, op, region));
+      let checks = mergeChecks(base, buildRegionalTransitChecks(item, op, region));
+      // ── Inject port-specific checks for EU ──
+      if (region === 'eu' && _selectedPort && PORT_CHECKS[_selectedPort]) {
+        checks = mergeChecks(checks, PORT_CHECKS[_selectedPort]);
+      }
+      // ── Inject ADR DB checks if matched ──
+      if (region === 'eu' && item.adrFromDB) {
+        const a = item.adrFromDB;
+        checks = mergeChecks([
+          { item: `ADR ${a.un} Кл.${a.class} PG ${a.pg}: ${a.label}`, status: 'red', note: a.desc },
+          { item: 'ADR: обов\u0027язковий ADR-сертифікат перевізника', status: 'red', note: 'Для ADR-вантажів — перевізник повинен мати чинний ADR-сертифікат водія та транспортний документ TREMCARD.' },
+        ], checks);
+      }
+      if (region === 'ua' && item.adrFromDB) {
+        const a = item.adrFromDB;
+        checks = mergeChecks([
+          { item: `ADR ${a.un} Кл.${a.class}: контроль на KПП Україна`, status: 'red', note: `Для ADR-вантажу (${a.label}) — обов\u0027язкова перевірка UN-маркування, SDS, TREMCARD, ADR-свідоцтва перевізника на KПП.` },
+        ], checks);
+      }
+      return checks;
     }
 
     function logisticsBrokerOnlyChecks(checks = []) {
@@ -9245,7 +9609,40 @@ ${euRegulations}
     function enrichItemWithCodeOrigin(item, rowMeta = {}) {
       const tableCode = normalizeHsCode(rowMeta.uctzedCode);
       const aiCode = normalizeHsCode(item.uctzedCode);
-      const finalCode = tableCode || aiCode;
+
+      // ── UKTZED CODE DB: якщо коду немає в таблиці — шукаємо по назві ──
+      let finalCode = tableCode || aiCode;
+      if (!finalCode || finalCode === '—') {
+        const dbCode = lookupUktzedCode(item.name);
+        if (dbCode) {
+          finalCode = dbCode.code;
+          item._uktzedFromDB = true;
+          item._uktzedDBName = dbCode.name;
+        }
+      }
+
+      // ── MANUFACTURER KB: збагачуємо походження з виробника ──
+      const mfr = item.manufacturer || rowMeta.manufacturer || '';
+      if (mfr) {
+        const mfrKB = lookupManufacturerKB(mfr);
+        if (mfrKB && (!item.originType || item.originType === 'Не визначено' || item.originType === 'невідоме')) {
+          item.originType = mfrKB.originType;
+          item.productionMethod = mfrKB.productionMethod;
+          item.originConfidence = 'medium';
+          item.mfrKBMatched = mfrKB.gmpStatus + ' · ' + mfrKB.country;
+        }
+      }
+
+      // ── ADR DB: примусова перевірка ADR по назві товару ──
+      const adrMatch = lookupADR(item.name);
+      if (adrMatch) {
+        item.adrFromDB = adrMatch;
+        item.hazardAnalysis = (item.hazardAnalysis ? item.hazardAnalysis + ' | ' : '') +
+          '[ADR DB] ' + adrMatch.un + ' Кл.' + adrMatch.class + ' PG ' + adrMatch.pg + ': ' + adrMatch.desc;
+        if (item.risk !== 'Критичний') item.risk = 'Критичний';
+        item.riskNote = (item.riskNote || '') + (item.riskNote ? '; ' : '') + adrMatch.label + ' ' + adrMatch.un;
+      }
+
       const profile = codeBasedOriginProfile(finalCode, item);
 
       item.uctzedCode = finalCode || item.uctzedCode || '—';
@@ -9549,6 +9946,88 @@ ${euRegulations}
       }
     }
 
+
+    // ============================================================
+    //  CONSOLIDATED DOCUMENT CHECKLIST
+    //  Aggregates all unique red/yellow checks across all items
+    // ============================================================
+    function buildConsolidatedChecklist(items) {
+      if (!items || !items.length) return '';
+
+      const docCounts = {}; // doc_key → { item, status, products[] }
+
+      items.forEach(item => {
+        const profile = selectedOriginProfile(item, item.selectedOriginKey);
+        const euChecks = logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, profile, 'eu'));
+        const uaChecks = logisticsBrokerOnlyChecks(buildRegionalDisplayChecks(item, profile, 'ua'));
+        const allChecks = [...euChecks, ...uaChecks].filter(c => c.status === 'red' || c.status === 'yellow');
+
+        allChecks.forEach(c => {
+          const key = (c.item || '').replace(/\s+/g, ' ').toLowerCase().slice(0, 50);
+          if (!docCounts[key]) {
+            docCounts[key] = { item: c.item, status: c.status, note: c.note, products: new Set() };
+          } else if (c.status === 'red' && docCounts[key].status !== 'red') {
+            docCounts[key].status = 'red';
+          }
+          docCounts[key].products.add(item.name || '?');
+        });
+      });
+
+      const sorted = Object.values(docCounts)
+        .sort((a,b) => {
+          const sp = { red: 0, yellow: 1, green: 2 };
+          return (sp[a.status] || 2) - (sp[b.status] || 2);
+        });
+
+      if (!sorted.length) return '';
+
+      const redItems = sorted.filter(c => c.status === 'red');
+      const yellowItems = sorted.filter(c => c.status === 'yellow');
+
+      function renderRow(c) {
+        const st = c.status === 'red' ? 'var(--red)' : 'var(--yellow)';
+        const icon = c.status === 'red' ? '🔴' : '🟡';
+        const prods = [...c.products].slice(0, 3).join(', ') + (c.products.size > 3 ? ` +${c.products.size-3}` : '');
+        return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:flex-start">
+          <span style="flex-shrink:0;margin-top:2px">${icon}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">${escHtml(c.item || '—')}</div>
+            ${c.note ? `<div style="font-size:11px;color:var(--ink-2);margin-bottom:3px;line-height:1.4">${escHtml(c.note.slice(0,140))}${c.note.length>140?'…':''}</div>` : ''}
+            <div style="font-size:10px;color:var(--ink-3);font-family:var(--mono)">Стосується: ${escHtml(prods)}</div>
+          </div>
+        </div>`;
+      }
+
+      const redHtml = redItems.length ? `
+        <div style="margin-bottom:16px">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--red-bright);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(239,74,74,.2)">
+            🔴 Критичні документи · без них вантаж не пройде (${redItems.length})
+          </div>
+          ${redItems.map(renderRow).join('')}
+        </div>` : '';
+
+      const yellowHtml = yellowItems.length ? `
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(229,181,58,.2)">
+            🟡 Потребують підготовки (${yellowItems.length})
+          </div>
+          ${yellowItems.map(renderRow).join('')}
+        </div>` : '';
+
+      return `
+    <div class="sec-head" style="margin-top:28px">
+      <span class="sec-num">04 · CHECKLIST</span>
+      <span class="sec-title">Зведений чекліст документів партії</span>
+      <span class="sec-line"></span>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:28px">
+      <div style="font-size:12px;color:var(--ink-2);margin-bottom:16px;padding:10px 14px;background:var(--amber-dim);border-radius:var(--radius);border:1px solid var(--amber-glow);">
+        📋 Агрегований список усіх унікальних перевірок та документів по всій партії. Підготуйте до відправки.
+      </div>
+      ${redHtml}${yellowHtml}
+    </div>`;
+    }
+
     function renderResults(d, url, opts = {}) {
       lastAnalysisData = d;
       const s = d.summary || {};
@@ -9649,6 +10128,21 @@ ${euRegulations}
       <span class="sec-title">Логістичний план перевірок</span>
       <span class="sec-line"></span>
     </div>
+    <div class="port-selector">
+      <span class="port-selector-label">Порт транзиту ЄС:</span>
+      <button class="port-btn" id="portBtn-gdansk" onclick="setTransitPort('gdansk')">
+        <span class="port-flag">🇵🇱</span> Гданськ (BCT/DCT)
+      </button>
+      <button class="port-btn" id="portBtn-hamburg" onclick="setTransitPort('hamburg')">
+        <span class="port-flag">🇩🇪</span> Гамбург
+      </button>
+      <button class="port-btn" id="portBtn-rotterdam" onclick="setTransitPort('rotterdam')">
+        <span class="port-flag">🇳🇱</span> Роттердам
+      </button>
+      <button class="port-btn" id="portBtn-koper" onclick="setTransitPort('koper')">
+        <span class="port-flag">🇸🇮</span> Копер
+      </button>
+    </div>
     <div class="download-wrap">
       <button class="download-btn" id="dlBtn" onclick="downloadReport(event)">
         <svg class="dl-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -9692,9 +10186,16 @@ ${euRegulations}
     <div class="alerts">
       ${al}
       <div class="al al-green"><h4>NCTS Phase 5 · Checklist</h4><ul>${nc}</ul></div>
-    </div>`;
+    </div>
+    ${buildConsolidatedChecklist(d.items || [])}`;
 
       refreshOpenAccordions(document.getElementById('resultsArea'));
+      // Activate port button
+      setTimeout(() => {
+        document.querySelectorAll('.port-btn').forEach(b => b.classList.remove('active'));
+        const pb = document.getElementById('portBtn-' + _selectedPort);
+        if (pb) pb.classList.add('active');
+      }, 0);
       // Async AI origin enrichment — runs after render
       if (Array.isArray(d.items)) {
         d.items.forEach((item, idx) => {
@@ -10583,7 +11084,7 @@ ${euRegulations}
           sections: [
             {
               title: "Рослинне походження", rows: [
-                ["EU транзит", "Погодити BCP/фітоконтроль, перевірити phytosanitary certificate, CITES, IPPC/дерев’яну упаковку, запах і вологість."],
+                ["EU транзит", "Погодити BCP/фітоконтроль, перевірити phytosanitary certificate, CITES, IPPC/дерев\u0027яну упаковку, запах і вологість."],
                 ["UA транзит/митниця", "Фітосанітарний сертифікат, карантинний огляд, латинська назва, частина рослини, партія, можлива проба."],
                 ["Логістичний фокус", "Не ставити поруч з odor-sensitive API/фарма сировиною; контролювати сухість, палети, цілісність мішків."],
                 ["Документи", "Invoice, PL, CoA, phytosanitary, origin certificate, batch/lot, crop/harvest data за потреби."]
