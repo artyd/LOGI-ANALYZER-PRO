@@ -4773,7 +4773,102 @@
       margin-bottom: 0;
     }
 
-  </style>
+  
+    /* ============================================
+       v2.20 · KB ORIGIN FIX + WIDER BORDERED MANIFEST
+       ============================================ */
+    #resultsArea,
+    #page-arch,
+    #page-zed {
+      width: min(96vw, 1860px) !important;
+      max-width: none !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    #resultsArea .tbl-card {
+      border: 1px solid var(--line-3) !important;
+      box-shadow: 0 18px 48px -36px rgba(0,0,0,.5);
+    }
+
+    #resultsArea .tbl-scroll {
+      overflow-x: auto !important;
+      width: 100% !important;
+    }
+
+    #resultsArea table {
+      min-width: 1720px !important;
+      width: 100% !important;
+      border-collapse: collapse !important;
+      table-layout: fixed !important;
+    }
+
+    #resultsArea .tbl-col-product { width: 27% !important; }
+    #resultsArea .tbl-col-qty     { width: 7% !important; }
+    #resultsArea .tbl-col-value   { width: 10% !important; }
+    #resultsArea .tbl-col-eu      { width: 24% !important; }
+    #resultsArea .tbl-col-ua      { width: 24% !important; }
+    #resultsArea .tbl-col-risk    { width: 8% !important; }
+
+    #resultsArea thead th {
+      border: 1px solid var(--line-2) !important;
+      border-bottom: 1px solid var(--line-3) !important;
+      background: linear-gradient(180deg, var(--surface-2), var(--surface)) !important;
+    }
+
+    #resultsArea tbody td {
+      border: 1px solid var(--line-2) !important;
+    }
+
+    #resultsArea tbody tr:hover td {
+      background: rgba(44, 184, 120, 0.035) !important;
+    }
+
+    .origin-info-card-btn {
+      border-left: 3px solid var(--amber) !important;
+      background: linear-gradient(180deg, rgba(44,184,120,.07), var(--surface-2)) !important;
+    }
+
+    .origin-info-card-btn:hover {
+      border-color: rgba(44,184,120,.45) !important;
+      box-shadow: 0 6px 18px -12px var(--amber-glow);
+    }
+
+    .ptc-badge.kb {
+      background: var(--amber-dim);
+      border: 1px solid rgba(44,184,120,.28);
+      color: var(--amber-bright);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .origin-option-card[kbmatched],
+    .origin-option-card .origin-card-rec-badge {
+      letter-spacing: .05em;
+    }
+
+    .origin-cards-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      align-items: stretch;
+    }
+
+    .origin-option-card {
+      max-width: none !important;
+      min-width: 0 !important;
+    }
+
+    @media (max-width: 1500px) {
+      #resultsArea,
+      #page-arch,
+      #page-zed {
+        width: calc(100vw - 16px) !important;
+        margin-left: calc(50% - 50vw + 8px) !important;
+        margin-right: calc(50% - 50vw + 8px) !important;
+      }
+    }
+
+</style>
 </head>
 
 <body>
@@ -6748,29 +6843,195 @@
 
 
     // ────────────────────────────────────────────────────────────────
-    //  Функція пошуку в Knowledge Base за назвою товару
+    //  PRODUCT ORIGIN KB: robust deterministic lookup before AI
+    //  Fixes: normalizes UA/RU/EN spellings, searches all item fields,
+    //  creates real origin cards/options, and locks KB result from AI override.
     // ────────────────────────────────────────────────────────────────
-    function lookupProductOriginKB(name, hsCode) {
-      if (!name) return null;
-      const norm = String(name).toLowerCase()
-        .replace(/[^а-яёa-z0-9\-\s]/gi, ' ')
-        .replace(/\s+/g, ' ').trim();
+    function normalizeOriginKBText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ё/g, 'е')
+        .replace(/[ії]/g, 'и')
+        .replace(/є/g, 'е')
+        .replace(/ґ/g, 'г')
+        .replace(/[’'`´]/g, '')
+        .replace(/[^a-zа-я0-9]+/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function collectOriginKBText(input, hsCode) {
+      if (!input) return normalizeOriginKBText(hsCode || '');
+      if (typeof input !== 'object') return normalizeOriginKBText([input, hsCode].filter(Boolean).join(' '));
+
+      const fields = [
+        input.name, input.description, input.rawDescription, input.originalName,
+        input.productName, input.supplierProductName, input.invoiceDescription,
+        input.manufacturer, input.supplier, input.shipper, input.exporter,
+        input.category, input.applications, input.applicationContext,
+        input.originType, input.productionMethod, input.originShortNote,
+        input.uctzedCode, input.hsCode, input.code, hsCode
+      ];
+
+      // Also scan simple string/number values in the item, because uploaded
+      // tables often store product text under non-standard column names.
+      Object.keys(input || {}).forEach(k => {
+        const v = input[k];
+        if ((typeof v === 'string' || typeof v === 'number') && !fields.includes(v)) fields.push(v);
+      });
+
+      return normalizeOriginKBText(fields.filter(Boolean).join(' '));
+    }
+
+    function lookupProductOriginKB(input, hsCode) {
+      const norm = collectOriginKBText(input, hsCode);
+      if (!norm) return null;
 
       let bestMatch = null;
       let bestScore = 0;
+      let bestKeyword = '';
 
       for (const entry of PRODUCT_ORIGIN_KB) {
-        for (const kw of entry.keys) {
-          if (norm.includes(kw)) {
-            const score = kw.length; // довший ключ = точніший збіг
-            if (score > bestScore) {
-              bestScore = score;
-              bestMatch = entry;
-            }
+        for (const rawKw of (entry.keys || [])) {
+          const kw = normalizeOriginKBText(rawKw);
+          if (!kw || kw.length < 2) continue;
+
+          const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const hasWordMatch = new RegExp(`(^|\\s)${escaped}(\\s|$)`, 'i').test(norm);
+          const hasPhraseMatch = norm.includes(kw);
+          if (!hasPhraseMatch && !hasWordMatch) continue;
+
+          let score = kw.length;
+          if (hasWordMatch) score += 80;
+          if (norm.startsWith(kw)) score += 40;
+          if (/\d/.test(kw)) score += 10;
+          if ((entry.confidence || '').toLowerCase() === 'high') score += 12;
+
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = entry;
+            bestKeyword = rawKw;
           }
         }
       }
-      return bestMatch;
+
+      return bestMatch ? { ...bestMatch, _matchedKeyword: bestKeyword, _matchScore: bestScore } : null;
+    }
+
+    function kbOriginCandidateKeys(kb = {}) {
+      const t = normalizeOriginKBText([
+        kb.originType, kb.productionMethod, kb.category
+      ].filter(Boolean).join(' '));
+
+      const keys = [];
+      const add = (key) => { if (!keys.includes(key)) keys.push(key); };
+
+      const isAlternative = /\b(або|или|or|and|та|и)\b|\/|\+|змишан|смешан|mixed|комбин|комбін|semi|напив|полусинт/.test(t);
+      if (isAlternative) add('mixed');
+
+      if (/фермент|ferment|біотех|биотех|microb|strain|штам|enzyme|ензим|бактер|yeast|дрожж/.test(t)) add('fermentation');
+      if (/синтет|synthet|synthesis|синтез|хим|хім|chemical|petro|нафто|органіч|органич/.test(t)) add('synthetic');
+      if (/рослин|растител|plant|botanic|herb|extract|екстракт|олия|олія|масло|seed|leaf|root|flower|wood|starch|cellulose|крохмал|крахмал/.test(t)) add('plant');
+      if (/тварин|животн|animal|bovine|porcine|fish|marine|lanolin|wool|шерст|желатин|gelatin|collagen|колаген|casein|казеин|albumin|альбумин|молоч|dairy/.test(t)) add('animal');
+      if (/мінерал|минерал|mineral|inorganic|неорган|metal|метал|oxide|оксид|salt|соль|сіль|hydroxide|гидроксид|гідроксид|ore|руда/.test(t)) add('mineral');
+
+      if (!keys.length) add('unknown');
+
+      // If the KB says a single clear method, do not force "mixed".
+      if (keys.length === 2 && keys[0] === 'mixed' && !isAlternative) return [keys[1]];
+      return keys;
+    }
+
+    function buildKBOriginOptions(item = {}, kb = {}) {
+      const keys = kbOriginCandidateKeys(kb);
+      const kbConf = kb.confidence || (keys.includes('unknown') ? 'low' : 'medium');
+      const method = kb.productionMethod || 'Метод виробництва потребує підтвердження документами.';
+      const kbCategory = kb.category || item.category || 'Категорія не вказана';
+      const originType = kb.originType || 'Походження потребує підтвердження';
+
+      const labels = {
+        fermentation: 'Ферментаційне',
+        synthetic: 'Синтетичне',
+        plant: 'Рослинне',
+        animal: 'Тваринне',
+        mineral: 'Мінеральне / неорганічне',
+        mixed: originType,
+        unknown: 'Невідоме / підтвердити'
+      };
+
+      return keys.map((key, index) => {
+        const base = originProfileByKey(key, item);
+        const recommended = index === 0;
+        const label = keys.length === 1 && key !== 'unknown'
+          ? `${originType} · KB`
+          : `${labels[key] || base.label} · KB`;
+
+        return {
+          ...base,
+          key,
+          label,
+          shortLabel: labels[key] || base.shortLabel || label,
+          confidence: kbConf,
+          recommended,
+          kbMatched: true,
+          kbCategory,
+          kbKeyword: kb._matchedKeyword || '',
+          shortConclusion: `${originType}. ${method}`,
+          basis: `PRODUCT_ORIGIN_KB: ${kbCategory}. Метод/джерело: ${method}. Збіг: ${kb._matchedKeyword || 'назва товару'}.`,
+          evidence: [
+            `KB-збіг за ключем: ${kb._matchedKeyword || '—'}`,
+            `Тип походження: ${originType}`,
+            `Метод виробництва: ${method}`,
+            `Рівень впевненості KB: ${kbConf}`
+          ],
+          riskFlags: [
+            'Підтвердити джерело/route of synthesis у CoA, SDS або окремому Origin/Manufacturing statement',
+            'Звірити Certificate of Origin, виробника і маркування партії'
+          ],
+          documentsToCheck: [
+            'Certificate of Origin',
+            'CoA',
+            'SDS/MSDS',
+            'TDS / Specification',
+            'Manufacturing / Origin statement'
+          ],
+          qdproUrl: item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode)
+        };
+      });
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    //  Apply PRODUCT_ORIGIN_KB to item before AI and keep it locked.
+    // ────────────────────────────────────────────────────────────────
+    function applyKBOriginToItem(item) {
+      const kb = lookupProductOriginKB(item, item && item.uctzedCode);
+      if (!kb) return item;
+
+      item.kbMatched = true;
+      item.kbOriginKeyword = kb._matchedKeyword || '';
+      item.originType = kb.originType || item.originType;
+      item.productionMethod = kb.productionMethod || item.productionMethod;
+      item.originConfidence = kb.confidence || item.originConfidence || 'medium';
+      item.originShortNote = `[PRODUCT_ORIGIN_KB] ${kb.originType || 'Походження визначено KB'}. Метод: ${kb.productionMethod || 'уточнити за документами'}.`;
+      item.originEvidence = `PRODUCT_ORIGIN_KB match: ${kb._matchedKeyword || '—'}`;
+
+      if (kb.category && (!item.category || /невідом|unknown|подвійне|подвійного|—/i.test(String(item.category)))) {
+        item.category = kb.category;
+      }
+
+      item.originOptions = buildKBOriginOptions(item, kb);
+      item.selectedOriginKey = (item.originOptions.find(o => o.recommended) || item.originOptions[0] || {}).key || 'unknown';
+      item.possibleOriginLabels = item.originOptions.map(o => o.label).join(' | ');
+      item.originSelectionNote = item.originOptions[0] ? item.originOptions[0].basis : item.originSelectionNote;
+
+      // Important: do not let async AI replace a deterministic KB match.
+      item._originLockedByKB = true;
+      item._needsAIOrigin = false;
+
+      mergeOriginProfileIntoItem(item, selectedOriginProfile(item, item.selectedOriginKey));
+      return item;
     }
 
 
@@ -9034,10 +9295,19 @@ ${euRegulations}
       const name = escHtml(item.name || '—');
       const hs = escHtml(item.uctzedCode || '—');
       const qdproUrl = item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
-      const originSelector = renderOriginSelectorCard(item, idx);
       const apps = item.applications || item.applicationContext || '';
       const selected = selectedOriginProfile(item, item.selectedOriginKey) || {};
+      const selectedKey = selected.key || item.selectedOriginKey || 'unknown';
       const riskColor = item.risk === 'Критичний' ? 'var(--red-bright)' : item.risk === 'Середній' ? 'var(--yellow)' : 'var(--green-bright)';
+
+      const conf = selected.confidence || item.originConfidence || 'low';
+      const confLabel = conf === 'high' ? 'висока' : conf === 'medium' ? 'середня' : 'низька';
+      const originDot = item._originLockedByKB ? 'ok' : conf === 'high' ? 'ok' : conf === 'medium' ? 'warn' : 'red';
+      const originCardTitle = item._originLockedByKB ? 'Походження / QDPro · KB' : 'Походження / QDPro';
+      const originNote = [
+        selected.label || item.originType || '—',
+        item._originLockedByKB ? 'PRODUCT_ORIGIN_KB' : `довіра: ${confLabel}`
+      ].filter(Boolean).join(' · ');
 
       const precursorBadge = item.precursorRisk
         ? `<div class="precursor-badge">⚠ ПРЕКУРСОР / КОНТРОЛЬОВАНА РЕЧОВИНА</div>` : '';
@@ -9079,10 +9349,11 @@ ${euRegulations}
         conclusion: 'Звірте Імпорт / Транзит / Експорт для поточного 10-значного коду.',
         info: [
           { label: 'QDPro', value: qdproUrl },
-          { label: 'Варіанти', value: (item.originOptions || []).map(o => o.label).join(' | ') || '—' },
-          { label: 'Обрано', value: selected.label || item.originType || '—' }
-        ].filter(r => r.value && r.value !== '—'),
-        docs: ['Certificate of Origin', 'Invoice', 'Packing List', 'SDS/MSDS'],
+          { label: 'Варіанти походження', value: (item.originOptions || []).map(o => o.label).join(' | ') || '—' },
+          { label: 'Обрано', value: selected.label || item.originType || '—' },
+          item.kbMatched && { label: 'KB-збіг', value: item.kbOriginKeyword || 'PRODUCT_ORIGIN_KB' }
+        ].filter(r => r && r.value && r.value !== '—'),
+        docs: ['Certificate of Origin', 'Invoice', 'Packing List', 'SDS/MSDS', 'CoA'],
         recommendation: 'Логіст/брокер має звірити вкладки Імпорт / Транзит / Експорт у QDPro goodinfo.',
         qdproUrl
       });
@@ -9095,6 +9366,7 @@ ${euRegulations}
             <span class="ptc-badge risk" style="--rc:${riskColor}">${escHtml(item.risk || '—')}</span>
             ${item.dutyRatePercent != null ? `<span class="ptc-badge duty">Мито ${item.dutyRatePercent}%</span>` : ''}
             ${item.category ? `<span class="ptc-badge cat">${escHtml(item.category)}</span>` : ''}
+            ${item.kbMatched ? `<span class="ptc-badge kb">KB origin</span>` : ''}
           </div>
           ${precursorBadge}
         </div>
@@ -9108,7 +9380,14 @@ ${euRegulations}
           <div class="icb-arrow">›</div>
         </button>
 
-        ${originSelector}
+        <button class="info-card-btn origin-info-card-btn" onclick="openOriginDetailCard(${idx},'${escHtml(selectedKey)}')" type="button">
+          <div class="icb-dot ${originDot}"></div>
+          <div class="icb-body">
+            <div class="icb-title">${originCardTitle}</div>
+            <div class="icb-note">${escHtml(originNote)}</div>
+          </div>
+          <div class="icb-arrow">›</div>
+        </button>
 
         ${apps || item.category ? `<button class="info-card-btn" onclick="openDetailCard('${contextCardId}')" type="button">
           <div class="icb-dot ok"></div>
@@ -9129,6 +9408,7 @@ ${euRegulations}
         </button>
       </div>`;
     }
+
 
     // ===== AI-BASED ORIGIN INFERENCE =====
 
@@ -9708,6 +9988,7 @@ ${euRegulations}
 
     // Async post-render AI origin enrichment
     async function enrichItemOriginAsync(item, idx) {
+      if (item && item._originLockedByKB) return;
       try {
         const aiOpts = await inferOriginProfilesByAI(item);
         if (!aiOpts || !aiOpts.length) return;
@@ -10199,7 +10480,7 @@ ${euRegulations}
       // Async AI origin enrichment — runs after render
       if (Array.isArray(d.items)) {
         d.items.forEach((item, idx) => {
-          if (item._needsAIOrigin !== false) {
+          if (item._needsAIOrigin !== false && !item._originLockedByKB) {
             // Small stagger so UI isn't blocked
             setTimeout(() => enrichItemOriginAsync(item, idx), idx * 120);
           }
