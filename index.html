@@ -24,6 +24,29 @@
     }
     .port-btn:hover { border-color:var(--line-3); color:var(--ink); }
     .port-btn.active { background:var(--amber-dim); border-color:var(--amber); color:var(--amber); }
+
+    .manifest-actions {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin:0 0 18px;
+      flex-wrap:wrap;
+      width:100%;
+    }
+    .manifest-actions .port-selector {
+      margin:0;
+      flex:1 1 680px;
+      min-width:0;
+    }
+    .manifest-actions .download-wrap {
+      margin:0;
+      flex:0 0 auto;
+    }
+    @media (max-width: 980px) {
+      .manifest-actions { align-items:flex-start; }
+      .manifest-actions .download-wrap { width:100%; justify-content:flex-start; }
+    }
     .port-btn .port-flag { font-size:13px; }
 
     /* ============================================
@@ -2123,6 +2146,7 @@
       display: flex;
       flex-direction: column;
       gap: 7px;
+      width: 100%;
     }
 
     .sc-empty {
@@ -2256,6 +2280,18 @@
     }
 
     .summary-card:hover .sc-arrow { transform: translateX(3px); color: var(--amber); }
+
+    /* Transit cards inside table columns */
+    td.col-eu, td.col-ua {
+      min-width: 420px;
+      text-align: left !important;
+      vertical-align: top !important;
+    }
+    td.col-eu .summary-card,
+    td.col-ua .summary-card {
+      min-height: 58px;
+    }
+
 
     /* INFO CARD BUTTONS (product column) */
     .info-card-btn {
@@ -3644,6 +3680,7 @@
     #resultsArea .sheet-banner,
     #resultsArea .metrics,
     #resultsArea .sec-head,
+    #resultsArea .manifest-actions,
     #resultsArea .download-wrap,
     #resultsArea .tbl-card,
     #resultsArea .alerts {
@@ -6958,11 +6995,13 @@
       document.querySelectorAll('.port-btn').forEach(b => b.classList.remove('active'));
       const btn = document.getElementById('portBtn-' + port);
       if (btn) btn.classList.add('active');
-      // Re-render dots if results are shown
+      // Re-render transit summary cards if results are shown
       if (lastAnalysisData && Array.isArray(lastAnalysisData.items)) {
         lastAnalysisData.items.forEach((item, idx) => {
           const euCell = document.getElementById('euChecks-' + idx);
-          if (euCell) euCell.innerHTML = renderDotsCell(item, idx, 'eu');
+          if (euCell) euCell.innerHTML = renderEuTransitCell(item, idx);
+          const uaCell = document.getElementById('uaChecks-' + idx);
+          if (uaCell) uaCell.innerHTML = renderUaTransitCell(item, idx);
         });
       }
     }
@@ -10453,11 +10492,11 @@ ${euRegulations}
         <div class="td-value-line">код/ставка ${dutyRateDisplay}</div>
         <div class="td-value-vat">для ВМД / гарантії</div>
       </td>
-      <td class="col-eu" id="euChecks-${idx}" style="vertical-align:middle;text-align:center">
-        ${renderDotsCell(item, idx, 'eu')}
+      <td class="col-eu" id="euChecks-${idx}" style="vertical-align:top;text-align:left">
+        ${renderEuTransitCell(item, idx)}
       </td>
-      <td class="col-ua" id="uaChecks-${idx}" style="vertical-align:middle;text-align:center">
-        ${renderDotsCell(item, idx, 'ua')}
+      <td class="col-ua" id="uaChecks-${idx}" style="vertical-align:top;text-align:left">
+        ${renderUaTransitCell(item, idx)}
       </td>
       <td class="col-risk">
         <span class="pill ${rc}">${item.risk || '—'}</span>
@@ -10482,7 +10521,6 @@ ${euRegulations}
         ${s.ignoredSheets && s.ignoredSheets.length > 0 ? `<br><span style="color:var(--ink-3);font-size:11px;">Проігноровано (${s.ignoredSheets.length}): ${s.ignoredSheets.join(', ')}</span>` : ''}
       </div>
     </div>` : ''}
-    <div class="logi-scope-banner"><b>LOGISTICS ONLY</b><span>Звіт сфокусований на роботі логіста та брокера: маршрут, T1/NCTS, документи, ADR/SDS, BCP/TRACES, фіто/ветконтроль, митна лабораторія, пакування, температура, маркування та ризик затримки. Комерційний або закупівельний аналіз не відображається.</span></div>
     <div class="sec-head">
       <span class="sec-num">01 · OVERVIEW</span>
       <span class="sec-title">Зведення для логіста / брокера</span>
@@ -10516,27 +10554,29 @@ ${euRegulations}
       <span class="sec-title">Логістичний план перевірок</span>
       <span class="sec-line"></span>
     </div>
-    <div class="port-selector">
-      <span class="port-selector-label">Порт транзиту ЄС:</span>
-      <button class="port-btn" id="portBtn-gdansk" onclick="setTransitPort('gdansk')">
-        <span class="port-flag">🇵🇱</span> Гданськ (BCT/DCT)
-      </button>
-      <button class="port-btn" id="portBtn-hamburg" onclick="setTransitPort('hamburg')">
-        <span class="port-flag">🇩🇪</span> Гамбург
-      </button>
-      <button class="port-btn" id="portBtn-rotterdam" onclick="setTransitPort('rotterdam')">
-        <span class="port-flag">🇳🇱</span> Роттердам
-      </button>
-      <button class="port-btn" id="portBtn-koper" onclick="setTransitPort('koper')">
-        <span class="port-flag">🇸🇮</span> Копер
-      </button>
-    </div>
-    <div class="download-wrap">
-      <button class="download-btn" id="dlBtn" onclick="downloadReport(event)">
-        <svg class="dl-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span class="dl-spinner"></span>
-        <span class="dl-label">Завантажити звіт (.xlsx)</span>
-      </button>
+    <div class="manifest-actions">
+      <div class="port-selector">
+        <span class="port-selector-label">Порт транзиту ЄС:</span>
+        <button class="port-btn" id="portBtn-gdansk" onclick="setTransitPort('gdansk')">
+          <span class="port-flag">🇵🇱</span> Гданськ (BCT/DCT)
+        </button>
+        <button class="port-btn" id="portBtn-hamburg" onclick="setTransitPort('hamburg')">
+          <span class="port-flag">🇩🇪</span> Гамбург
+        </button>
+        <button class="port-btn" id="portBtn-rotterdam" onclick="setTransitPort('rotterdam')">
+          <span class="port-flag">🇳🇱</span> Роттердам
+        </button>
+        <button class="port-btn" id="portBtn-koper" onclick="setTransitPort('koper')">
+          <span class="port-flag">🇸🇮</span> Копер
+        </button>
+      </div>
+      <div class="download-wrap">
+        <button class="download-btn" id="dlBtn" onclick="downloadReport(event)">
+          <svg class="dl-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="dl-spinner"></span>
+          <span class="dl-label">Завантажити звіт (.xlsx)</span>
+        </button>
+      </div>
     </div>
     <div class="tbl-card">
       <div class="tbl-head-bar">
