@@ -3688,6 +3688,18 @@
       padding: 11px 12px;
     }
 
+
+    /* v2.30 · Ukrainian origin cards */
+    .origin-detail-basis b { color: var(--amber); font-weight: 700; }
+    .origin-info-card-btn .icb-title::after {
+      content: " · походження";
+      color: var(--ink-3);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .origin-option-card .origin-country { line-height: 1.25; }
+
     @media (max-width: 1500px) {
       #resultsArea .tbl-scroll {
         overflow-x: auto;
@@ -3744,6 +3756,18 @@
     #resultsArea .tbl-col-eu { width: 25.5%; }
     #resultsArea .tbl-col-ua { width: 25.5%; }
     #resultsArea .tbl-col-risk { width: 8%; }
+
+
+    /* v2.30 · Ukrainian origin cards */
+    .origin-detail-basis b { color: var(--amber); font-weight: 700; }
+    .origin-info-card-btn .icb-title::after {
+      content: " · походження";
+      color: var(--ink-3);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .origin-option-card .origin-country { line-height: 1.25; }
 
     @media (max-width: 1500px) {
       #resultsArea,
@@ -4435,6 +4459,18 @@
     #resultsArea .tbl-col-ua { width: 17%; }
     #resultsArea .tbl-col-risk { width: 7%; }
 
+
+    /* v2.30 · Ukrainian origin cards */
+    .origin-detail-basis b { color: var(--amber); font-weight: 700; }
+    .origin-info-card-btn .icb-title::after {
+      content: " · походження";
+      color: var(--ink-3);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .origin-option-card .origin-country { line-height: 1.25; }
+
     @media (max-width: 1500px) {
       #resultsArea table { min-width: 1680px; }
       #resultsArea .tbl-scroll { overflow-x: auto; }
@@ -4471,6 +4507,18 @@
     #resultsArea .tbl-col-eu { width: 27%; }
     #resultsArea .tbl-col-ua { width: 27%; }
     #resultsArea .tbl-col-risk { width: 8%; }
+
+
+    /* v2.30 · Ukrainian origin cards */
+    .origin-detail-basis b { color: var(--amber); font-weight: 700; }
+    .origin-info-card-btn .icb-title::after {
+      content: " · походження";
+      color: var(--ink-3);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .origin-option-card .origin-country { line-height: 1.25; }
 
     @media (max-width: 1500px) {
       #resultsArea {
@@ -4780,7 +4828,7 @@
     #resultsArea,
     #page-arch,
     #page-zed {
-      width: min(96vw, 1860px) !important;
+      width: min(98vw, 1960px) !important;
       max-width: none !important;
       margin-left: auto !important;
       margin-right: auto !important;
@@ -4797,17 +4845,17 @@
     }
 
     #resultsArea table {
-      min-width: 1720px !important;
+      min-width: 1840px !important;
       width: 100% !important;
       border-collapse: collapse !important;
       table-layout: fixed !important;
     }
 
-    #resultsArea .tbl-col-product { width: 27% !important; }
+    #resultsArea .tbl-col-product { width: 29% !important; }
     #resultsArea .tbl-col-qty     { width: 7% !important; }
     #resultsArea .tbl-col-value   { width: 10% !important; }
-    #resultsArea .tbl-col-eu      { width: 24% !important; }
-    #resultsArea .tbl-col-ua      { width: 24% !important; }
+    #resultsArea .tbl-col-eu      { width: 23% !important; }
+    #resultsArea .tbl-col-ua      { width: 23% !important; }
     #resultsArea .tbl-col-risk    { width: 8% !important; }
 
     #resultsArea thead th {
@@ -4857,6 +4905,18 @@
       max-width: none !important;
       min-width: 0 !important;
     }
+
+
+    /* v2.30 · Ukrainian origin cards */
+    .origin-detail-basis b { color: var(--amber); font-weight: 700; }
+    .origin-info-card-btn .icb-title::after {
+      content: " · походження";
+      color: var(--ink-3);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .origin-option-card .origin-country { line-height: 1.25; }
 
     @media (max-width: 1500px) {
       #resultsArea,
@@ -5375,10 +5435,10 @@
     }
 
     // ============================================================
-    //  PRODUCT ORIGIN KNOWLEDGE BASE v1.0
-    //  200+ речовин з точним походженням — перевіряється ДО AI
+    //  PRODUCT ORIGIN KNOWLEDGE BASE v2.30
+    //  300+ речовин з українськими описами походження — перевіряється ДО AI
     //  Категорії: ветеринарні АФІ, фарм АФІ, амінокислоти,
-    //  вітаміни, косметична сировина, харчові добавки, ексципієнти
+    //  вітаміни, косметична/олеохімічна сировина, харчові добавки, ексципієнти, пакування
     // ============================================================
 
     const PRODUCT_ORIGIN_KB = [
@@ -6573,6 +6633,74 @@
         category: 'Промислова хімія', confidence: 'high' },
 
 
+
+      // ─── ДОДАТКОВА УНІВЕРСАЛЬНА БАЗА v2.30: субстанції з завантажених збірників + типові закупівельні позиції ───
+      {"keys": ["метамізол натрію", "метамизол натрия", "анальгін", "анальгин", "dipyrone", "metamizole sodium", "novalgin"], "originType": "синтетичне", "productionMethod": "хімічний синтез похідного піразолону з подальшим утворенням натрієвої солі", "category": "Фармацевтична АФІ / анальгетик", "confidence": "high"},
+      {"keys": ["фталілсульфатіазол", "фталилсульфатиазол", "фталазол", "phthalylsulfathiazole", "phthalazol"], "originType": "синтетичне", "productionMethod": "хімічний синтез сульфаніламідного похідного з фталільним фрагментом", "category": "Фармацевтична АФІ / сульфаніламід", "confidence": "high"},
+      {"keys": ["ізоніазид", "изониазид", "isoniazid", "isonicotinic acid hydrazide"], "originType": "синтетичне", "productionMethod": "хімічний синтез гідразиду ізонікотинової кислоти", "category": "Фармацевтична АФІ / протитуберкульозна речовина", "confidence": "high"},
+      {"keys": ["ацикловір", "ацикловир", "acyclovir"], "originType": "синтетичне", "productionMethod": "багатостадійний хімічний синтез ациклічного нуклеозидного аналога", "category": "Фармацевтична АФІ / противірусна речовина", "confidence": "high"},
+      {"keys": ["алопуринол", "аллопуринол", "allopurinol"], "originType": "синтетичне", "productionMethod": "хімічний синтез піразолопіримідинового похідного", "category": "Фармацевтична АФІ", "confidence": "high"},
+      {"keys": ["кетоконазол", "ketoconazole"], "originType": "синтетичне", "productionMethod": "хімічний синтез імідазольного протигрибкового похідного", "category": "Фармацевтична АФІ / протигрибкова речовина", "confidence": "high"},
+      {"keys": ["фуросемід", "фуросемид", "furosemide"], "originType": "синтетичне", "productionMethod": "хімічний синтез похідного сульфонаміду та антранілової кислоти", "category": "Фармацевтична АФІ / діуретик", "confidence": "high"},
+      {"keys": ["німесулід", "нимесулид", "nimesulide"], "originType": "синтетичне", "productionMethod": "хімічний синтез похідного сульфонаніліду", "category": "Фармацевтична АФІ / НПЗЗ", "confidence": "high"},
+      {"keys": ["диклофенак натрію", "диклофенак натрия", "diclofenac sodium", "diclofenac"], "originType": "синтетичне", "productionMethod": "хімічний синтез похідного феніл-оцтової кислоти з утворенням натрієвої солі", "category": "Фармацевтична АФІ / НПЗЗ", "confidence": "high"},
+      {"keys": ["мелоксикам", "meloxicam"], "originType": "синтетичне", "productionMethod": "хімічний синтез оксикамового похідного", "category": "Фармацевтична АФІ / НПЗЗ", "confidence": "high"},
+      {"keys": ["лідокаїну гідрохлорид", "лидокаина гидрохлорид", "лідокаїн гідрохлорид", "лидокаин гидрохлорид", "lidocaine hydrochloride", "lidocaine hcl"], "originType": "синтетичне", "productionMethod": "хімічний синтез місцевого анестетика амідного типу з подальшим утворенням хлороводневої солі", "category": "Фармацевтична АФІ / місцевий анестетик", "confidence": "high"},
+      {"keys": ["новокаїн гідрохлорид", "новокаин гидрохлорид", "прокаїн гідрохлорид", "прокаин гидрохлорид", "procaine hydrochloride", "procaine hcl", "novocaine"], "originType": "синтетичне", "productionMethod": "хімічний синтез естерного місцевого анестетика з подальшим утворенням хлороводневої солі", "category": "Фармацевтична АФІ / місцевий анестетик", "confidence": "high"},
+      {"keys": ["анестезин", "анестезин", "бензокаїн", "бензокаин", "benzocaine", "ethyl aminobenzoate"], "originType": "синтетичне", "productionMethod": "хімічний синтез етилового естеру п-амінобензойної кислоти", "category": "Фармацевтична АФІ / місцевий анестетик", "confidence": "high"},
+      {"keys": ["стрептоцид", "сульфаніламід", "сульфаниламид", "sulfanilamide", "streptocide"], "originType": "синтетичне", "productionMethod": "хімічний синтез сульфаніламідної речовини", "category": "Фармацевтична АФІ / сульфаніламід", "confidence": "high"},
+      {"keys": ["хлоргексидин", "хлоргекседин", "chlorhexidine", "chlorhexidine acetate", "хлоргексидина ацетат", "хлоргексидину ацетат"], "originType": "синтетичне", "productionMethod": "хімічний синтез бігуанідного антисептика; сіль/форма залежить від специфікації", "category": "Фармацевтична АФІ / антисептик", "confidence": "high"},
+      {"keys": ["брильянтовий зелений", "бриллиантовый зеленый", "бриллиантовй зеленый", "зеленка", "brilliant green"], "originType": "синтетичне", "productionMethod": "хімічний синтез трифенілметанового барвника", "category": "Фармацевтична/ветеринарна речовина / барвник-антисептик", "confidence": "high"},
+      {"keys": ["йод", "iodine", "iodum"], "originType": "мінеральне / неорганічне", "productionMethod": "виділення йоду з природних розсолів або мінеральної сировини з подальшим очищенням", "category": "Фармацевтична / хімічна речовина", "confidence": "high"},
+      {"keys": ["борна кислота", "борная кислота", "boric acid", "orthoboric acid"], "originType": "мінеральне / синтетичне", "productionMethod": "отримання з борних мінералів або реакцією боратів із мінеральними кислотами", "category": "Фармацевтична / промислова хімія", "confidence": "high"},
+      {"keys": ["натрію тіосульфат", "натрия тиосульфат", "sodium thiosulfate", "sodium thiosulphate"], "originType": "мінеральне / синтетичне", "productionMethod": "хімічний синтез з сульфітів/сірки або інших неорганічних сірковмісних сполук", "category": "Фармацевтична / хімічна речовина", "confidence": "high"},
+      {"keys": ["калію йодид", "калия йодид", "potassium iodide", "ki"], "originType": "мінеральне / синтетичне", "productionMethod": "нейтралізація йодоводневої кислоти калієвою основою або реакції йоду з калійвмісними відновниками", "category": "Фармацевтична / харчова добавка", "confidence": "high"},
+      {"keys": ["кальцію гліцерофосфат", "кальция глицерофосфат", "calcium glycerophosphate"], "originType": "синтетичне (мінеральне + органічне)", "productionMethod": "хімічна нейтралізація гліцерофосфорної кислоти кальцієвою основою/сіллю", "category": "Фармацевтична АФІ / мінеральна добавка", "confidence": "high"},
+      {"keys": ["кальцію глюконат вет", "кальция глюконат вет", "calcium gluconate vet"], "originType": "синтетичне (мінеральне + ферментаційне органічне)", "productionMethod": "реакція глюконової кислоти з кальцієвою сіллю; глюконова кислота зазвичай отримується ферментацією глюкози", "category": "Ветеринарна/фармацевтична субстанція", "confidence": "high"},
+      {"keys": ["альбендазол", "albendazole"], "originType": "синтетичне", "productionMethod": "хімічний синтез бензимідазольного карбамату", "category": "Ветеринарна/фармацевтична АФІ / антигельмінтик", "confidence": "high"},
+      {"keys": ["енрофлоксацин основа", "энрофлоксацин основание", "енрофлоксацин", "энрофлоксацин", "enrofloxacin base", "enrofloxacin"], "originType": "синтетичне", "productionMethod": "хімічний синтез фторхінолонового похідного", "category": "Ветеринарна АФІ / антибактеріальна речовина", "confidence": "high"},
+      {"keys": ["олаквіндокс", "олаквиндокс", "olaquindox"], "originType": "синтетичне", "productionMethod": "хімічний синтез похідного хіноксаліну-N-оксиду", "category": "Ветеринарна/кормова речовина", "confidence": "high"},
+      {"keys": ["метронідазол бензоат", "метронидазол бензоат", "metronidazole benzoate"], "originType": "синтетичне", "productionMethod": "хімічний синтез нітроімідазольної речовини з подальшим утворенням бензоатної форми", "category": "Фармацевтична/ветеринарна АФІ", "confidence": "high"},
+      {"keys": ["хлортетрациклін гідрохлорид", "хлортетрациклина г/х", "хлортетрациклин гхл", "chlortetracycline hydrochloride", "chlortetracycline hcl"], "originType": "ферментаційне", "productionMethod": "ферментація Streptomyces aureofaciens з подальшим виділенням, очищенням і утворенням хлороводневої солі", "category": "Ветеринарна АФІ / антибіотик", "confidence": "high"},
+      {"keys": ["окситетрациклін гідрохлорид", "окситетрациклин гхл", "oxytetracycline hydrochloride", "oxytetracycline hcl"], "originType": "ферментаційне", "productionMethod": "ферментація Streptomyces rimosus з подальшим виділенням, очищенням і утворенням хлороводневої солі", "category": "Ветеринарна/фармацевтична АФІ / антибіотик", "confidence": "high"},
+      {"keys": ["доксициклін гіклат", "доксициклина хиклат", "doxycycline hyclate"], "originType": "напівсинтетичне (ферментаційна основа)", "productionMethod": "напівсинтез на основі тетрациклінового ферментаційного ядра з подальшим утворенням гіклату", "category": "Фармацевтична/ветеринарна АФІ / антибіотик", "confidence": "high"},
+      {"keys": ["тиамулина гидроген фумарат", "тіамуліну гідроген фумарат", "tiamulin hydrogen fumarate"], "originType": "напівсинтетичне (ферментаційна основа)", "productionMethod": "хімічна модифікація плевромутиліну, отриманого ферментацією, з утворенням фумаратної солі", "category": "Ветеринарна АФІ / антибіотик", "confidence": "high"},
+      {"keys": ["менадіон нікотинамід бісульфіт", "менадион мnb", "менадион мнб", "mnb", "menadione nicotinamide bisulfite", "vitamin k3 mnb"], "originType": "синтетичне", "productionMethod": "хімічний синтез менадіону з подальшим утворенням водорозчинного бісульфітного комплексу з нікотинамідом", "category": "Кормова добавка / вітамін K3", "confidence": "high"},
+      {"keys": ["мальтитол сироп", "мальтитоловий сироп", "maltitol syrup"], "originType": "рослинне (модифіковане)", "productionMethod": "гідроліз крохмалю до мальтози з подальшим каталітичним гідруванням до мальтитолу", "category": "Харчова добавка / підсолоджувач", "confidence": "high"},
+      {"keys": ["сорбітол 70", "сорбитол 70", "sorbitol 70", "sorbitol solution", "сорбітол розчин", "сорбитол раствор"], "originType": "рослинне (модифіковане)", "productionMethod": "каталітичне гідрування глюкози, отриманої з кукурудзяного або іншого крохмалю", "category": "Харчова добавка / фарм ексципієнт", "confidence": "high"},
+      {"keys": ["еритритол", "эритритол", "erythritol"], "originType": "ферментаційне", "productionMethod": "ферментація глюкозного субстрату осмотолерантними дріжджами з подальшим очищенням і кристалізацією", "category": "Харчова добавка / підсолоджувач", "confidence": "high"},
+      {"keys": ["ціанокобаламін 1% кормовий", "цианокобаламин 1% кормовой", "cyanocobalamin 1% feed"], "originType": "ферментаційне", "productionMethod": "ферментаційне отримання вітаміну B12 з подальшим змішуванням з носієм до потрібної концентрації", "category": "Кормова добавка / вітамін B12", "confidence": "high"},
+      {"keys": ["вітамін а пальмітат", "витамин а пальмитат", "vitamin a palmitate", "retinyl palmitate"], "originType": "синтетичне", "productionMethod": "хімічний синтез ретиноїдної речовини з подальшим естерифікуванням пальмітиновою кислотою", "category": "Вітамін / АФІ / кормова добавка", "confidence": "high"},
+      {"keys": ["ізопропіл міристат", "изопропил миристат", "изопропила миристат", "isopropyl myristate", "ipm"], "originType": "рослинне або синтетичне", "productionMethod": "естерифікація міристинової кислоти з ізопропанолом; жирна кислота часто походить з кокосової або пальмоядрової олії", "category": "Косметична / фармацевтична допоміжна речовина", "confidence": "medium"},
+      {"keys": ["ізопропіл пальмітат", "изопропил пальмитат", "isopropyl palmitate", "ipp"], "originType": "рослинне або синтетичне", "productionMethod": "естерифікація пальмітинової кислоти ізопропанолом; жирна кислота часто рослинного походження", "category": "Косметична / фармацевтична допоміжна речовина", "confidence": "medium"},
+      {"keys": ["тригліцерид мст", "триглицерид мст", "мст", "medium chain triglycerides", "mct oil", "caprylic capric triglyceride", "каприлові капринові тригліцериди"], "originType": "рослинне", "productionMethod": "фракціонування кокосової або пальмоядрової олії з подальшою естерифікацією/очищенням середньоланцюгових жирних кислот", "category": "Косметична / харчова / фармацевтична допоміжна речовина", "confidence": "high"},
+      {"keys": ["лауринова кислота", "лауриновая кислота", "lauric acid", "palmac 99-12", "лауринка"], "originType": "рослинне", "productionMethod": "фракціонування кокосової або пальмоядрової олії з подальшим очищенням жирної кислоти", "category": "Олеохімічна / косметична сировина", "confidence": "high"},
+      {"keys": ["олеїнова кислота", "олеиновая кислота", "oleic acid"], "originType": "рослинне або тваринне", "productionMethod": "гідроліз і фракціонування рослинних олій або тваринних жирів; джерело підтверджується origin statement", "category": "Олеохімічна / косметична сировина", "confidence": "medium"},
+      {"keys": ["стеаринова кислота 1842", "стеариновая кислота 1842", "stearic acid 1842", "стеаринова кислота 1860", "стеариновая кислота 1860", "stearic acid 1860", "palmac 55-16"], "originType": "рослинне або тваринне", "productionMethod": "фракціонування та гідрогенізація жирних кислот; для Palmac/олеохімії типово пальмове або пальмоядрове походження", "category": "Олеохімічна / косметична сировина", "confidence": "medium"},
+      {"keys": ["цетилстеариловий спирт", "цетилстеариловый спирт", "цетеариловий спирт", "цетеариловый спирт", "cetearyl alcohol", "cetostearyl alcohol", "cetyl stearyl alcohol"], "originType": "рослинне або синтетичне", "productionMethod": "гідрогенізація природних жирних кислот/естерів або нафтохімічний синтез жирних спиртів; джерело підтверджується виробником", "category": "Косметична / фармацевтична допоміжна речовина", "confidence": "medium"},
+      {"keys": ["моностеарат 40", "моностеарат 90", "гліцерил моностеарат", "глицерил моностеарат", "glyceryl monostearate", "gms"], "originType": "рослинне або тваринне", "productionMethod": "естерифікація гліцерину стеариновою/пальмітиновою кислотою; джерело жирної кислоти потрібно підтвердити", "category": "Ексципієнт / емульгатор / косметична сировина", "confidence": "medium"},
+      {"keys": ["кокамідопропілбетаїн 30", "кокамидопропилбетаин 30", "кокамідопропілбетаїн 45", "кокамидопропилбетаин 45", "cocamidopropyl betaine", "capb"], "originType": "змішане (рослинна жирна кислота + синтетична амінна частина)", "productionMethod": "реакція кокосових/пальмоядрових жирних кислот з диметиламінопропіламіном та монохлороцтовою кислотою", "category": "Косметична ПАР / промислова хімія", "confidence": "high"},
+      {"keys": ["пропіленгліколь дикаприлат дикапрат", "пропиленгликоль дикаприлат дикапрат", "propylene glycol dicaprylate dicaprate"], "originType": "рослинне або синтетичне", "productionMethod": "естерифікація пропіленгліколю каприловою/каприновою кислотами; жирні кислоти часто з кокосової або пальмоядрової олії", "category": "Косметична / фармацевтична допоміжна речовина", "confidence": "medium"},
+      {"keys": ["касторова олія", "касторовое масло", "castor oil", "ricinus oil"], "originType": "рослинне", "productionMethod": "пресування або екстракція насіння рицини Ricinus communis з подальшим очищенням", "category": "Олія / фармацевтична або косметична сировина", "confidence": "high"},
+      {"keys": ["камфора", "camphor"], "originType": "рослинне або синтетичне", "productionMethod": "екстракція з камфорного дерева або синтез з терпентинної олії/пінену; джерело підтверджується CoA/SDS", "category": "Фармацевтична / косметична речовина", "confidence": "medium"},
+      {"keys": ["ментол", "menthol", "l-menthol"], "originType": "рослинне або синтетичне", "productionMethod": "виділення з м’ятної олії або синтез/гідрогенізація тимолу; джерело підтверджується виробником", "category": "Фармацевтична / харчова / косметична речовина", "confidence": "medium"},
+      {"keys": ["циклпентасилоксан", "циклопентасилоксан", "cyclopentasiloxane", "d5"], "originType": "синтетичне", "productionMethod": "хімічний синтез циклічного силоксану з кремнійорганічних проміжних продуктів", "category": "Косметична сировина / силікон", "confidence": "high"},
+      {"keys": ["вазелін білий", "вазелин белый", "вазелін", "вазелин", "white petrolatum", "petrolatum", "petroleum jelly"], "originType": "мінеральне / нафтохімічне", "productionMethod": "очищення нафтових фракцій з подальшою депарафінізацією та рафінацією до фарм/косм grade", "category": "Фармацевтичний/косметичний ексципієнт", "confidence": "high"},
+      {"keys": ["вазелінова олія", "вазелиновое масло", "paraffinum liquidum", "liquid paraffin", "mineral oil", "масло апар", "apar oil"], "originType": "мінеральне / нафтохімічне", "productionMethod": "глибоке очищення нафтових мінеральних олив до відповідної в’язкості та grade", "category": "Фармацевтична / косметична / промислова олива", "confidence": "high"},
+      {"keys": ["гідрогенізована вуглеводнева смола", "водородизированная углеводородная смола", "hydrogenated hydrocarbon resin", "hc-9120"], "originType": "синтетичне / нафтохімічне", "productionMethod": "полімеризація нафтохімічних C5/C9-фракцій з подальшим гідруванням смоли", "category": "Промислова хімія / полімерна смола", "confidence": "high"},
+      {"keys": ["плівка пвх", "пленка пвх", "pvc film", "polyvinyl chloride film", "пвх белая", "пвх прозрачная"], "originType": "синтетичне / нафтохімічне", "productionMethod": "полімеризація вінілхлориду з подальшим каландруванням/екструзією у плівку; може містити пластифікатори та стабілізатори", "category": "Пакувальний полімерний матеріал", "confidence": "high"},
+      {"keys": ["фільтрувальний папір", "фильтровальная бумага", "filter paper"], "originType": "рослинне", "productionMethod": "виробництво з целюлозної пульпи з подальшим формуванням, очищенням і сушінням паперу", "category": "Папір / фільтрувальний матеріал", "confidence": "high"},
+      {"keys": ["акрипол", "акриловий полімер", "акриловый полимер", "carbomer", "carbopol", "polyacrylic acid"], "originType": "синтетичне", "productionMethod": "радикальна полімеризація акрилової кислоти або споріднених акрилатних мономерів", "category": "Ексципієнт / косметична сировина / полімер", "confidence": "high"},
+      {"keys": ["1-метил-2-піролідон", "1-метил-2 пиролидон", "1-метил-2-пиролидон", "n-methyl-2-pyrrolidone", "nmp"], "originType": "синтетичне", "productionMethod": "хімічний синтез розчинника з гамма-бутиролактону та метиламіну або спорідненими маршрутами", "category": "Промисловий розчинник / хімічна сировина", "confidence": "high"},
+      {"keys": ["цирконію оксихлорид", "циркония оксихлорид", "zirconium oxychloride", "zirconyl chloride"], "originType": "мінеральне / синтетичне", "productionMethod": "хімічна переробка цирконового піску або інших цирконієвих мінералів кислотами з подальшим очищенням", "category": "Промислова хімія", "confidence": "high"},
+      {"keys": ["васильки", "волошка", "волошки", "cornflower", "centaurea cyanus"], "originType": "рослинне", "productionMethod": "збір, сушіння та очищення квіток/рослинної сировини Centaurea cyanus", "category": "Рослинна сировина / фарм або чайна сировина", "confidence": "high"},
+      {"keys": ["евкаліпт зелені листки", "евкаліпт листя", "эвкалипт листья", "eucalyptus leaves", "eucalyptus leaf"], "originType": "рослинне", "productionMethod": "збір, сушіння та очищення листя евкаліпта; важливо підтвердити латинську назву та частину рослини", "category": "Рослинна сировина / фарм або ефіроолійна сировина", "confidence": "high"},
+      {"keys": ["екстракт ашваганди 10 1", "екстракт ашваганди", "ашваганда 10:1", "ashwagandha extract 10:1"], "originType": "рослинне", "productionMethod": "екстракція кореня Withania somnifera з подальшим концентруванням/стандартизацією", "category": "Рослинний екстракт / харчова добавка", "confidence": "high"},
+      {"keys": ["рутин", "rutin", "rutoside", "рутозид", "рутин монфарм"], "originType": "рослинне", "productionMethod": "екстракція з рослинної сировини, часто Sophora japonica або гречка, з подальшим очищенням флавоноїду", "category": "Фармацевтична АФІ / рослинний флавоноїд", "confidence": "high"},
+      {"keys": ["ацетаміприд", "ацетамиприд", "acetamiprid"], "originType": "синтетичне", "productionMethod": "хімічний синтез неонікотиноїдної речовини з хлорпіридиновими проміжними продуктами", "category": "Пестицид / промислова хімія", "confidence": "high"},
+      {"keys": ["фіпроніл", "фипронил", "fipronil"], "originType": "синтетичне", "productionMethod": "хімічний синтез фенілпіразольної речовини", "category": "Пестицид / ветеринарна речовина / промислова хімія", "confidence": "high"},
+      {"keys": ["моносульфірам", "моносульфирам", "monosulfiram"], "originType": "синтетичне", "productionMethod": "хімічний синтез сірковмісного органічного похідного", "category": "Фармацевтична/ветеринарна речовина", "confidence": "medium"},
+
     ]; // END PRODUCT_ORIGIN_KB
 
     // ============================================================
@@ -6965,8 +7093,8 @@
         const base = originProfileByKey(key, item);
         const recommended = index === 0;
         const label = keys.length === 1 && key !== 'unknown'
-          ? `${originType} · KB`
-          : `${labels[key] || base.label} · KB`;
+          ? `${originType} · база`
+          : `${labels[key] || base.label} · база`;
 
         return {
           ...base,
@@ -6978,24 +7106,27 @@
           kbMatched: true,
           kbCategory,
           kbKeyword: kb._matchedKeyword || '',
+          originType,
+          productionMethod: method,
+          sourceLabel: 'База походження',
           shortConclusion: `${originType}. ${method}`,
-          basis: `PRODUCT_ORIGIN_KB: ${kbCategory}. Метод/джерело: ${method}. Збіг: ${kb._matchedKeyword || 'назва товару'}.`,
+          basis: `База походження: ${kbCategory}. Походження: ${originType}. Метод/джерело: ${method}. Збіг: ${kb._matchedKeyword || 'назва товару'}.`,
           evidence: [
-            `KB-збіг за ключем: ${kb._matchedKeyword || '—'}`,
+            `Збіг у базі за ключем: ${kb._matchedKeyword || '—'}`,
             `Тип походження: ${originType}`,
             `Метод виробництва: ${method}`,
-            `Рівень впевненості KB: ${kbConf}`
+            `Рівень впевненості бази: ${kbConf}`
           ],
           riskFlags: [
-            'Підтвердити джерело/route of synthesis у CoA, SDS або окремому Origin/Manufacturing statement',
-            'Звірити Certificate of Origin, виробника і маркування партії'
+            'Підтвердити джерело та маршрут виробництва у сертифікаті якості, паспорті безпеки або окремій заяві виробника про походження',
+            'Звірити сертифікат походження, виробника і маркування партії'
           ],
           documentsToCheck: [
-            'Certificate of Origin',
-            'CoA',
-            'SDS/MSDS',
-            'TDS / Specification',
-            'Manufacturing / Origin statement'
+            'Сертифікат походження',
+            'Сертифікат якості партії',
+            'Паспорт безпеки',
+            'Технічна специфікація',
+            'Заява виробника про походження / метод виробництва'
           ],
           qdproUrl: item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode)
         };
@@ -7014,8 +7145,8 @@
       item.originType = kb.originType || item.originType;
       item.productionMethod = kb.productionMethod || item.productionMethod;
       item.originConfidence = kb.confidence || item.originConfidence || 'medium';
-      item.originShortNote = `[PRODUCT_ORIGIN_KB] ${kb.originType || 'Походження визначено KB'}. Метод: ${kb.productionMethod || 'уточнити за документами'}.`;
-      item.originEvidence = `PRODUCT_ORIGIN_KB match: ${kb._matchedKeyword || '—'}`;
+      item.originShortNote = `[База походження] ${kb.originType || 'Походження визначено базою'}. Метод: ${kb.productionMethod || 'уточнити за документами'}.`;
+      item.originEvidence = `Збіг у базі походження: ${kb._matchedKeyword || '—'}`;
 
       if (kb.category && (!item.category || /невідом|unknown|подвійне|подвійного|—/i.test(String(item.category)))) {
         item.category = kb.category;
@@ -7065,38 +7196,6 @@
       }
       return item;
     }
-
-    // ────────────────────────────────────────────────────────────────
-    //  Застосувати KB-знання до item (перекриває AI якщо confidence high)
-    // ────────────────────────────────────────────────────────────────
-    function applyKBOriginToItem(item) {
-      const kb = lookupProductOriginKB(item.name, item.uctzedCode);
-      if (!kb) return item;
-
-      // Якщо KB дає high confidence — перекриваємо AI
-      if (kb.confidence === 'high') {
-        item.originType        = kb.originType;
-        item.productionMethod  = kb.productionMethod;
-        item.originConfidence  = 'high';
-        item.originShortNote   = `[KB] ${kb.originType}. Метод: ${kb.productionMethod}. Підтвердження: CoA, MSDS.`;
-        item.kbMatched         = true;
-        if (kb.category && (!item.category || item.category === 'ПОДВІЙНЕ ПРИЗНАЧЕННЯ')) {
-          // не перекриваємо категорію якщо AI вже визначив точнішу
-        }
-      } else if (kb.confidence === 'medium' && (
-        !item.originType || item.originType === 'Не визначено' || item.originType === 'невідоме'
-      )) {
-        // Тільки якщо AI нічого не знайшов — беремо medium KB
-        item.originType        = kb.originType;
-        item.productionMethod  = kb.productionMethod;
-        item.originConfidence  = 'medium';
-        item.originShortNote   = `[KB medium] ${kb.originType}. Потрібне підтвердження CoA від виробника.`;
-        item.kbMatched         = true;
-      }
-      return item;
-    }
-
-
 
     async function runAudit() {
       if (!getActiveKey()) { alert('Спочатку введіть API ключ!'); return; }
@@ -9303,10 +9402,10 @@ ${euRegulations}
       const conf = selected.confidence || item.originConfidence || 'low';
       const confLabel = conf === 'high' ? 'висока' : conf === 'medium' ? 'середня' : 'низька';
       const originDot = item._originLockedByKB ? 'ok' : conf === 'high' ? 'ok' : conf === 'medium' ? 'warn' : 'red';
-      const originCardTitle = item._originLockedByKB ? 'Походження / QDPro · KB' : 'Походження / QDPro';
+      const originCardTitle = item._originLockedByKB ? 'Походження / QDPro · база' : 'Походження / QDPro';
       const originNote = [
         selected.label || item.originType || '—',
-        item._originLockedByKB ? 'PRODUCT_ORIGIN_KB' : `довіра: ${confLabel}`
+        item._originLockedByKB ? 'база походження' : `довіра: ${confLabel}`
       ].filter(Boolean).join(' · ');
 
       const precursorBadge = item.precursorRisk
@@ -9350,10 +9449,11 @@ ${euRegulations}
         info: [
           { label: 'QDPro', value: qdproUrl },
           { label: 'Варіанти походження', value: (item.originOptions || []).map(o => o.label).join(' | ') || '—' },
-          { label: 'Обрано', value: selected.label || item.originType || '—' },
-          item.kbMatched && { label: 'KB-збіг', value: item.kbOriginKeyword || 'PRODUCT_ORIGIN_KB' }
+          { label: 'Обране походження', value: selected.label || item.originType || '—' },
+          item.productionMethod && { label: 'Метод виробництва', value: item.productionMethod },
+          item.kbMatched && { label: 'Збіг у базі', value: item.kbOriginKeyword || 'база походження' }
         ].filter(r => r && r.value && r.value !== '—'),
-        docs: ['Certificate of Origin', 'Invoice', 'Packing List', 'SDS/MSDS', 'CoA'],
+        docs: ['Сертифікат походження', 'Інвойс', 'Пакувальний лист', 'Паспорт безпеки', 'Сертифікат якості партії'],
         recommendation: 'Логіст/брокер має звірити вкладки Імпорт / Транзит / Експорт у QDPro goodinfo.',
         qdproUrl
       });
@@ -9366,7 +9466,7 @@ ${euRegulations}
             <span class="ptc-badge risk" style="--rc:${riskColor}">${escHtml(item.risk || '—')}</span>
             ${item.dutyRatePercent != null ? `<span class="ptc-badge duty">Мито ${item.dutyRatePercent}%</span>` : ''}
             ${item.category ? `<span class="ptc-badge cat">${escHtml(item.category)}</span>` : ''}
-            ${item.kbMatched ? `<span class="ptc-badge kb">KB origin</span>` : ''}
+            ${item.kbMatched ? `<span class="ptc-badge kb">походження з бази</span>` : ''}
           </div>
           ${precursorBadge}
         </div>
@@ -9402,7 +9502,7 @@ ${euRegulations}
           <div class="icb-dot info"></div>
           <div class="icb-body">
             <div class="icb-title">Документи для брокера</div>
-            <div class="icb-note">QDPro · <span style="color:var(--amber)">${escHtml(selected.label || '—')}</span></div>
+            <div class="icb-note">Обране походження · <span style="color:var(--amber)">${escHtml(selected.label || '—')}</span></div>
           </div>
           <div class="icb-arrow">›</div>
         </button>
@@ -9463,11 +9563,11 @@ ${euRegulations}
           basis: 'Недостатньо даних для визначення походження. Запросіть документи у постачальника.',
           shortConclusion: 'Походження не визначено. Потрібне підтвердження документами.',
           evidence: ['Не знайдено ознак конкретного походження в доступних полях'],
-          riskFlags: ['Запросити Certificate of Origin у постачальника', 'Перевірити маркування та Invoice'],
+          riskFlags: ['Запросити сертифікат походження у постачальника', 'Перевірити маркування та інвойс'],
           euChecks: [{ status: 'yellow', item: 'Походження не підтверджено', note: 'Запросити CoO у постачальника перед транзитом ЄС' }],
           uaChecks: [{ status: 'yellow', item: 'Походження не підтверджено', note: 'Необхідний CoO для митного оформлення в UA' }],
           brokerChecks: [{ status: 'yellow', item: 'Підтвердити походження', note: 'Запросити CoO, Invoice з зазначенням країни виробника' }],
-          documentsToCheck: ['Certificate of Origin', 'Invoice', 'Packing List']
+          documentsToCheck: ['Сертифікат походження', 'Інвойс', 'Пакувальний лист']
         }];
       }
 
@@ -9485,12 +9585,12 @@ ${euRegulations}
           basis: fromDispatch
             ? `Країна відправлення (${f.country}) вказує на вірогідне походження`
             : `Ключові слова в назві/описі/виробнику вказують на ${f.country}`,
-          shortConclusion: `Вірогідне походження: ${f.label}. ${confidence === 'medium' ? 'Підтвердити Certificate of Origin.' : 'Низька впевненість — потрібна документальна перевірка.'}`,
+          shortConclusion: `Вірогідне походження: ${f.label}. ${confidence === 'medium' ? 'Підтвердити сертифікатом походження.' : 'Низька впевненість — потрібна документальна перевірка.'}`,
           evidence: [
             fromDispatch ? `Країна відправлення: ${f.country}` : `Знайдено маркер походження: ${f.country} у полях товару`
           ],
           riskFlags: [
-            'Підтвердити Certificate of Origin',
+            'Підтвердити сертифікатом походження',
             confidence === 'low' ? 'Низька впевненість AI — обов\'язкова перевірка документів' : 'Перевірити маркування на упаковці'
           ],
           euChecks: [
@@ -9502,7 +9602,7 @@ ${euRegulations}
           brokerChecks: [
             { status: 'yellow', item: 'Запросити CoO у постачальника', note: `Підтвердити походження: ${f.label}` }
           ],
-          documentsToCheck: ['Certificate of Origin', 'Invoice', 'Packing List', 'SDS/MSDS']
+          documentsToCheck: ['Сертифікат походження', 'Інвойс', 'Пакувальний лист', 'Паспорт безпеки']
         };
       });
     }
@@ -9596,6 +9696,9 @@ ${euRegulations}
     function renderOriginDetailModal(item, op, idx) {
       const confidenceLabel = op.confidence === 'high' ? 'ВИСОКА' : op.confidence === 'medium' ? 'СЕРЕДНЯ' : 'НИЗЬКА';
       const qdproUrl = op.qdproUrl || item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
+      const explicitOrigin = op.originType || item.originType || op.label || 'Походження потрібно підтвердити';
+      const explicitMethod = op.productionMethod || item.productionMethod || 'Метод виробництва потрібно підтвердити документами партії';
+      const explicitCategory = op.kbCategory || item.category || 'Категорія не визначена';
 
       const evidenceHtml = Array.isArray(op.evidence) && op.evidence.length
         ? `<ul class="origin-detail-evidence-list">${op.evidence.map(e => `<li>${escHtml(e)}</li>`).join('')}</ul>`
@@ -9641,7 +9744,11 @@ ${euRegulations}
               <div class="origin-detail-conclusion">${escHtml(op.shortConclusion || op.basis || 'Походження потрібно підтвердити документами.')}</div>
             </div>
             <div class="origin-detail-section">
-              <div class="origin-detail-section-title">Підстава AI-аналізу</div>
+              <div class="origin-detail-section-title">Походження</div>
+              <div class="origin-detail-basis"><b>Тип:</b> ${escHtml(explicitOrigin)}<br><b>Метод / джерело:</b> ${escHtml(explicitMethod)}<br><b>Категорія:</b> ${escHtml(explicitCategory)}</div>
+            </div>
+            <div class="origin-detail-section">
+              <div class="origin-detail-section-title">Підстава визначення походження</div>
               <div class="origin-detail-basis">${escHtml(op.basis || 'Аналіз полів товарної позиції.')}</div>
             </div>
             <div class="origin-detail-section">
@@ -9723,16 +9830,16 @@ ${euRegulations}
       }).join('');
 
       const aiNote = item._needsAIOrigin !== false
-        ? '<div class="origin-ai-loading">AI аналізує походження...</div>' : '';
+        ? '<div class="origin-ai-loading">Система визначає можливе походження...</div>' : '';
 
       return `<div class="origin-selector-card" id="originCard-${idx}">
         <div class="origin-selector-head">
-          <div class="origin-selector-title">AI · Можливі походження</div>
+          <div class="origin-selector-title">Можливі варіанти походження</div>
           <a class="qdpro-link" href="${escHtml(qdproUrl)}" target="_blank" rel="noopener">QDPro ↗</a>
         </div>
         ${aiNote}
         <div class="origin-cards-grid">${cardsHtml}</div>
-        <div class="origin-select-all-note">AI визначив варіанти походження. Натисніть <b>Обрати</b> або <b>Детальніше</b>.</div>
+        <div class="origin-select-all-note">Натисніть <b>Обрати</b> або <b>Детальніше</b>, щоб перевірити походження і документи.</div>
         <div class="origin-panel" id="originPanel-${idx}">${renderOriginPanel(item, selectedKey, idx)}</div>
       </div>`;
     }
