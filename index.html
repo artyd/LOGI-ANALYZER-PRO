@@ -29,23 +29,25 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:14px;
+      gap:16px;
       margin:0 0 18px;
-      flex-wrap:wrap;
+      flex-wrap:nowrap;
       width:100%;
     }
     .manifest-actions .port-selector {
       margin:0;
-      flex:1 1 680px;
+      flex:1 1 auto;
       min-width:0;
     }
     .manifest-actions .download-wrap {
       margin:0;
       flex:0 0 auto;
+      justify-content:flex-end;
     }
-    @media (max-width: 980px) {
-      .manifest-actions { align-items:flex-start; }
-      .manifest-actions .download-wrap { width:100%; justify-content:flex-start; }
+    @media (max-width: 720px) {
+      .manifest-actions { flex-wrap:wrap; align-items:flex-start; }
+      .manifest-actions .download-wrap { width:100%; }
+      .manifest-actions .download-btn { width:100%; justify-content:center; }
     }
     .port-btn .port-flag { font-size:13px; }
 
@@ -13071,16 +13073,6 @@ ${batchData}`;
             <div id="uaChecks-${idx}">${renderUaTransitCell(item, idx)}</div>
           </div>
         </div>
-      </div>
-
-      <div class="sec-head">
-        <span class="sec-num">02 · ADVISORY</span>
-        <span class="sec-title">Ризики та чекліст</span>
-        <span class="sec-line"></span>
-      </div>
-      <div class="alerts">
-        ${al || '<div></div>'}
-        <div class="al al-green"><h4>NCTS Phase 5 · Checklist</h4><ul>${nc || '<li>Стандартна транзитна процедура NCTS Phase 5.</li>'}</ul></div>
       </div>
     </div>`;
 
