@@ -38,16 +38,17 @@
       margin:0;
       flex:1 1 auto;
       min-width:0;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      scrollbar-width:none;
     }
+    .manifest-actions .port-selector::-webkit-scrollbar { display:none; }
+    .manifest-actions .port-selector .port-btn { flex:0 0 auto; }
+    .manifest-actions .port-selector-label { flex:0 0 auto; }
     .manifest-actions .download-wrap {
       margin:0;
       flex:0 0 auto;
       justify-content:flex-end;
-    }
-    @media (max-width: 720px) {
-      .manifest-actions { flex-wrap:wrap; align-items:flex-start; }
-      .manifest-actions .download-wrap { width:100%; }
-      .manifest-actions .download-btn { width:100%; justify-content:center; }
     }
     .port-btn .port-flag { font-size:13px; }
 
@@ -11310,18 +11311,7 @@ ${euRegulations}
           <tbody>${rows}</tbody>
         </table>
       </div>
-    </div>
-    
-    <div class="sec-head">
-      <span class="sec-num">03 · ADVISORY</span>
-      <span class="sec-title">Ризики та чекліст</span>
-      <span class="sec-line"></span>
-    </div>
-    <div class="alerts">
-      ${al}
-      <div class="al al-green"><h4>NCTS Phase 5 · Checklist</h4><ul>${nc}</ul></div>
-    </div>
-    ${buildConsolidatedChecklist(d.items || [])}`;
+    </div>`;
 
       refreshOpenAccordions(document.getElementById('resultsArea'));
       // Activate port button
