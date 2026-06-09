@@ -1297,6 +1297,560 @@
       }
     }
 
+    /* =========== ANALYSIS MODE SWITCH (batch / single product) =========== */
+    .mode-switch {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      width: min(520px, 100%);
+      margin: 0 auto 26px auto;
+      padding: 5px;
+      background: var(--surface-2);
+      border: 1px solid var(--line-2);
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .mode-switch-indicator {
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      bottom: 5px;
+      width: calc((100% - 10px) / 2);
+      border-radius: 999px;
+      background: var(--amber);
+      box-shadow: 0 10px 24px -12px var(--amber-glow), 0 0 0 1px var(--amber);
+      transform: translateX(0%);
+      transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease;
+      z-index: 1;
+    }
+
+    .mode-switch[data-mode="single"] .mode-switch-indicator {
+      transform: translateX(100%);
+    }
+
+    .mode-opt {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 14px;
+      background: transparent;
+      border: none;
+      border-radius: 999px;
+      color: var(--ink-2);
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: color 0.2s ease, transform 0.18s ease;
+      user-select: none;
+    }
+
+    .mode-opt svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+    }
+
+    .mode-opt:hover {
+      color: var(--ink);
+    }
+
+    .mode-opt.active {
+      color: var(--bg);
+    }
+
+    /* =========== DECK FLIP CARD (input ingestion) =========== */
+    .deck-flip-scene {
+      perspective: 1800px;
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto;
+      min-height: 120px;
+      height: 372px;
+      transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .deck-flip-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .deck-flip-card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .deck-flip-face {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .deck-flip-back {
+      transform: rotateY(180deg);
+    }
+
+    /* =========== SINGLE PRODUCT FORM =========== */
+    .sp-form {
+      text-align: left;
+      background: var(--surface-2);
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius);
+      padding: 22px 22px 24px;
+    }
+
+    .sp-form-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 16px;
+    }
+
+    .sp-form-head::before {
+      content: "";
+      width: 18px;
+      height: 1px;
+      background: var(--amber);
+    }
+
+    .sp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 14px;
+    }
+
+    .sp-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sp-field.sp-col-span {
+      grid-column: 1 / -1;
+    }
+
+    .sp-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .sp-label .sp-req {
+      color: var(--amber);
+      margin-left: 2px;
+    }
+
+    .sp-input,
+    .sp-textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--line-2);
+      border-radius: 10px;
+      color: var(--ink);
+      font-size: 13px;
+      font-family: var(--sans);
+      outline: none;
+      transition: border-color 0.18s, background 0.18s;
+    }
+
+    .sp-input {
+      height: 44px;
+      padding: 0 14px;
+    }
+
+    .sp-textarea {
+      padding: 11px 14px;
+      min-height: 66px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .sp-input:focus,
+    .sp-textarea:focus {
+      border-color: var(--amber);
+      background: var(--surface-3);
+    }
+
+    .sp-input::placeholder,
+    .sp-textarea::placeholder {
+      color: var(--ink-4);
+    }
+
+    .sp-actions {
+      margin-top: 18px;
+    }
+
+    .sp-go-btn {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 52px;
+      padding: 0 26px;
+      background: var(--amber);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--sans);
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, transform 0.1s;
+      box-shadow: 0 8px 24px -8px var(--amber-glow);
+    }
+
+    .sp-go-content {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .sp-go-btn:hover {
+      background: var(--amber-bright);
+    }
+
+    .sp-go-btn:active {
+      transform: translateY(1px);
+    }
+
+    .sp-go-btn:disabled {
+      cursor: progress;
+      box-shadow: none;
+    }
+
+    .sp-go-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* Indeterminate search/loading sweep across the full-width button */
+    .sp-go-bar {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      opacity: 0;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.0) 20%,
+        rgba(255, 255, 255, 0.45) 50%,
+        rgba(255, 255, 255, 0.0) 80%,
+        transparent 100%);
+      background-size: 45% 100%;
+      background-repeat: no-repeat;
+      background-position: -50% 0;
+      pointer-events: none;
+    }
+
+    .sp-go-btn.searching {
+      background: var(--amber);
+      color: var(--bg);
+    }
+
+    .sp-go-btn.searching .sp-go-bar {
+      opacity: 1;
+      animation: sp-go-sweep 0.85s linear infinite;
+    }
+
+    @keyframes sp-go-sweep {
+      0% { background-position: -50% 0; }
+      100% { background-position: 150% 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sp-go-btn.searching .sp-go-bar { animation: none; opacity: 0.5; }
+    }
+
+    /* ── Autocomplete dropdown ── */
+    .sp-autocomplete {
+      position: relative;
+    }
+
+    .sp-suggest {
+      position: fixed;
+      z-index: 9999;
+      max-height: 300px;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--line-2);
+      border-radius: 12px;
+      box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.55);
+      padding: 6px;
+      display: none;
+    }
+
+    .sp-suggest.open {
+      display: block;
+    }
+
+    .sp-suggest-empty {
+      padding: 12px 12px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-4);
+      letter-spacing: 0.02em;
+    }
+
+    .sp-suggest-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.12s ease;
+    }
+
+    .sp-suggest-item:hover,
+    .sp-suggest-item.active {
+      background: var(--amber-dim);
+    }
+
+    .sp-suggest-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sp-suggest-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sp-suggest-name mark {
+      background: transparent;
+      color: var(--amber);
+      font-weight: 700;
+    }
+
+    .sp-suggest-meta {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-4);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .sp-suggest-code {
+      flex-shrink: 0;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--amber);
+      background: var(--amber-dim);
+      border: 1px solid var(--line-2);
+      border-radius: 6px;
+      padding: 3px 7px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Code source / QDPro verification line ── */
+    .sp-code-source {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.02em;
+    }
+
+    .sp-code-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--green-bright);
+    }
+
+    .sp-code-status.warn {
+      color: var(--yellow);
+    }
+
+    .sp-qdpro-link {
+      color: var(--amber);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--amber);
+      padding-bottom: 1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .sp-qdpro-link:hover {
+      color: var(--amber-bright);
+      border-color: var(--amber-bright);
+    }
+
+    /* =========== SINGLE PRODUCT RESULT =========== */
+    .sp-result {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .sp-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .sp-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--surface-2), var(--surface));
+    }
+
+    .sp-card-head-main {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .sp-card-name {
+      font-family: var(--serif);
+      font-size: clamp(20px, 2.4vw, 28px);
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    .sp-card-code {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-3);
+      letter-spacing: 0.04em;
+    }
+
+    .sp-card-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 1.1fr) 1fr 1fr;
+      gap: 0;
+    }
+
+    .sp-col {
+      padding: 18px 20px;
+      border-right: 1px solid var(--line);
+      min-width: 0;
+    }
+
+    .sp-col:last-child {
+      border-right: none;
+    }
+
+    .sp-col-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sp-meta-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border-top: 1px solid var(--line);
+    }
+
+    .sp-meta-cell {
+      background: var(--surface);
+      padding: 14px 18px;
+    }
+
+    .sp-meta-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-4);
+      margin-bottom: 5px;
+    }
+
+    .sp-meta-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    @media (max-width: 920px) {
+      .sp-card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sp-col {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .sp-col:last-child {
+        border-bottom: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .sp-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mode-opt {
+        font-size: 12px;
+        padding: 10px 8px;
+      }
+
+      .sp-go-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
     /* =========== KEY MANAGEMENT =========== */
     .api-chip {
       cursor: pointer;
@@ -3280,8 +3834,8 @@
       --arch-filter-index: 0;
       position: relative;
       display: grid;
-      grid-template-columns: repeat(3, minmax(140px, 1fr));
-      width: min(720px, 100%);
+      grid-template-columns: repeat(4, minmax(110px, 1fr));
+      width: min(840px, 100%);
       min-height: 46px;
       padding: 4px;
       background: var(--surface);
@@ -3296,7 +3850,7 @@
       left: 4px;
       top: 4px;
       bottom: 4px;
-      width: calc((100% - 8px) / 3);
+      width: calc((100% - 8px) / 4);
       border-radius: 999px;
       background: var(--amber);
       box-shadow: 0 10px 24px -12px var(--amber-glow), 0 0 0 1px var(--amber);
@@ -3371,6 +3925,12 @@
       border-color: rgba(127, 176, 255, 0.28);
     }
 
+    .arch-source-badge.single {
+      color: #d9a3ff;
+      background: rgba(193, 122, 255, 0.12);
+      border-color: rgba(193, 122, 255, 0.30);
+    }
+
     .arch-source-title {
       display: flex;
       align-items: center;
@@ -3407,8 +3967,8 @@
 
     @media (max-width: 900px) {
       .arch-toolbar { flex-direction: column; align-items: stretch; }
-      .arch-filter { grid-template-columns: repeat(3, 1fr); min-width: 0; }
-      .arch-filter button { font-size: 10px; }
+      .arch-filter { grid-template-columns: repeat(4, 1fr); min-width: 0; }
+      .arch-filter button { font-size: 9.5px; letter-spacing: 0.04em; padding: 0 2px; }
       .arch-filter-counts { white-space: normal; }
       .arch-item { grid-template-columns: auto 1fr; }
       .arch-datetime, .arch-risk, .arch-total { grid-column: 2; }
@@ -5089,39 +5649,114 @@
         <div class="deck-head-left">SYSTEM READY · Ingestion Bay</div>
       </div>
       <div class="deck-body">
-        <div class="deck-eyebrow">Freight Intelligence · v2.6</div>
-        <h1 class="deck-title">
-          Аналіз <em>збірної партії</em> перед відправкою з Європи до України
-        </h1>
-        <p class="deck-lede">
-          Завантажте маніфест у форматі Google&nbsp;Sheets, Excel або CSV. Система автоматично розрахує митні платежі,
-          підготує чекліст документів та оцінить ризики транзиту через порти&nbsp;ЄС.
-        </p>
 
-        <div class="input-row">
-          <div class="url-wrap">
-            <input class="url-input" id="driveUrl" type="text" placeholder="docs.google.com/spreadsheets/d/...">
-          </div>
-          <button class="go-btn" id="goBtn" onclick="runAudit()">
+        <!-- ANALYSIS MODE SWITCH -->
+        <div class="mode-switch" id="modeSwitch" data-mode="batch" role="tablist" aria-label="Режим аналізу">
+          <span class="mode-switch-indicator" aria-hidden="true"></span>
+          <button type="button" class="mode-opt active" data-mode="batch" role="tab" aria-selected="true"
+            onclick="setAnalysisMode('batch')">
             <svg viewBox="0 0 24 24">
-              <path d="M5 12h14M13 6l6 6-6 6" />
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/>
             </svg>
-            <span id="goTxt">Запустити аналіз</span>
-            <div id="goSpin" class="spinner" style="display:none"></div>
+            Збірна партія
+          </button>
+          <button type="button" class="mode-opt" data-mode="single" role="tab" aria-selected="false"
+            onclick="setAnalysisMode('single')">
+            <svg viewBox="0 0 24 24">
+              <path d="M10 2v7.31"/><path d="M14 9.3V2"/><path d="M8.5 2h7"/>
+              <path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/>
+            </svg>
+            Один продукт
           </button>
         </div>
 
-        <div class="or-divider">or · upload file</div>
+        <!-- FLIP SCENE: collection input <-> single product input -->
+        <div class="deck-flip-scene" id="deckFlipScene">
+          <div class="deck-flip-card" id="deckFlipCard">
 
-        <label for="fileUpload" class="file-upload-label">
-          <svg viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-          </svg>
-          Завантажити Excel або CSV
-        </label>
-        <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" style="display:none"
-          onchange="handleFileUpload(event)">
-        <div id="fileName" class="file-name-badge"></div>
+            <!-- FRONT: collection (batch) input -->
+            <div class="deck-flip-face deck-flip-front" id="deckFaceBatch">
+              <h1 class="deck-title">
+                Аналіз <em>збірної партії</em> перед відправкою з Європи до України
+              </h1>
+              <p class="deck-lede">
+                Завантажте маніфест у форматі Google&nbsp;Sheets, Excel або CSV. Система автоматично розрахує митні платежі,
+                підготує чекліст документів та оцінить ризики транзиту через порти&nbsp;ЄС.
+              </p>
+              <div class="input-row">
+                <div class="url-wrap">
+                  <input class="url-input" id="driveUrl" type="text" placeholder="docs.google.com/spreadsheets/d/...">
+                </div>
+                <button class="go-btn" id="goBtn" onclick="runAudit()">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                  <span id="goTxt">Запустити аналіз</span>
+                  <div id="goSpin" class="spinner" style="display:none"></div>
+                </button>
+              </div>
+
+              <div class="or-divider">or · upload file</div>
+
+              <label for="fileUpload" class="file-upload-label">
+                <svg viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                </svg>
+                Завантажити Excel або CSV
+              </label>
+              <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" style="display:none"
+                onchange="handleFileUpload(event)">
+              <div id="fileName" class="file-name-badge"></div>
+            </div>
+
+            <!-- BACK: single product input -->
+            <div class="deck-flip-face deck-flip-back" id="deckFaceSingle">
+              <h1 class="deck-title">
+                Аналіз <em>одного продукту</em> для логіста та брокера
+              </h1>
+              <p class="deck-lede">
+                Введіть назву товару та код УКТЗЕД. Система визначить можливе походження, перевірки транзиту&nbsp;ЄС
+                та&nbsp;UA, орієнтовні платежі та логістичні ризики.
+              </p>
+              <div class="sp-form">
+                <div class="sp-form-head">Аналіз одного продукту</div>
+                <div class="sp-grid">
+                  <div class="sp-field sp-col-span sp-autocomplete">
+                    <label class="sp-label" for="spName">Назва товару<span class="sp-req">*</span></label>
+                    <input class="sp-input" id="spName" type="text" autocomplete="off" spellcheck="false"
+                      placeholder="Почніть вводити назву — напр. Метронідазол, ПВП, Лізин..."
+                      oninput="spOnNameInput()" onkeydown="spNameKeydown(event)" onfocus="spOnNameInput()"
+                      onblur="spHideSuggestionsSoon()" role="combobox" aria-expanded="false"
+                      aria-autocomplete="list" aria-controls="spSuggestList">
+                    <div class="sp-suggest" id="spSuggestList" role="listbox"></div>
+                  </div>
+                  <div class="sp-field sp-col-span">
+                    <label class="sp-label" for="spCode">Код УКТЗЕД / HS</label>
+                    <input class="sp-input" id="spCode" type="text" inputmode="numeric" autocomplete="off"
+                      placeholder="напр. 2933299090 — підставиться з бази або введіть вручну"
+                      oninput="spOnCodeInput()">
+                    <div class="sp-code-source" id="spCodeSource">
+                      <a id="spQdproLink" class="sp-qdpro-link" href="https://www.qdpro.com.ua/uk/goodinfo"
+                        target="_blank" rel="noopener">QDPro · Довідка по товару УКТЗЕД ↗</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="sp-actions">
+                  <button class="sp-go-btn" id="spGoBtn" onclick="runSingleProduct()">
+                    <span class="sp-go-bar" aria-hidden="true"></span>
+                    <span class="sp-go-content">
+                      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                      <span id="spGoTxt">Проаналізувати продукт</span>
+                      <div id="spGoSpin" class="spinner" style="display:none"></div>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
 
       </div>
     </section>
@@ -5139,8 +5774,9 @@
         <button type="button" class="active" data-filter="all" onclick="setArchiveFilter('all')">Всі</button>
         <button type="button" data-filter="link" onclick="setArchiveFilter('link')">По ссылке</button>
         <button type="button" data-filter="file" onclick="setArchiveFilter('file')">Через файл</button>
+        <button type="button" data-filter="single" onclick="setArchiveFilter('single')">Один продукт</button>
       </div>
-      <div class="arch-filter-counts" id="archFilterCounts">ALL 0 · LINK 0 · FILE 0</div>
+      <div class="arch-filter-counts" id="archFilterCounts">ALL 0 · LINK 0 · FILE 0 · PRODUCT 0</div>
     </div>
     <div id="archList">
       <div class="arch-empty">Архів порожній — запустіть перший аналіз</div>
@@ -5205,6 +5841,8 @@
     let archiveFilter = 'all';
     let uploadedFileData = null;
     let uploadedFileName = null;
+    // Active analysis mode: 'batch' (collection) or 'single' (one product)
+    let analysisMode = 'batch';
 
     // Selected provider in the banner (before first save)
     let bannerProvider = currentProvider;
@@ -5250,11 +5888,76 @@
       if (getActiveKey()) setApiOnline(currentProvider);
       seedKnowledgeBaseMemory();
       renderZed();
+      initDeckFlip();
+      spInitPortal();
     }
 
     function toggleTheme() {
       const isLight = document.documentElement.classList.toggle('theme-light');
       safeStorageSet('lap_theme', isLight ? 'light' : 'dark');
+    }
+
+    // ===== ANALYSIS MODE SWITCH + DECK FLIP =====
+
+    function updateDeckFlipHeight() {
+      const scene = document.getElementById('deckFlipScene');
+      if (!scene) return;
+      const face = analysisMode === 'single'
+        ? document.getElementById('deckFaceSingle')
+        : document.getElementById('deckFaceBatch');
+      if (!face) return;
+      const h = face.offsetHeight;
+      // Skip when the deck is hidden (e.g. another page is active) so we
+      // never collapse the card to 0; ResizeObserver restores it on return.
+      if (h > 0) scene.style.height = h + 'px';
+    }
+
+    function initDeckFlip() {
+      const scene = document.getElementById('deckFlipScene');
+      if (!scene) return;
+      // Keep the scene height in sync with whichever face is active,
+      // even as its content changes (file badge appears, validation, etc.)
+      if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(() => updateDeckFlipHeight());
+        ['deckFaceBatch', 'deckFaceSingle'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) ro.observe(el);
+        });
+      }
+      window.addEventListener('resize', updateDeckFlipHeight);
+      // Initial sizing (after layout settles)
+      updateDeckFlipHeight();
+      setTimeout(updateDeckFlipHeight, 60);
+      setTimeout(updateDeckFlipHeight, 300);
+    }
+
+    function setAnalysisMode(mode) {
+      if (mode !== 'single' && mode !== 'batch') mode = 'batch';
+      analysisMode = mode;
+
+      const sw = document.getElementById('modeSwitch');
+      if (sw) {
+        sw.dataset.mode = mode;
+        sw.querySelectorAll('.mode-opt').forEach(b => {
+          const active = b.dataset.mode === mode;
+          b.classList.toggle('active', active);
+          b.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+      }
+
+      const card = document.getElementById('deckFlipCard');
+      if (card) card.classList.toggle('flipped', mode === 'single');
+
+      if (typeof spHideSuggestions === 'function') spHideSuggestions();
+
+      updateDeckFlipHeight();
+      // Focus the primary input of the revealed face
+      setTimeout(() => {
+        const target = mode === 'single'
+          ? document.getElementById('spName')
+          : document.getElementById('driveUrl');
+        if (target) target.focus();
+      }, 320);
     }
 
     // Banner provider selection handled by akcSelectProv / akcFlipBack
@@ -10659,6 +11362,7 @@ ${euRegulations}
     }
 
     function normalizeArchiveSourceType(a = {}) {
+      if (a.mode === 'single' || a.sourceType === 'single') return 'single';
       if (a.sourceType === 'file' || a.sourceType === 'link') return a.sourceType;
       const src = String(a.sourceRaw || a.url || '').trim();
       if (/^https?:\/\//i.test(src) || /docs\.google\.com|spreadsheets\/d\//i.test(src)) return 'link';
@@ -10667,6 +11371,7 @@ ${euRegulations}
     }
 
     function archiveSourceMeta(a = {}) {
+      if (normalizeArchiveSourceType(a) === 'single') return { type: 'single', icon: '🔬', label: 'PRODUCT', text: 'Один продукт', badgeClass: 'single' };
       const type = normalizeArchiveSourceType(a);
       if (type === 'link') return { type, icon: '🔗', label: 'LINK', text: 'По ссылке', badgeClass: 'link' };
       return { type, icon: '📄', label: 'FILE', text: 'Через файл', badgeClass: 'file' };
@@ -10689,7 +11394,7 @@ ${euRegulations}
       archiveFilter = filter;
       const filterEl = document.getElementById('archFilter');
       if (filterEl) {
-        const idx = filter === 'link' ? 1 : filter === 'file' ? 2 : 0;
+        const idx = filter === 'link' ? 1 : filter === 'file' ? 2 : filter === 'single' ? 3 : 0;
         filterEl.style.setProperty('--arch-filter-index', idx);
         filterEl.dataset.active = filter;
         const indicator = filterEl.querySelector('.arch-filter-indicator');
@@ -10710,14 +11415,15 @@ ${euRegulations}
       const totalAll = archive.length;
       const totalLinks = archive.filter(a => normalizeArchiveSourceType(a) === 'link').length;
       const totalFiles = archive.filter(a => normalizeArchiveSourceType(a) === 'file').length;
+      const totalSingle = archive.filter(a => normalizeArchiveSourceType(a) === 'single').length;
       const filtered = archiveFilter === 'all'
         ? archive
         : archive.filter(a => normalizeArchiveSourceType(a) === archiveFilter);
 
       if (countEl) countEl.textContent = `${filtered.length} shown · ${totalAll} records`;
-      if (countsEl) countsEl.textContent = `ALL ${totalAll} · LINK ${totalLinks} · FILE ${totalFiles}`;
+      if (countsEl) countsEl.textContent = `ALL ${totalAll} · LINK ${totalLinks} · FILE ${totalFiles} · PRODUCT ${totalSingle}`;
       if (filterEl) {
-        const idx = archiveFilter === 'link' ? 1 : archiveFilter === 'file' ? 2 : 0;
+        const idx = archiveFilter === 'link' ? 1 : archiveFilter === 'file' ? 2 : archiveFilter === 'single' ? 3 : 0;
         filterEl.style.setProperty('--arch-filter-index', idx);
         filterEl.dataset.active = archiveFilter;
         const indicator = filterEl.querySelector('.arch-filter-indicator');
@@ -10732,7 +11438,10 @@ ${euRegulations}
         return;
       }
       if (!filtered.length) {
-        const label = archiveFilter === 'link' ? 'аналізів по ссылке' : 'аналізів через файл';
+        const label = archiveFilter === 'link' ? 'аналізів по ссылке'
+          : archiveFilter === 'file' ? 'аналізів через файл'
+          : archiveFilter === 'single' ? 'аналізів одного продукту'
+          : 'аналізів';
         list.innerHTML = `<div class="arch-empty">// Немає ${label}</div>`;
         return;
       }
@@ -10748,7 +11457,19 @@ ${euRegulations}
         const displaySource = a.sourceDisplay || a.url || raw || 'Без назви';
         const displayName = displaySource.length > 72 ? displaySource.slice(0, 72) + '…' : displaySource;
         const rawLine = raw && raw !== displaySource ? ` · ${raw.length > 50 ? raw.slice(0, 50) + '…' : raw}` : '';
-        const sheetLine = a.selectedSheetName ? `Лист: ${a.selectedSheetName}` : 'Лист не вказаний';
+        const isSingle = normalizeArchiveSourceType(a) === 'single';
+        // Single-product entries: show code + how many EU/UA checks were saved
+        let metaLine, sheetLine;
+        if (isSingle) {
+          const it = (a.data && a.data.items && a.data.items[0]) || {};
+          const euN = (it.euChecks || []).length;
+          const uaN = (it.uaChecks || []).length;
+          metaLine = `${srcMeta.text} · ${euN + uaN} перевірок збережено`;
+          sheetLine = `УКТЗЕД: ${it.uctzedCode || '—'}${it.originType ? ' · ' + it.originType : ''}`;
+        } else {
+          metaLine = `${srcMeta.text}${rawLine} · ${a.items} позицій`;
+          sheetLine = a.selectedSheetName ? `Лист: ${a.selectedSheetName}` : 'Лист не вказаний';
+        }
 
         const el = document.createElement('div');
         el.className = 'arch-item';
@@ -10759,7 +11480,7 @@ ${euRegulations}
           <span class="arch-source-badge ${srcMeta.badgeClass}">${srcMeta.icon} ${srcMeta.label}</span>
           <div class="arch-url">${displayName}</div>
         </div>
-        <div class="arch-meta">${srcMeta.text}${rawLine} · ${a.items} позицій</div>
+        <div class="arch-meta">${metaLine}</div>
         <div class="arch-sheet">${sheetLine}</div>
       </div>
       <div class="arch-datetime">
@@ -10773,8 +11494,14 @@ ${euRegulations}
           document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
           document.querySelector('.nav-btn').classList.add('active');
           showPage('new', null);
-          document.getElementById('driveUrl').value = srcMeta.type === 'link' ? (a.sourceRaw || a.url || '') : '';
-          renderResults(a.data, a.sourceDisplay || a.url, { skipArchive: true, sourceType: srcMeta.type, sourceRaw: a.sourceRaw || a.url });
+          if (a.mode === 'single') {
+            setAnalysisMode('single');
+            document.getElementById('resultsArea').innerHTML = '';
+            renderSingleProductResult(a.data, { addToArchive: false });
+          } else {
+            document.getElementById('driveUrl').value = srcMeta.type === 'link' ? (a.sourceRaw || a.url || '') : '';
+            renderResults(a.data, a.sourceDisplay || a.url, { skipArchive: true, sourceType: srcMeta.type, sourceRaw: a.sourceRaw || a.url });
+          }
           setTimeout(() => document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth' }), 100);
         };
         list.appendChild(el);
@@ -11717,6 +12444,7 @@ ${euRegulations}
         } else {
           document.getElementById('driveUrl').value = '';
         }
+        if (typeof updateDeckFlipHeight === 'function') updateDeckFlipHeight();
       };
       reader.readAsArrayBuffer(file);
     }
@@ -11829,6 +12557,629 @@ ${batchData}`;
       return { items: allItems, ...meta };
     }
 
+    // ============================================================
+    //  SINGLE PRODUCT ANALYSIS — окрема функція (не чіпає аналіз збірки)
+    // ============================================================
+
+    // ── Autocomplete index built from our verified local knowledge base ──
+    let _spSuggestIndex = null;
+    let _spActiveSuggest = -1;
+    let _spHideTimer = null;
+    let _spPortalReady = false;
+
+    // Move the dropdown out of the 3D-transformed flip card (and the deck's
+    // overflow:hidden) so it can never be clipped; position it with fixed coords.
+    function spInitPortal() {
+      if (_spPortalReady) return;
+      const box = document.getElementById('spSuggestList');
+      if (!box) return;
+      document.body.appendChild(box);
+      _spPortalReady = true;
+      const reposition = () => { if (box.classList.contains('open')) spPositionSuggest(); };
+      window.addEventListener('scroll', reposition, true);
+      window.addEventListener('resize', reposition);
+    }
+
+    function spPositionSuggest() {
+      const box = document.getElementById('spSuggestList');
+      const input = document.getElementById('spName');
+      if (!box || !input) return;
+      const r = input.getBoundingClientRect();
+      box.style.left = r.left + 'px';
+      box.style.top = (r.bottom + 6) + 'px';
+      box.style.width = r.width + 'px';
+    }
+
+    function spNormalize(v) {
+      return String(v || '')
+        .toLowerCase()
+        .replace(/ё/g, 'е').replace(/ъ/g, '').replace(/[’'`´]/g, '')
+        .replace(/[^a-zа-яіїєґ0-9\-\s]/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function spTitleCase(s) {
+      s = String(s || '').trim();
+      return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+    }
+
+    // Pick a clean, human-readable display name from a list of synonym keys.
+    function spPickLabel(keys) {
+      const arr = (keys || []).map(k => String(k || '').trim()).filter(Boolean);
+      if (!arr.length) return '';
+      const cyr = /[а-яіїєґ]/i;
+      // Prefer a mostly-Cyrillic key without leading latin prefixes / digits
+      const clean = arr.filter(k => cyr.test(k) && !/^\s*(dl|l|d)\b/i.test(k) && !/\d/.test(k));
+      const pool = clean.length ? clean : arr.filter(k => cyr.test(k));
+      const pick = (pool.length ? pool : arr).slice().sort((a, b) => a.length - b.length)[0];
+      return spTitleCase(pick);
+    }
+
+    function buildSpSuggestIndex() {
+      if (_spSuggestIndex) return _spSuggestIndex;
+      const byLabel = new Map();
+
+      function add(label, code, cat, keys) {
+        const norm = spNormalize(label);
+        if (!norm) return;
+        const existing = byLabel.get(norm);
+        const allKeys = new Set((keys || []).map(spNormalize).filter(Boolean));
+        allKeys.add(norm);
+        if (existing) {
+          // Keep a code if we learn one; merge synonyms
+          if (!existing.code && code) { existing.code = code; }
+          if (!existing.cat && cat) existing.cat = cat;
+          allKeys.forEach(k => existing.keys.add(k));
+        } else {
+          byLabel.set(norm, { label, code: code || '', cat: cat || '', keys: allKeys });
+        }
+      }
+
+      // 1) Verified code base (name → 10-digit УКТЗЕД). Highest priority.
+      try {
+        (UKTZED_CODE_DB || []).forEach(e => add(e.name || spPickLabel(e.keys), e.code || '', '', e.keys));
+      } catch (_) {}
+
+      // 2) Origin knowledge base (large list of substances, no code on its own —
+      //    code is resolved from the code base when possible).
+      try {
+        (PRODUCT_ORIGIN_KB || []).forEach(e => {
+          const label = spPickLabel(e.keys);
+          if (!label) return;
+          const codeMatch = (typeof lookupUktzedCode === 'function') ? lookupUktzedCode(label) : null;
+          add(label, codeMatch ? codeMatch.code : '', e.category || '', e.keys);
+        });
+      } catch (_) {}
+
+      _spSuggestIndex = Array.from(byLabel.values());
+      return _spSuggestIndex;
+    }
+
+    function spSearchSuggestions(query, limit = 8) {
+      const q = spNormalize(query);
+      if (q.length < 2) return [];
+      const idx = buildSpSuggestIndex();
+      const scored = [];
+      for (const entry of idx) {
+        let best = 0;
+        for (const k of entry.keys) {
+          if (k === q) { best = Math.max(best, 100); }
+          else if (k.startsWith(q)) { best = Math.max(best, 80 - Math.min(20, k.length - q.length)); }
+          else if (k.includes(q)) { best = Math.max(best, 55 - Math.min(20, k.indexOf(q))); }
+        }
+        if (best > 0) scored.push({ entry, score: best });
+      }
+      scored.sort((a, b) => b.score - a.score || a.entry.label.length - b.entry.label.length);
+      return scored.slice(0, limit).map(s => s.entry);
+    }
+
+    function spHighlight(label, query) {
+      const safe = escHtml(label);
+      const q = spNormalize(query);
+      if (!q) return safe;
+      const lower = label.toLowerCase();
+      const pos = spNormalize(lower).indexOf(q);
+      // Best-effort highlight on the raw label
+      const rawPos = lower.indexOf(q);
+      if (rawPos < 0) return safe;
+      return escHtml(label.slice(0, rawPos)) + '<mark>' + escHtml(label.slice(rawPos, rawPos + q.length)) + '</mark>' + escHtml(label.slice(rawPos + q.length));
+    }
+
+    function spRenderSuggestions(list, query) {
+      const box = document.getElementById('spSuggestList');
+      const input = document.getElementById('spName');
+      if (!box) return;
+      _spActiveSuggest = -1;
+      if (!list.length) {
+        box.innerHTML = `<div class="sp-suggest-empty">Немає збігів у базі — введіть назву та код вручну</div>`;
+        box.classList.add('open');
+        spPositionSuggest();
+        if (input) input.setAttribute('aria-expanded', 'true');
+        return;
+      }
+      box.innerHTML = list.map((e, i) => {
+        const meta = e.cat ? escHtml(e.cat) : (e.code ? 'УКТЗЕД у базі' : 'код підбере AI');
+        const codeBadge = e.code ? `<span class="sp-suggest-code">${escHtml(e.code)}</span>` : '';
+        return `<div class="sp-suggest-item" role="option" data-i="${i}" onmousedown="spSelectSuggestion(${i});event.preventDefault();">
+          <div class="sp-suggest-main">
+            <div class="sp-suggest-name">${spHighlight(e.label, query)}</div>
+            <div class="sp-suggest-meta">${meta}</div>
+          </div>
+          ${codeBadge}
+        </div>`;
+      }).join('');
+      box.classList.add('open');
+      spPositionSuggest();
+      if (input) input.setAttribute('aria-expanded', 'true');
+      box._list = list;
+    }
+
+    function spHideSuggestions() {
+      const box = document.getElementById('spSuggestList');
+      const input = document.getElementById('spName');
+      if (box) { box.classList.remove('open'); box.innerHTML = ''; box._list = null; }
+      if (input) input.setAttribute('aria-expanded', 'false');
+      _spActiveSuggest = -1;
+    }
+
+    function spHideSuggestionsSoon() {
+      clearTimeout(_spHideTimer);
+      _spHideTimer = setTimeout(spHideSuggestions, 150);
+    }
+
+    function spOnNameInput() {
+      const input = document.getElementById('spName');
+      if (!input) return;
+      const list = spSearchSuggestions(input.value, 8);
+      spRenderSuggestions(list, input.value);
+    }
+
+    function spSelectSuggestion(i) {
+      const box = document.getElementById('spSuggestList');
+      const list = box && box._list;
+      if (!list || !list[i]) return;
+      const entry = list[i];
+      const nameInput = document.getElementById('spName');
+      const codeInput = document.getElementById('spCode');
+      if (nameInput) nameInput.value = entry.label;
+      // Resolve a verified code: prefer index code, else look it up by name.
+      let code = entry.code;
+      if (!code && typeof lookupUktzedCode === 'function') {
+        const m = lookupUktzedCode(entry.label);
+        if (m) code = m.code;
+      }
+      if (codeInput && code) codeInput.value = code;
+      spUpdateCodeSource(code, !!code);
+      spHideSuggestions();
+      if (codeInput) codeInput.focus();
+    }
+
+    function spNameKeydown(e) {
+      const box = document.getElementById('spSuggestList');
+      if (!box || !box.classList.contains('open')) return;
+      const items = Array.from(box.querySelectorAll('.sp-suggest-item'));
+      if (!items.length) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        _spActiveSuggest = Math.min(items.length - 1, _spActiveSuggest + 1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        _spActiveSuggest = Math.max(0, _spActiveSuggest - 1);
+      } else if (e.key === 'Enter') {
+        if (_spActiveSuggest >= 0) { e.preventDefault(); spSelectSuggestion(_spActiveSuggest); return; }
+      } else if (e.key === 'Escape') {
+        spHideSuggestions();
+        return;
+      } else {
+        return;
+      }
+      items.forEach((el, i) => el.classList.toggle('active', i === _spActiveSuggest));
+      if (items[_spActiveSuggest]) items[_spActiveSuggest].scrollIntoView({ block: 'nearest' });
+    }
+
+    function spOnCodeInput() {
+      const codeInput = document.getElementById('spCode');
+      const code = codeInput ? codeInput.value.trim() : '';
+      spUpdateCodeSource(code, false);
+    }
+
+    // Update the QDPro verification line + "code from verified base" status.
+    function spUpdateCodeSource(code, fromBase) {
+      const wrap = document.getElementById('spCodeSource');
+      if (!wrap) return;
+      const cleanCode = (typeof normalizeHsCode === 'function') ? normalizeHsCode(code) : (code || '').replace(/\D/g, '');
+      const url = (typeof buildQdProGoodInfoUrl === 'function')
+        ? buildQdProGoodInfoUrl(cleanCode)
+        : 'https://www.qdpro.com.ua/uk/goodinfo' + (cleanCode ? '/' + cleanCode : '');
+      const statusHtml = fromBase
+        ? `<span class="sp-code-status">✓ Код з перевіреної бази</span>`
+        : (cleanCode
+          ? `<span class="sp-code-status warn">Звірте код на офіційному джерелі</span>`
+          : '');
+      wrap.innerHTML = `${statusHtml}<a id="spQdproLink" class="sp-qdpro-link" href="${escHtml(url)}" target="_blank" rel="noopener">QDPro · Довідка по товару УКТЗЕД ↗</a>`;
+    }
+
+    function buildSingleProductSystemPrompt() {
+      return `Ти — професійний аналітик міжнародної логістики та митного оформлення фармацевтичних і хімічних товарів з Китаю/Індії в Україну через ЄС.
+
+ПОТОЧНА ДАТА: ЧЕРВЕНЬ 2026
+
+Тобі надано дані про ОДИН товар (товарну позицію), які ввів користувач. Проаналізуй САМЕ цей товар для логіста та митного брокера.
+
+ПРАВИЛА:
+- Використовуй ТІЛЬКИ надані дані. Якщо якогось поля немає (ціна, вага, виробник, код) — залиш порожнім/null/0, не вигадуй конкретні числа.
+- Назву бери точно як надав користувач.
+- Якщо користувач надав код УКТЗЕД/HS — використовуй саме його. Якщо не надав — підбери найбільш імовірний 10-значний код за назвою/описом і познач це.
+- Аналіз будуй від коду УКТЗЕД/HS (глава, товарна позиція), назви, виробника та опису: тип походження, метод виробництва, перевірки ЄС/України.
+- УСІ ТЕКСТИ — ВИКЛЮЧНО УКРАЇНСЬКОЮ МОВОЮ.
+- Числа (qtyKg, buyPricePerKg, dutyRatePercent) — ТІЛЬКИ числа без одиниць. НЕ рахуй митну вартість/мито/ПДВ — це зробить система.
+
+СВІТЛОФОР СТАТУСІВ (status):
+- "green" — стандартна перевірка/документ, проблем не очікується.
+- "yellow" — звернути увагу, потрібна додаткова підготовка або можлива перевірка.
+- "red" — критично, без цього вантаж не пройде, обов'язкова перевірка чи дозвіл.
+
+У euChecks та uaChecks обов'язково врахуй:
+- перевірки, що випливають з коду УКТЗЕД/HS та типу походження ("Код/походження: ...");
+- фізичні процедури на митниці (сканування, огляд, зважування, відбір проб);
+- документальні вимоги (NCTS/T1, MRN, CMR/AWB/BL, invoice, packing list, CoA, SDS, GMP, фіто/вет, TRACES/BCP, ДПСС, ADR/UN);
+- санкційні/Dual-Use ризики за потреби.
+Порядок: спочатку red, потім yellow, потім green.
+
+ПРАВИЛА РИЗИКУ (risk):
+- "Критичний": ADR/небезпечний вантаж, прекурсор/контрольована речовина, потрібен особливий дозвіл.
+- "Середній": потрібні специфічні сертифікати (GMP, CoA), температурний режим або додатковий контроль.
+- "Низький": стандартний товар без особливих обмежень.
+
+ФОРМАТ ВІДПОВІДІ — ТІЛЬКИ валідний JSON без markdown:
+{
+  "items": [
+    {
+      "name": "ТОЧНА назва товару",
+      "uctzedCode": "10-значний код (з вводу або підібраний)",
+      "codeBasis": "код від користувача / підібрано AI — перевірити брокером",
+      "originType": "синтетичне / рослинне / тваринне / ферментаційне / напівсинтетичне / мінеральне / змішане / невідоме",
+      "productionMethod": "хімічний синтез / екстракція / ферментація / очищення / інше",
+      "originShortNote": "1-2 речення: що означає код для походження і які документи це підтверджують",
+      "originConfidence": "high|medium|low",
+      "qtyKg": число або 0,
+      "buyPricePerKg": число або 0,
+      "dutyRatePercent": число (напр. 6.5 або 0),
+      "category": "АФІ / Ветеринарна АФІ / Косметична сировина / Харчова добавка / Допоміжна речовина / Промислова хімія / ПОДВІЙНЕ ПРИЗНАЧЕННЯ",
+      "applications": "детальний опис застосування українською",
+      "hazardAnalysis": "аналіз небезпеки: ADR клас, CLP, токсичність. Якщо безпечний — 'Не класифікується як небезпечний вантаж'",
+      "storageRequirements": "вимоги до зберігання українською",
+      "euChecks": [ { "item": "...", "status": "green|yellow|red", "note": "..." } ],
+      "uaChecks": [ { "item": "...", "status": "green|yellow|red", "note": "..." } ],
+      "risk": "Критичний|Середній|Низький",
+      "riskNote": "конкретна причина ризику українською"
+    }
+  ],
+  "borderDelay": "прогноз затримки на кордоні (напр. '12-24 год')",
+  "criticalAlert": "якщо товар небезпечний/критичний — детально українською, інакше null",
+  "nctsList": ["крок 1 українською", "крок 2", "крок 3"]
+}
+
+Поверни РІВНО ОДИН об'єкт у масиві items.`;
+    }
+
+    async function runSingleProduct() {
+      if (!getActiveKey()) { alert('Спочатку введіть API ключ!'); return; }
+
+      const name = document.getElementById('spName').value.trim();
+      if (!name) {
+        alert('Вкажіть назву товару для аналізу.');
+        document.getElementById('spName').focus();
+        return;
+      }
+
+      const code = document.getElementById('spCode').value.trim();
+
+      const btn = document.getElementById('spGoBtn');
+      const txt = document.getElementById('spGoTxt');
+      const spin = document.getElementById('spGoSpin');
+      btn.disabled = true; btn.classList.add('searching'); txt.textContent = 'Пошук...'; spin.style.display = 'block';
+      document.getElementById('resultsArea').innerHTML = '';
+      showLoader();
+
+      try {
+        setLoaderStep('> Аналіз одного продукту...', `Товар: "${name}"`);
+
+        const systemPrompt = buildSingleProductSystemPrompt();
+        const userPrompt = `Дані товару для аналізу:
+- Назва: ${name}
+- Код УКТЗЕД/HS: ${code || '— (не вказано, підбери найбільш імовірний 10-значний код)'}
+
+Проаналізуй САМЕ цей товар. Поверни рівно один об'єкт у масиві items.`;
+
+        setLoaderStep('> Відправка на аналіз AI...', 'Визначення коду, походження та перевірок...');
+        let raw;
+        try {
+          raw = await callAI(systemPrompt, userPrompt, 4000, true);
+        } catch (e) {
+          throw new Error('AI-аналіз не вдався: ' + e.message);
+        }
+
+        let parsed;
+        try {
+          let clean = raw.replace(/```json|```/g, '').trim();
+          clean = clean.replace(/(\d),(\d)/g, '$1$2');
+          parsed = JSON.parse(clean);
+        } catch (e) {
+          throw new Error('Не вдалося розпарсити відповідь AI: ' + e.message + '\n\n' + raw.slice(0, 300));
+        }
+
+        // Accept {items:[...]}, a bare item object, or {item:{...}}
+        let item;
+        if (Array.isArray(parsed.items) && parsed.items.length) item = parsed.items[0];
+        else if (parsed.item && typeof parsed.item === 'object') item = parsed.item;
+        else if (parsed.name) item = parsed;
+        else item = {};
+
+        const meta = {
+          borderDelay: parsed.borderDelay || '—',
+          criticalAlert: parsed.criticalAlert || null,
+          nctsList: Array.isArray(parsed.nctsList) ? parsed.nctsList : []
+        };
+
+        setLoaderStep('> Збагачення за кодом / базою походжень...', 'Перевірки ЄС / UA, ставка мита, ADR...');
+
+        // ── User-provided values take priority over AI guesses ──
+        item.name = name;
+        if (code) item.uctzedCode = code;
+
+        // rowMeta mirrors what the batch pipeline builds per row, so we can
+        // reuse the exact same enrichment helpers (code → origin → checks).
+        const rowMeta = {
+          uctzedCode: code || item.uctzedCode || '',
+          manufacturer: item.manufacturer || '',
+          prevPrice: 0,
+          header: [],
+          row: []
+        };
+
+        item = enrichItemWithCodeOrigin(item, rowMeta);
+        item = applyKBOriginToItem(item);
+        item = applyPriceAnomalyCheck(item, rowMeta);
+
+        // ── Customs maths (same formula as collection analysis) ──
+        const FREIGHT_MULTIPLIER = 1.10;
+        const VAT_RATE = 0.20;
+        const qty = parseNumber(item.qtyKg);
+        const price = parseNumber(item.buyPricePerKg);
+        const dutyRate = parseNumber(item.dutyRatePercent);
+        const customsValue = +(price * qty * FREIGHT_MULTIPLIER).toFixed(2);
+        const duty = +(customsValue * dutyRate / 100).toFixed(2);
+        const vat = +((customsValue + duty) * VAT_RATE).toFixed(2);
+        item.qtyKg = qty;
+        item.buyPricePerKg = price;
+        item.dutyRatePercent = dutyRate;
+        item.customsValue = customsValue;
+        item.duty = duty;
+        item.vat = vat;
+        item.qty = qty > 0 ? qty.toLocaleString('uk-UA') + ' кг' : '—';
+        item.buyPrice = price;
+
+        const result = {
+          items: [item],
+          mode: 'single',
+          borderDelay: meta.borderDelay,
+          criticalAlert: meta.criticalAlert,
+          nctsList: meta.nctsList,
+          _meta: { analysisDate: new Date().toLocaleDateString('uk-UA'), mode: 'single' },
+          summary: {
+            totalCustomsValue: customsValue,
+            totalDuty: duty,
+            totalVAT: vat,
+            totalToPay: +(duty + vat).toFixed(2),
+            borderDelay: meta.borderDelay
+          }
+        };
+
+        hideLoader();
+        renderSingleProductResult(result, { sourceRaw: name, addToArchive: true });
+
+      } catch (e) {
+        hideLoader();
+        document.getElementById('resultsArea').innerHTML =
+          `<div class="status-box error" style="display:block;">> Помилка: ${escHtml(e.message)}</div>`;
+      } finally {
+        btn.disabled = false; btn.classList.remove('searching'); txt.textContent = 'Проаналізувати продукт'; spin.style.display = 'none';
+      }
+    }
+
+    function renderSingleProductResult(d, opts = {}) {
+      lastAnalysisData = d;
+      const item = (d.items || [])[0] || {};
+      const idx = 0;
+      const s = d.summary || {};
+
+      // Make sure origin options / transit checks exist (same prep as renderResults)
+      if (!Array.isArray(item.originOptions) || !item.originOptions.length) {
+        const fallbackProfile = codeBasedOriginProfile(item.uctzedCode, item);
+        item.qdproUrl = item.qdproUrl || buildQdProGoodInfoUrl(item.uctzedCode);
+        item.qdproChapterNote = item.qdproChapterNote || getQdProChapterNote(item.uctzedCode);
+        item.originOptions = buildOriginOptionsForItem(item, fallbackProfile);
+        item.selectedOriginKey = item.selectedOriginKey || chooseRecommendedOriginKey(item, item.originOptions, fallbackProfile);
+        mergeOriginProfileIntoItem(item, selectedOriginProfile(item, item.selectedOriginKey));
+      } else {
+        mergeOriginProfileIntoItem(item, selectedOriginProfile(item, item.selectedOriginKey));
+      }
+
+      const rc = item.risk === 'Критичний' ? 'pill-r' : item.risk === 'Середній' ? 'pill-y' : 'pill-g';
+      const qtyDisplay = item.qty || (item.qtyKg ? item.qtyKg.toLocaleString('uk-UA') + ' кг' : '—');
+      const priceDisplay = item.buyPricePerKg ? fmt(item.buyPricePerKg) + '/кг' : '—';
+      const dutyRateDisplay = item.dutyRatePercent != null ? `${item.dutyRatePercent}%` : '—';
+      const hasAdr = (item.hazardAnalysis && item.hazardAnalysis.includes('Клас')) || item.adrFromDB;
+
+      const al = d.criticalAlert
+        ? `<div class="al al-red"><h4>Критичний фактор</h4><p>${escHtml(d.criticalAlert)}</p></div>`
+        : '';
+      const nc = (d.nctsList || []).map(i => `<li>${escHtml(i)}</li>`).join('');
+
+      document.getElementById('resultsArea').innerHTML = `
+    <div class="sp-result">
+      <div class="status-box" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;border-color:var(--amber);background:var(--amber-dim);">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--amber);white-space:nowrap;margin-top:2px;">▶ ПРОДУКТ</span>
+        <div style="font-size:12px;line-height:1.6;">
+          <strong style="color:var(--ink);font-family:var(--mono);">Аналіз одного продукту</strong>
+          <br><span style="color:var(--ink-2);">Окремий товар, поза контекстом збірної партії · ${escHtml((d._meta && d._meta.analysisDate) || '')}</span>
+        </div>
+      </div>
+
+      <div class="sec-head">
+        <span class="sec-num">01 · OVERVIEW</span>
+        <span class="sec-title">Орієнтовні платежі для брокера</span>
+        <span class="sec-line"></span>
+      </div>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Митна база <span class="tag">CIF</span></div>
+          <div class="metric-value">${fmt(s.totalCustomsValue)}</div>
+          <div class="metric-sub">Ціна × кількість × 1.10</div>
+        </div>
+        <div class="metric is-duty">
+          <div class="metric-label">Мито <span class="tag">${dutyRateDisplay}</span></div>
+          <div class="metric-value">${fmt(s.totalDuty)}</div>
+          <div class="metric-sub">Звірити код у QDPro</div>
+        </div>
+        <div class="metric is-vat">
+          <div class="metric-label">ПДВ <span class="tag">20%</span></div>
+          <div class="metric-value">${fmt(s.totalVAT)}</div>
+          <div class="metric-sub">(База + Мито) × 20%</div>
+        </div>
+        <div class="metric is-total">
+          <div class="metric-label">Разом до сплати <span class="tag">ИТОГО</span></div>
+          <div class="metric-value">${fmt(s.totalToPay)}</div>
+          <div class="metric-sub">Очікувана затримка · ${escHtml(s.borderDelay || '—')}</div>
+        </div>
+      </div>
+
+      <div class="sec-head">
+        <span class="sec-num">02 · PRODUCT</span>
+        <span class="sec-title">Картка аналізу продукту</span>
+        <span class="sec-line"></span>
+      </div>
+
+      <div class="manifest-actions">
+        <div class="port-selector">
+          <span class="port-selector-label">Порт транзиту ЄС:</span>
+          <button class="port-btn" id="portBtn-gdansk" onclick="setTransitPort('gdansk')"><span class="port-flag">🇵🇱</span> Гданськ (BCT/DCT)</button>
+          <button class="port-btn" id="portBtn-hamburg" onclick="setTransitPort('hamburg')"><span class="port-flag">🇩🇪</span> Гамбург</button>
+          <button class="port-btn" id="portBtn-rotterdam" onclick="setTransitPort('rotterdam')"><span class="port-flag">🇳🇱</span> Роттердам</button>
+          <button class="port-btn" id="portBtn-koper" onclick="setTransitPort('koper')"><span class="port-flag">🇸🇮</span> Копер</button>
+        </div>
+        <div class="download-wrap">
+          <button class="download-btn" id="dlBtn" onclick="downloadReport(event)">
+            <svg class="dl-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span class="dl-spinner"></span>
+            <span class="dl-label">Завантажити звіт (.xlsx)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sp-card">
+        <div class="sp-card-head">
+          <div class="sp-card-head-main">
+            <div class="sp-card-name">${escHtml(item.name || '—')}${hasAdr ? ' <span class="adr-badge">▲ ADR</span>' : ''}</div>
+            <div class="sp-card-code">УКТЗЕД · ${escHtml(item.uctzedCode || '—')}${item.category ? ' · ' + escHtml(item.category) : ''}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <span class="pill ${rc}">${escHtml(item.risk || '—')}</span>
+            <div class="pill-note" style="max-width:240px;">${escHtml(item.riskNote || '')}</div>
+          </div>
+        </div>
+
+        <div class="sp-card-grid">
+          <div class="sp-col sp-col-product">
+            <div class="sp-col-title">🧬 Товар · походження</div>
+            ${renderProductInfoCell(item, idx)}
+            ${renderOriginSelectorCard(item, idx)}
+          </div>
+          <div class="sp-col">
+            <div class="sp-col-title">🇪🇺 Транзит ЄС / брокер</div>
+            <div id="euChecks-${idx}">${renderEuTransitCell(item, idx)}</div>
+          </div>
+          <div class="sp-col">
+            <div class="sp-col-title">🇺🇦 Транзит UA / брокер</div>
+            <div id="uaChecks-${idx}">${renderUaTransitCell(item, idx)}</div>
+          </div>
+        </div>
+
+        <div class="sp-meta-row">
+          <div class="sp-meta-cell">
+            <div class="sp-meta-label">Кількість</div>
+            <div class="sp-meta-value">${escHtml(qtyDisplay)}</div>
+          </div>
+          <div class="sp-meta-cell">
+            <div class="sp-meta-label">Ціна закупки</div>
+            <div class="sp-meta-value">${escHtml(priceDisplay)}</div>
+          </div>
+          <div class="sp-meta-cell">
+            <div class="sp-meta-label">Митна вартість</div>
+            <div class="sp-meta-value">${fmt(item.customsValue)}</div>
+          </div>
+          <div class="sp-meta-cell">
+            <div class="sp-meta-label">Мито (${dutyRateDisplay})</div>
+            <div class="sp-meta-value">${fmt(item.duty)}</div>
+          </div>
+          <div class="sp-meta-cell">
+            <div class="sp-meta-label">ПДВ</div>
+            <div class="sp-meta-value">${fmt(item.vat)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-head">
+        <span class="sec-num">03 · ADVISORY</span>
+        <span class="sec-title">Ризики та чекліст</span>
+        <span class="sec-line"></span>
+      </div>
+      <div class="alerts">
+        ${al || '<div></div>'}
+        <div class="al al-green"><h4>NCTS Phase 5 · Checklist</h4><ul>${nc || '<li>Стандартна транзитна процедура NCTS Phase 5.</li>'}</ul></div>
+      </div>
+    </div>`;
+
+      refreshOpenAccordions(document.getElementById('resultsArea'));
+      setTimeout(() => {
+        document.querySelectorAll('.port-btn').forEach(b => b.classList.remove('active'));
+        const pb = document.getElementById('portBtn-' + _selectedPort);
+        if (pb) pb.classList.add('active');
+      }, 0);
+
+      // Async AI origin enrichment (same path as collection analysis)
+      if (item._needsAIOrigin !== false && !item._originLockedByKB) {
+        setTimeout(() => enrichItemOriginAsync(item, idx), 120);
+      }
+
+      // Archive (re-opens via renderSingleProductResult thanks to mode flag)
+      if (opts.addToArchive) {
+        const now = new Date();
+        const hasHigh = item.risk === 'Критичний';
+        const hasMed = item.risk === 'Середній';
+        const total = fmt((s.totalCustomsValue || 0) + (s.totalDuty || 0) + (s.totalVAT || 0));
+        archive.unshift({
+          url: item.name,
+          sourceDisplay: item.name,
+          sourceRaw: opts.sourceRaw || item.name,
+          sourceType: 'single',
+          mode: 'single',
+          timestamp: now.toISOString(),
+          date: now.toLocaleDateString('uk-UA'),
+          time: now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
+          items: 1,
+          total,
+          hasHigh,
+          hasMed,
+          selectedSheetName: '',
+          data: d
+        });
+        safeStorageSet('lap_archive', JSON.stringify(archive.slice(0, 50)));
+      }
+    }
+
     // Live terminal clock
     function updateClock() {
       const now = new Date();
@@ -11867,7 +13218,14 @@ ${batchData}`;
       openChecksModal,
       closeChecksModal,
       ckmOverlayClick,
-      ckmSetFilter
+      ckmSetFilter,
+      setAnalysisMode,
+      runSingleProduct,
+      spOnNameInput,
+      spNameKeydown,
+      spHideSuggestionsSoon,
+      spSelectSuggestion,
+      spOnCodeInput
     });
 
 
