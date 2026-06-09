@@ -1717,8 +1717,9 @@
 
     /* =========== SINGLE PRODUCT RESULT =========== */
     .sp-result {
-      width: min(1180px, 100%);
-      margin: 0 auto;
+      width: 100%;
+      max-width: none;
+      margin: 0;
       text-align: left;
     }
 
@@ -13020,44 +13021,8 @@ ${batchData}`;
 
       document.getElementById('resultsArea').innerHTML = `
     <div class="sp-result">
-      <div class="status-box" style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;border-color:var(--amber);background:var(--amber-dim);">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--amber);white-space:nowrap;margin-top:2px;">▶ ПРОДУКТ</span>
-        <div style="font-size:12px;line-height:1.6;">
-          <strong style="color:var(--ink);font-family:var(--mono);">Аналіз одного продукту</strong>
-          <br><span style="color:var(--ink-2);">Окремий товар, поза контекстом збірної партії · ${escHtml((d._meta && d._meta.analysisDate) || '')}</span>
-        </div>
-      </div>
-
       <div class="sec-head">
-        <span class="sec-num">01 · OVERVIEW</span>
-        <span class="sec-title">Орієнтовні платежі для брокера</span>
-        <span class="sec-line"></span>
-      </div>
-      <div class="metrics">
-        <div class="metric">
-          <div class="metric-label">Митна база <span class="tag">CIF</span></div>
-          <div class="metric-value">${fmt(s.totalCustomsValue)}</div>
-          <div class="metric-sub">Ціна × кількість × 1.10</div>
-        </div>
-        <div class="metric is-duty">
-          <div class="metric-label">Мито <span class="tag">${dutyRateDisplay}</span></div>
-          <div class="metric-value">${fmt(s.totalDuty)}</div>
-          <div class="metric-sub">Звірити код у QDPro</div>
-        </div>
-        <div class="metric is-vat">
-          <div class="metric-label">ПДВ <span class="tag">20%</span></div>
-          <div class="metric-value">${fmt(s.totalVAT)}</div>
-          <div class="metric-sub">(База + Мито) × 20%</div>
-        </div>
-        <div class="metric is-total">
-          <div class="metric-label">Разом до сплати <span class="tag">ИТОГО</span></div>
-          <div class="metric-value">${fmt(s.totalToPay)}</div>
-          <div class="metric-sub">Очікувана затримка · ${escHtml(s.borderDelay || '—')}</div>
-        </div>
-      </div>
-
-      <div class="sec-head">
-        <span class="sec-num">02 · PRODUCT</span>
+        <span class="sec-num">01 · PRODUCT</span>
         <span class="sec-title">Картка аналізу продукту</span>
         <span class="sec-line"></span>
       </div>
@@ -13106,33 +13071,10 @@ ${batchData}`;
             <div id="uaChecks-${idx}">${renderUaTransitCell(item, idx)}</div>
           </div>
         </div>
-
-        <div class="sp-meta-row">
-          <div class="sp-meta-cell">
-            <div class="sp-meta-label">Кількість</div>
-            <div class="sp-meta-value">${escHtml(qtyDisplay)}</div>
-          </div>
-          <div class="sp-meta-cell">
-            <div class="sp-meta-label">Ціна закупки</div>
-            <div class="sp-meta-value">${escHtml(priceDisplay)}</div>
-          </div>
-          <div class="sp-meta-cell">
-            <div class="sp-meta-label">Митна вартість</div>
-            <div class="sp-meta-value">${fmt(item.customsValue)}</div>
-          </div>
-          <div class="sp-meta-cell">
-            <div class="sp-meta-label">Мито (${dutyRateDisplay})</div>
-            <div class="sp-meta-value">${fmt(item.duty)}</div>
-          </div>
-          <div class="sp-meta-cell">
-            <div class="sp-meta-label">ПДВ</div>
-            <div class="sp-meta-value">${fmt(item.vat)}</div>
-          </div>
-        </div>
       </div>
 
       <div class="sec-head">
-        <span class="sec-num">03 · ADVISORY</span>
+        <span class="sec-num">02 · ADVISORY</span>
         <span class="sec-title">Ризики та чекліст</span>
         <span class="sec-line"></span>
       </div>
