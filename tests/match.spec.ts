@@ -48,6 +48,23 @@ describe('lookupUktzedCode — стійкість до брудних назв',
   });
 });
 
+describe('lookupUktzedCode — кормові амінокислоти + АФІ (оверлей)', () => {
+  const cases: [string, string][] = [
+    ['L-Лізин сульфат 70%', '2922410000'],
+    ['lysine hcl feed grade', '2922410000'],
+    ['DL-Метіонін кормовий', '2930400000'],
+    ['L-Threonine 98.5%', '2922500000'],
+    ['L-триптофан', '2922490000'],
+    ['Глутамат натрію (MSG)', '2922420000'],
+    ['Парацетамол USP', '2924299890'],
+    ['Caffeine anhydrous', '2939300000'],
+    ['Метронідазол субстанція', '2933299090'],
+  ];
+  it.each(cases)('%s → %s', (name, code) => {
+    expect(lookupUktzedCode(name)?.code).toBe(code);
+  });
+});
+
 describe('lookupProductOriginMatch — впевненість походження', () => {
   it('лізин → ферментаційне з високою впевненістю', () => {
     const m = lookupProductOriginMatch('L-Лізин сульфат 70%');

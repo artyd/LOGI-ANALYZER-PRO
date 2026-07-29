@@ -21,4 +21,22 @@ export const UKTZED_CODE_DB_EXTRA: UktzedEntry[] = [
   { keys: ['vitamin k3', 'menadione sodium bisulfite', 'менадіон натрію бісульфіт'], code: '2936290000', name: 'Вітамін K3' },
   { keys: ['vitamin b9', 'folacin', 'фолацин'], code: '2936290000', name: 'Фолієва кислота (B9)' },
   { keys: ['vitamin h', 'd-biotin', 'д-біотин'], code: '2936290000', name: 'Біотин (B7/H)' },
+
+  // ── Кормові/харчові амінокислоти (ядро вантажу) — HS 2922/2930 ──
+  { keys: ['l-lysine', 'lysine', 'lysine hcl', 'lysine sulfate', 'l-лізин', 'лізин', 'лізин сульфат', 'лізин гідрохлорид', 'l-лизин', 'лизин', 'лизин сульфат', 'лизин гидрохлорид'], code: '2922410000', name: 'L-Лізин' },
+  { keys: ['dl-methionine', 'l-methionine', 'methionine', 'dl-метіонін', 'метіонін', 'dl-метионин', 'метионин'], code: '2930400000', name: 'DL-Метіонін' },
+  { keys: ['l-threonine', 'threonine', 'l-треонін', 'треонін', 'треонин'], code: '2922500000', name: 'L-Треонін' },
+  { keys: ['l-tryptophan', 'tryptophan', 'l-триптофан', 'триптофан'], code: '2922490000', name: 'L-Триптофан' },
+  { keys: ['l-valine', 'valine', 'l-валін', 'валін', 'валин'], code: '2922490000', name: 'L-Валін' },
+  { keys: ['l-leucine', 'leucine', 'l-лейцин', 'лейцин'], code: '2922490000', name: 'L-Лейцин' },
+  { keys: ['l-isoleucine', 'isoleucine', 'l-ізолейцин', 'ізолейцин', 'изолейцин'], code: '2922490000', name: 'L-Ізолейцин' },
+  { keys: ['l-glutamine', 'glutamine', 'l-глутамін', 'глутамін', 'глутамин'], code: '2922490000', name: 'L-Глутамін' },
+  { keys: ['glycine', 'гліцин', 'глицин'], code: '2922490000', name: 'Гліцин' },
+  { keys: ['glutamic acid', 'monosodium glutamate', 'msg', 'глутамінова кислота', 'глутамат натрію', 'глутамат', 'глутаминовая кислота'], code: '2922420000', name: 'Глутамінова кислота / MSG' },
+
+  // ── Часті АФІ, яких НЕ було в базі (парацетамол/метронідазол вже є з точнішими кодами) ──
+  { keys: ['caffeine', 'кофеїн', 'кофеин'], code: '2939300000', name: 'Кофеїн' },
+  { keys: ['ibuprofen', 'ібупрофен', 'ибупрофен'], code: '2916390000', name: 'Ібупрофен' },
+  { keys: ['metformin', 'метформін', 'метформин'], code: '2925290000', name: 'Метформін' },
+  { keys: ['omeprazole', 'омепразол'], code: '2933990000', name: 'Омепразол' },
 ];
