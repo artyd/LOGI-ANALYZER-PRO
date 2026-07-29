@@ -2,7 +2,7 @@ import { selectActualSheet, type SheetInput } from '../sheets/selectActualSheet'
 import { extractRows, type ColumnMap } from '../sheets/parse';
 import { resolveLine, type ResolvedLine } from '../engines/resolve';
 import { calculatePayments } from '../engines/payment';
-import { buildOriginOptions, originKeyFromType, type OriginProfile, type OriginPin } from '../engines/origin';
+import { buildOriginOptions, originKeyFromType, categoryChecks, type OriginProfile, type OriginPin, type OriginCheck } from '../engines/origin';
 import {
   ShipmentCostInput,
   type CalcResponse,
@@ -17,6 +17,7 @@ export interface AnalysisLine {
   resolved: ResolvedLine;
   calc: CalcLineResult;
   originOptions: OriginProfile[];
+  appChecks: { eu: OriginCheck[]; ua: OriginCheck[] };
 }
 
 export interface AnalysisResult {
@@ -75,6 +76,7 @@ export function analyzeDeterministic(
         },
         pinned,
       ),
+      appChecks: categoryChecks(r.origin?.category),
     };
   });
 

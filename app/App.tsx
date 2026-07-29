@@ -584,8 +584,8 @@ function Results({ r, currency, ai, aiBusy, aiError, hasKey, onExport }: { r: An
               </div>
               <div style={{ fontSize: 13, color: 'var(--ink-2)', marginBottom: 12 }}>{sel.basis}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-                <div><div className="metric-label" style={{ color: 'var(--ink)' }}>🇪🇺 Транзит ЄС</div><CheckList checks={sel.euChecks} /></div>
-                <div><div className="metric-label" style={{ color: 'var(--ink)' }}>🇺🇦 Розмитнення UA</div><CheckList checks={sel.uaChecks} /></div>
+                <div><div className="metric-label" style={{ color: 'var(--ink)' }}>🇪🇺 Транзит ЄС</div><CheckList checks={[...sel.euChecks, ...l.appChecks.eu]} /></div>
+                <div><div className="metric-label" style={{ color: 'var(--ink)' }}>🇺🇦 Розмитнення UA</div><CheckList checks={[...sel.uaChecks, ...l.appChecks.ua]} /></div>
                 <div><div className="metric-label" style={{ color: 'var(--ink)' }}>🚚 Транзит / логістика</div><CheckList checks={sel.transitChecks} /></div>
               </div>
             </div>

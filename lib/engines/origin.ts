@@ -266,6 +266,31 @@ function chooseRecommended(item: OriginItem, options: OriginProfile[]): OriginKe
   return (firstNon ?? options[0] ?? { key: 'unknown' as OriginKey }).key;
 }
 
+/** Перевірки за призначенням/категорією товару (детерміновано, з бази категорій). */
+export function categoryChecks(category?: string | null): { eu: OriginCheck[]; ua: OriginCheck[] } {
+  const cat = String(category ?? '').toLowerCase();
+  const eu: OriginCheck[] = [];
+  const ua: OriginCheck[] = [];
+  if (/подвійн|двойн|dual/.test(cat)) {
+    eu.push(c('Подвійне призначення: export control', 'red', 'Перевірити dual-use (Reg. 2021/821), Annex I та end-use/end-user перед транзитом.'));
+    ua.push(c('Подвійне призначення: Держекспортконтроль', 'red', 'Можливий дозвіл ДСЕК; підтвердити кінцеве використання й кінцевого споживача.'));
+  }
+  if (/афі|\bapi\b|фармац|активн\w* субстан|діюч\w* речовин/.test(cat)) {
+    eu.push(c('АФІ: GMP/письмове підтвердження', 'yellow', 'Підготувати GMP (EU/PIC-S/WHO), CoA, DMF/CEP за потреби.'));
+    ua.push(c('АФІ: Держлікслужба', 'red', 'Ліцензія імпортера + разовий дозвіл на ввезення (ЛЗ-2), реєстраційний контекст.'));
+  }
+  if (/корм|feed|ветерин/.test(cat)) {
+    ua.push(c('Кормове/вет: ДПСС', 'yellow', 'Держпродспоживслужба: реєстрація кормової добавки, вет-контроль за потреби.'));
+  }
+  if (/харчов|food|добавк|дієтич/.test(cat)) {
+    ua.push(c('Харчове: санітарні показники', 'yellow', 'Мікробіологія, важкі метали, пестициди; відповідність харчовому регламенту.'));
+  }
+  if (/космет|cosmet/.test(cat)) {
+    eu.push(c('Косметика: CPNP / Reg. 1223', 'yellow', 'Перевірити Reg. 1223/2009, заборонені інгредієнти, маркування, CPNP-нотифікацію.'));
+  }
+  return { eu, ua };
+}
+
 /** Тип походження з бази (текст) → ключ картки. */
 export function originKeyFromType(t?: string | null): OriginKey | null {
   const p = String(t ?? '').toLowerCase();
