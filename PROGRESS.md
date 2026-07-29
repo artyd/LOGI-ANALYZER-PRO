@@ -35,9 +35,11 @@
       пайплайн `lib/pipeline/deterministic.ts`.
 - [x] **Деплой на Vercel живий і публічний** — https://logi-analyzer-pro-djtourist11-1877s-projects.vercel.app
       (framework=nextjs, protection off; автодеплой з GitHub).
-- [ ] AI-перевірки ЄС/UA у терміналі (виклик `/api/ai` з BYOK-ключем) + картки походження.
-- [ ] Приймання Google Sheets URL (через backend-проксі, CORS).
-- [ ] Клієнтський XLSX-експорт + архів (localStorage).
+- [x] **AI-перевірки ЄС/UA** — `/api/checks` (грунтований промпт) + BYOK у терміналі; картки ЄС/UA, критичний алерт, NCTS.
+- [x] **Дизайн «Control Room» перенесено 1:1** — шрифти JetBrains Mono/Instrument Sans/Serif (next/font), палітра dark+light, фонова сітка+glow, topbar, deck, метрики, таблиця, пілюлі, лоадер (`app/globals.css`, `app/Topbar.tsx`, `app/layout.tsx`). Перемикач теми (без миготіння).
+- [x] **Google Sheets URL** — проксі `/api/sheet` (CORS-safe, парсинг на сервері).
+- [x] **XLSX-експорт** `lib/export/xlsx.ts` (Зведена/Детальний/ЄС/UA) + **архів** `lib/archive.ts` (localStorage, ≤50, відкриття).
+- [ ] Картки можливого походження (originOptions) з вибором і перебудовою перевірок.
 - [ ] Оркестратор `/api/analyze` (коли додамо RAG/БД).
 - [ ] Реальний Митний тариф UA; Neon-міграція + сид (після DATABASE_URL).
 - [ ] Паритет-фікстури старий-vs-новий.
