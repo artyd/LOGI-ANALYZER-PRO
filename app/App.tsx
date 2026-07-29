@@ -547,6 +547,9 @@ function Results({ r, currency, ai, aiBusy, aiError, hasKey, onExport }: { r: An
                         <span title={`впевненість коду: ${l.resolved.code.confidence}`}
                           style={{ marginLeft: 6, color: confColor(l.resolved.code.confidence) }}>●</span>
                       )}
+                      {l.resolved.codeIssue && (
+                        <span title={l.resolved.codeIssue} style={{ marginLeft: 4, color: 'var(--red-bright)' }}>⚠</span>
+                      )}
                     </td>
                     <td style={{ fontFamily: 'var(--mono)' }}>{fmt(l.calc.qtyKg)}</td>
                     <td style={{ fontFamily: 'var(--mono)' }}>{fmt(l.calc.goodsValue.value / (l.calc.qtyKg || 1))}</td>

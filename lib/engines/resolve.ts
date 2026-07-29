@@ -8,6 +8,7 @@ import {
   type PrecursorHit,
 } from './classify';
 import type { Confidence } from './match';
+import { validateUktzedStructure, codeClassPlausible } from './validate';
 import type { CalcLineInput, ValueSource, VatRegime } from '../types/contract';
 import type { ProductOriginEntry, AdrEntry } from '../data';
 
@@ -28,6 +29,8 @@ export interface RawLine {
 export interface ResolvedLine {
   calcInput: CalcLineInput;
   code: { value: string | null; source: ValueSource; matchedBy: string | null; confidence: Confidence | null };
+  /** Проблема з кодом (структура/правдоподібність), якщо є. */
+  codeIssue: string | null;
   origin: ProductOriginEntry | null;
   originConfidence: Confidence | null;
   /** Підказка типу походження, коли речовини немає в базі (з виробника). */
@@ -75,14 +78,32 @@ export function resolveLine(raw: RawLine): ResolvedLine {
       codeSource = 'kb_coarse';
       matchedBy = 'uktzed_dict';
       codeConfidence = dict.confidence;
-    } else if (raw.aiSuggestedCode && digitsOnly(raw.aiSuggestedCode).length >= 4) {
+    } else if (raw.aiSuggestedCode && validateUktzedStructure(raw.aiSuggestedCode).structureValid) {
       code = digitsOnly(raw.aiSuggestedCode);
       codeSource = 'ai';
       matchedBy = 'ai_suggested';
       codeConfidence = 'low';
       warnings.push('Код УКТЗЕД запропоновано AI — перевірити за офіційним тарифом.');
+    } else if (raw.aiSuggestedCode) {
+      warnings.push(`Код від AI відхилено (${validateUktzedStructure(raw.aiSuggestedCode).reason}).`);
     } else {
       warnings.push('Код УКТЗЕД не визначено — мито не рахується.');
+    }
+  }
+
+  // ── Валідація коду (структура + правдоподібність за класом) ──
+  let codeIssue: string | null = null;
+  if (code) {
+    const struct = validateUktzedStructure(code);
+    if (!struct.structureValid) {
+      codeIssue = struct.reason;
+      warnings.push(`Код ${code}: ${struct.reason}`);
+    } else {
+      const plaus = codeClassPlausible(code, origin?.category);
+      if (!plaus.plausible) {
+        codeIssue = plaus.note;
+        warnings.push(plaus.note!);
+      }
     }
   }
 
@@ -119,6 +140,7 @@ export function resolveLine(raw: RawLine): ResolvedLine {
   return {
     calcInput,
     code: { value: code, source: codeSource, matchedBy, confidence: codeConfidence },
+    codeIssue,
     origin,
     originConfidence,
     originTypeHint,
