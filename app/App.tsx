@@ -10,6 +10,7 @@ import type { AiResponse, AiItem } from '@/lib/ai/schema';
 import { exportReport } from '@/lib/export/xlsx';
 import { loadArchive, saveToArchive, clearArchive, type ArchiveEntry } from '@/lib/archive';
 import { buildQdProGoodInfoUrl } from '@/lib/engines/origin';
+import { parseTariffRows, buildTariffTable, type TariffEntry, type TariffTable } from '@/lib/tariff/tariff';
 import zedTopicsRaw from '@/lib/data/zed_topics.json';
 
 interface ZedTopic { ico: string; topic: string; short: string; sections: { title: string; rows: [string, string][] }[] }
@@ -73,6 +74,8 @@ export default function App() {
   const [insurance, setInsurance] = useState('');
   const [fx, setFx] = useState('');
   const [vatRegime, setVatRegime] = useState('standard_20');
+  const [tariff, setTariff] = useState<TariffTable | null>(null);
+  const [tariffCount, setTariffCount] = useState(0);
 
   // single
   const [spName, setSpName] = useState('');
@@ -99,6 +102,10 @@ export default function App() {
     const active = p && keys[p];
     if (active) { setApiKey(active); setKeyOnline(true); }
     setArchive(loadArchive());
+    try {
+      const t = JSON.parse(localStorage.getItem('lap_tariff') || 'null') as TariffEntry[] | null;
+      if (t && t.length) { setTariff(buildTariffTable(t)); setTariffCount(t.length); }
+    } catch { }
   }, []);
 
   useLayoutEffect(() => {
@@ -131,6 +138,23 @@ export default function App() {
       const parsed = await parseFile(f);
       setFileSheets(parsed); setFileName(`📄 ${f.name} · ${parsed.length} лист(ів)`);
     } catch (err) { setError(`Не вдалося прочитати файл: ${(err as Error).message}`); }
+  }
+
+  async function onTariffFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]; if (!f) return;
+    setError('');
+    try {
+      const sheets = await parseFile(f);
+      const entries: TariffEntry[] = sheets.flatMap((s) => parseTariffRows(s.rows));
+      if (!entries.length) { setError('У файлі тарифу не знайдено колонок «код» + «ставка мита». Перевірте заголовки.'); return; }
+      setTariff(buildTariffTable(entries)); setTariffCount(entries.length);
+      try { localStorage.setItem('lap_tariff', JSON.stringify(entries)); } catch { }
+    } catch (err) { setError(`Тариф: ${(err as Error).message}`); }
+  }
+
+  function clearTariff() {
+    setTariff(null); setTariffCount(0);
+    try { localStorage.removeItem('lap_tariff'); } catch { }
   }
 
   function shipmentInput() {
@@ -188,7 +212,7 @@ export default function App() {
         sheets = data.sheets as SheetInput[]; srcLabel = '🔗 Google Sheets';
       }
       if (!sheets) { setError('Завантажте файл, вставте посилання Google Sheets або натисніть «Демо».'); return; }
-      const res = analyzeDeterministic(sheets, shipmentInput(), new Date(), vatRegime as any);
+      const res = analyzeDeterministic(sheets, shipmentInput(), new Date(), vatRegime as any, tariff);
       setResult(res); void runAi(res, srcLabel);
     } catch (err) { setError((err as Error).message); }
     finally { setBusy(false); }
@@ -197,7 +221,7 @@ export default function App() {
   function runDemo() {
     setError(''); setAi(null); setBusy(true);
     try {
-      const res = analyzeDeterministic(DEMO, shipmentInput(), new Date(), vatRegime as any);
+      const res = analyzeDeterministic(DEMO, shipmentInput(), new Date(), vatRegime as any, tariff);
       setResult(res); void runAi(res, 'Демо-дані');
     } catch (err) { setError((err as Error).message); } finally { setBusy(false); }
   }
@@ -207,7 +231,7 @@ export default function App() {
     setError(''); setAi(null); setBusy(true);
     try {
       const sheets: SheetInput[] = [{ name: 'single', rows: [['Номенклатура', 'Кількість, кг', 'Ціна', 'УКТЗЕД'], [spName, '1', '0', spCode]] }];
-      const res = analyzeDeterministic(sheets, shipmentInput(), new Date(), vatRegime as any);
+      const res = analyzeDeterministic(sheets, shipmentInput(), new Date(), vatRegime as any, tariff);
       setResult(res); void runAi(res, `🧪 ${spName}`);
     } catch (err) { setError((err as Error).message); } finally { setBusy(false); }
   }
@@ -338,6 +362,18 @@ export default function App() {
                   <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={handleFileUpload} />
                   <div className="file-name-badge">{fileName}</div>
                   <button className="go-btn" style={{ marginTop: 14, background: 'var(--surface-3)', color: 'var(--ink)', boxShadow: 'none' }} onClick={runDemo}>Демо-дані</button>
+
+                  {/* Офіційний тариф (файл користувача) */}
+                  <div style={{ marginTop: 16, padding: '10px 14px', border: `1px solid ${tariff ? 'var(--amber)' : 'var(--line-2)'}`, borderRadius: 'var(--radius)', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: tariff ? 'var(--amber)' : 'var(--ink-3)' }}>
+                      ТАРИФ: {tariff ? `${tariffCount} позицій (офіційний)` : 'вбудована груба таблиця'}
+                    </span>
+                    <label className="btn" style={{ cursor: 'pointer', padding: '6px 12px', fontSize: 13 }}>
+                      ↥ Оновити тариф (УКТЗЕД+ставки)
+                      <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={onTariffFile} />
+                    </label>
+                    {tariff && <button className="btn" style={{ padding: '6px 12px', fontSize: 13 }} onClick={clearTariff}>Скинути</button>}
+                  </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 10, marginTop: 22, textAlign: 'left' }}>
                     <ParamSelect label="Incoterm" v={incoterm} set={setIncoterm} opts={INCOTERMS} />

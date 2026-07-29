@@ -32,12 +32,14 @@ export interface AnalysisResult {
 }
 
 import type { VatRegime } from '../types/contract';
+import type { TariffTable } from '../tariff/tariff';
 
 export function analyzeDeterministic(
   sheets: SheetInput[],
   shipmentInput: unknown,
   currentDate: Date,
   defaultVatRegime: VatRegime = 'standard_20',
+  tariff?: TariffTable | null,
 ): AnalysisResult {
   const shipment = ShipmentCostInput.parse(shipmentInput);
 
@@ -55,7 +57,7 @@ export function analyzeDeterministic(
     );
   }
 
-  const resolved = rows.map((r) => resolveLine({ ...r, vatRegime: defaultVatRegime }));
+  const resolved = rows.map((r) => resolveLine({ ...r, vatRegime: defaultVatRegime }, tariff));
   const calc = calculatePayments({
     shipment,
     lines: resolved.map((r) => r.calcInput),

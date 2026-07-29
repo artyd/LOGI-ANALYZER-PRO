@@ -9,6 +9,7 @@ import {
 } from './classify';
 import type { Confidence } from './match';
 import { validateUktzedStructure, codeClassPlausible, codeExistsInHs, hsHeadingDescription } from './validate';
+import type { TariffTable } from '../tariff/tariff';
 import type { CalcLineInput, ValueSource, VatRegime } from '../types/contract';
 import type { ProductOriginEntry, AdrEntry } from '../data';
 
@@ -44,7 +45,7 @@ export interface ResolvedLine {
 
 const digitsOnly = (s: string | null | undefined): string => String(s ?? '').replace(/\D/g, '');
 
-export function resolveLine(raw: RawLine): ResolvedLine {
+export function resolveLine(raw: RawLine, tariff?: TariffTable | null): ResolvedLine {
   const warnings: string[] = [];
 
   // ── Довідкове визначення речовини (для походження + крос-лінку) ──
@@ -116,16 +117,28 @@ export function resolveLine(raw: RawLine): ResolvedLine {
     }
   }
 
-  // ── Ставка мита за кодом ──
+  // ── Ставка мита за кодом (пріоритет: завантажений тариф > груба таблиця) ──
   let dutyRatePercent: number | null = null;
   let dutyRateSource: ValueSource = 'unknown';
+  let vatFromTariff: VatRegime | null = null;
   if (code) {
-    const duty = lookupDutyRate(code);
-    if (duty) {
-      dutyRatePercent = duty.ratePercent;
-      dutyRateSource = duty.source;
-    } else {
-      warnings.push(`Ставку мита для коду ${code} не знайдено в таблиці — уточнити.`);
+    const te = tariff?.get(code);
+    if (te) {
+      codeConfidence = 'high'; // код підтверджено офіційним завантаженим тарифом
+      vatFromTariff = te.vatRegime ?? null;
+      if (te.dutyPercent != null) {
+        dutyRatePercent = te.dutyPercent;
+        dutyRateSource = 'db'; // авторитетно, не оцінка
+      }
+    }
+    if (dutyRatePercent == null) {
+      const duty = lookupDutyRate(code);
+      if (duty) {
+        dutyRatePercent = duty.ratePercent;
+        dutyRateSource = duty.source;
+      } else {
+        warnings.push(`Ставку мита для коду ${code} не знайдено — уточнити.`);
+      }
     }
   }
 
@@ -142,7 +155,7 @@ export function resolveLine(raw: RawLine): ResolvedLine {
     unitPrice: raw.unitPrice,
     dutyRatePercent,
     dutyRateSource,
-    vatRegime: raw.vatRegime ?? 'standard_20',
+    vatRegime: vatFromTariff ?? raw.vatRegime ?? 'standard_20',
     exciseAmountPerKg: null,
   };
 
