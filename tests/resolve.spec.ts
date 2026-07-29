@@ -17,14 +17,15 @@ describe('resolveLine → calculatePayments (детермінований пай
     const { resolved, result } = pipeline({ name: 'Амоксицилін тригідрат', qtyKg: 100, unitPrice: 10 });
     expect(resolved.code.value).toBe('2941100000');
     expect(resolved.code.source).toBe('kb_coarse');
+    // Реальна MFN-ставка UA (WITS) для 294110 = 0% (uniform) → авторитетно (db), не оцінка.
     expect(result.dutyRatePercent!.value).toBe(0);
-    expect(result.dutyRatePercent!.estimated).toBe(true); // kb_coarse → потребує перевірки
+    expect(result.dutyRatePercent!.source).toBe('db');
+    expect(result.dutyRatePercent!.estimated).toBe(false);
     expect(result.duty!.value).toBe(0);
     expect(result.vat!.value).toBe(200); // ПДВ 20% від 1000
-    expect(result.needsReview).toBe(true);
   });
 
-  it('явний код з таблиці має пріоритет; гл.39 → 6.5%', () => {
+  it('явний код з таблиці + реальна MFN-ставка (WITS) для 3913', () => {
     const { resolved, result } = pipeline({
       name: 'Гіалуронова кислота',
       uctzedCode: '3913 90 00 90',
@@ -33,8 +34,9 @@ describe('resolveLine → calculatePayments (детермінований пай
     });
     expect(resolved.code.value).toBe('3913900090');
     expect(resolved.code.source).toBe('user');
-    expect(result.dutyRatePercent!.value).toBe(6.5);
-    expect(result.duty!.value).toBe(325); // 5000 * 6.5%
+    // WITS HS-6 391390 = 2.55% (середнє по діапазону) → мито 5000*2.55%.
+    expect(result.dutyRatePercent!.value).toBe(2.55);
+    expect(result.duty!.value).toBeCloseTo(127.5, 1);
   });
 
   it('прекурсор дає попередження', () => {

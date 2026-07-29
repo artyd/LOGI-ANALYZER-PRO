@@ -8,6 +8,7 @@ import {
   type PrecursorHit,
 } from './classify';
 import type { Confidence } from './match';
+import { lookupMfnRate } from './mfn';
 import { validateUktzedStructure, codeClassPlausible, codeExistsInHs, hsHeadingDescription } from './validate';
 import type { TariffTable } from '../tariff/tariff';
 import type { CalcLineInput, ValueSource, VatRegime } from '../types/contract';
@@ -132,12 +133,22 @@ export function resolveLine(raw: RawLine, tariff?: TariffTable | null): Resolved
       }
     }
     if (dutyRatePercent == null) {
-      const duty = lookupDutyRate(code);
-      if (duty) {
-        dutyRatePercent = duty.ratePercent;
-        dutyRateSource = duty.source;
+      const mfn = lookupMfnRate(code);
+      if (mfn) {
+        // Реальна MFN-ставка UA (WITS/UNCTAD) на рівні HS-6.
+        dutyRatePercent = mfn.ratePercent;
+        dutyRateSource = mfn.ranged ? 'kb_coarse' : 'db';
+        if (mfn.ranged) {
+          warnings.push(`Ставка мита ${mfn.ratePercent}% — середня по HS-6 ${mfn.hs6} (є діапазон); уточнити на 10-значному коді.`);
+        }
       } else {
-        warnings.push(`Ставку мита для коду ${code} не знайдено — уточнити.`);
+        const duty = lookupDutyRate(code);
+        if (duty) {
+          dutyRatePercent = duty.ratePercent;
+          dutyRateSource = duty.source;
+        } else {
+          warnings.push(`Ставку мита для коду ${code} не знайдено — уточнити.`);
+        }
       }
     }
   }
