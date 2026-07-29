@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app/api/analyze/route.ts": { "maxDuration": 60 },
+    "app/api/report/route.ts": { "maxDuration": 60 },
+    "app/api/py/*.py": { "runtime": "python3.12" }
+  },
+  "crons": [
+    { "path": "/api/py/tariff_import", "schedule": "0 3 * * *" },
+    { "path": "/api/py/embed", "schedule": "30 3 * * *" }
+  ]
+}

@@ -1,0 +1,12 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Safety net (per-app .gitignore also covers these)
+**/node_modules/
+**/.next/
+**/.vercel
+**/*.tsbuildinfo
