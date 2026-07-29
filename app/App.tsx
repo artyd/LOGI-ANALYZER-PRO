@@ -588,6 +588,11 @@ function Results({ r, currency, ai, aiBusy, aiError, hasKey, onExport }: { r: An
                 {l.resolved.code.value && <span style={{ fontFamily: 'var(--mono)', color: 'var(--ink-3)', fontSize: 12 }}>{l.resolved.code.value}</span>}
                 <a className="qdpro-link" style={{ marginLeft: 'auto', fontSize: 12 }} href={qurl} target="_blank" rel="noopener">QDPro goodinfo ↗</a>
               </div>
+              {l.resolved.hsDescription && (
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: 10, fontFamily: 'var(--mono)' }}>
+                  HS (офіц.): {l.resolved.hsDescription}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
                 {opts.map((o) => {
                   const active = o.key === selKey;

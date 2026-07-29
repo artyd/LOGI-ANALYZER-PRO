@@ -2,6 +2,14 @@ import { z } from 'zod';
 import { callAI, type Provider } from '@/lib/ai/providers';
 import { buildSystemPrompt } from '@/lib/ai/prompt';
 import { AiResponse } from '@/lib/ai/schema';
+import hsDescRaw from '@/lib/data/hs_desc.json';
+
+const HS_DESC = hsDescRaw as Record<string, string>;
+function hsDesc(code?: string | null): string | null {
+  const d = String(code ?? '').replace(/\D/g, '');
+  if (d.length < 2) return null;
+  return HS_DESC[d.slice(0, 6)] ?? HS_DESC[d.slice(0, 4)] ?? HS_DESC[d.slice(0, 2)] ?? null;
+}
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -31,6 +39,7 @@ function buildTariffFacts(items: z.infer<typeof ItemIn>[]): string {
       const lines = [
         `${i + 1}. ${it.name}`,
         `   УКТЗЕД: ${it.uctzedCode ?? 'не визначено'} (джерело: ${it.dutyRateSource ?? '—'}, впевненість коду: ${it.codeConfidence ?? '—'})`,
+        ...(hsDesc(it.uctzedCode) ? [`   HS (офіц. WCO): ${hsDesc(it.uctzedCode)}`] : []),
         `   Ставка мита: ${it.dutyRatePercent ?? '?'}%`,
         `   Походження (попередньо): ${it.originType ?? '—'}${it.recommendedOrigin ? `; рекомендований тип: ${it.recommendedOrigin}` : ''}${it.category ? `; категорія: ${it.category}` : ''}`,
       ];

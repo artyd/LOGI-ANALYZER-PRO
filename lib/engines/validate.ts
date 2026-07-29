@@ -1,7 +1,25 @@
 /**
- * Структурна валідація коду УКТЗЕД (без зовнішнього тарифу — на основі
- * стабільної структури HS/УКТЗЕД). Ловить некоректні коди, особливо від AI.
+ * Валідація коду УКТЗЕД: структура + існування у міжнародній номенклатурі HS
+ * (перші 6 знаків УКТЗЕД = HS, зафіксовані WCO). Дані: UN Comtrade harmonized-system.
  */
+import hsValid6 from '../data/hs_valid6.json';
+import hsHead from '../data/hs_head.json';
+
+const VALID6: Set<string> = new Set(hsValid6 as string[]);
+const HEAD = hsHead as Record<string, string>;
+
+/** Чи існує 6-значна підпозиція коду в реальній номенклатурі HS. */
+export function codeExistsInHs(code: string | null | undefined): boolean {
+  const d = String(code ?? '').replace(/\D/g, '').slice(0, 6);
+  return d.length === 6 && VALID6.has(d);
+}
+
+/** Офіційний опис позиції HS (4-значна, потім 2-значна глава). Англійською (WCO). */
+export function hsHeadingDescription(code: string | null | undefined): string | null {
+  const d = String(code ?? '').replace(/\D/g, '');
+  if (d.length < 2) return null;
+  return HEAD[d.slice(0, 4)] ?? HEAD[d.slice(0, 2)] ?? null;
+}
 
 // Глави, яких не існує в HS (зарезервовані/порожні).
 const INVALID_CHAPTERS = new Set(['00', '77', '98', '99']);

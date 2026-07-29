@@ -8,7 +8,7 @@ import {
   type PrecursorHit,
 } from './classify';
 import type { Confidence } from './match';
-import { validateUktzedStructure, codeClassPlausible } from './validate';
+import { validateUktzedStructure, codeClassPlausible, codeExistsInHs, hsHeadingDescription } from './validate';
 import type { CalcLineInput, ValueSource, VatRegime } from '../types/contract';
 import type { ProductOriginEntry, AdrEntry } from '../data';
 
@@ -31,6 +31,8 @@ export interface ResolvedLine {
   code: { value: string | null; source: ValueSource; matchedBy: string | null; confidence: Confidence | null };
   /** Проблема з кодом (структура/правдоподібність), якщо є. */
   codeIssue: string | null;
+  /** Офіційний опис позиції HS (WCO), якщо код визначено. */
+  hsDescription: string | null;
   origin: ProductOriginEntry | null;
   originConfidence: Confidence | null;
   /** Підказка типу походження, коли речовини немає в базі (з виробника). */
@@ -78,14 +80,21 @@ export function resolveLine(raw: RawLine): ResolvedLine {
       codeSource = 'kb_coarse';
       matchedBy = 'uktzed_dict';
       codeConfidence = dict.confidence;
-    } else if (raw.aiSuggestedCode && validateUktzedStructure(raw.aiSuggestedCode).structureValid) {
+    } else if (
+      raw.aiSuggestedCode &&
+      validateUktzedStructure(raw.aiSuggestedCode).structureValid &&
+      codeExistsInHs(raw.aiSuggestedCode)
+    ) {
       code = digitsOnly(raw.aiSuggestedCode);
       codeSource = 'ai';
       matchedBy = 'ai_suggested';
       codeConfidence = 'low';
       warnings.push('Код УКТЗЕД запропоновано AI — перевірити за офіційним тарифом.');
     } else if (raw.aiSuggestedCode) {
-      warnings.push(`Код від AI відхилено (${validateUktzedStructure(raw.aiSuggestedCode).reason}).`);
+      const why = !validateUktzedStructure(raw.aiSuggestedCode).structureValid
+        ? validateUktzedStructure(raw.aiSuggestedCode).reason
+        : 'підпозиція відсутня в номенклатурі HS';
+      warnings.push(`Код від AI відхилено (${why}).`);
     } else {
       warnings.push('Код УКТЗЕД не визначено — мито не рахується.');
     }
@@ -141,6 +150,7 @@ export function resolveLine(raw: RawLine): ResolvedLine {
     calcInput,
     code: { value: code, source: codeSource, matchedBy, confidence: codeConfidence },
     codeIssue,
+    hsDescription: hsHeadingDescription(code),
     origin,
     originConfidence,
     originTypeHint,
