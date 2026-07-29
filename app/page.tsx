@@ -1,5 +1,5 @@
-import Terminal from './Terminal';
+import App from './App';
 
 export default function Home() {
-  return <Terminal />;
+  return <App />;
 }
