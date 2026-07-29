@@ -154,12 +154,18 @@ export default function App() {
     if (!apiKey.trim()) { persist(res, null, srcLabel); return; }
     setAi(null); setAiError(''); setAiBusy(true);
     try {
-      const items = res.lines.map((l) => ({
-        name: l.calc.name, uctzedCode: l.resolved.code.value,
-        dutyRatePercent: l.calc.dutyRatePercent?.value ?? null, dutyRateSource: l.resolved.code.source,
-        originType: l.resolved.origin?.originType ?? null, category: l.resolved.origin?.category ?? '',
-        precursorNote: l.resolved.precursor?.note ?? null,
-      }));
+      const items = res.lines.map((l) => {
+        const rec = l.originOptions.find((o) => o.recommended) ?? l.originOptions[0];
+        return {
+          name: l.calc.name, uctzedCode: l.resolved.code.value,
+          codeConfidence: l.resolved.code.confidence ?? 'low',
+          dutyRatePercent: l.calc.dutyRatePercent?.value ?? null, dutyRateSource: l.resolved.code.source,
+          originType: l.resolved.origin?.originType ?? null,
+          recommendedOrigin: rec ? `${rec.shortLabel} (впевненість ${rec.confidence})` : null,
+          category: l.resolved.origin?.category ?? '',
+          precursorNote: l.resolved.precursor?.note ?? null,
+        };
+      });
       const r = await fetch('/api/checks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider, apiKey, items }) });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);

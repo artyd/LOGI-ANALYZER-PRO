@@ -9,9 +9,11 @@ export const maxDuration = 60;
 const ItemIn = z.object({
   name: z.string(),
   uctzedCode: z.string().nullable().optional(),
+  codeConfidence: z.string().optional(),
   dutyRatePercent: z.number().nullable().optional(),
   dutyRateSource: z.string().optional(),
   originType: z.string().nullable().optional(),
+  recommendedOrigin: z.string().nullable().optional(),
   category: z.string().optional(),
   precursorNote: z.string().nullable().optional(),
 });
@@ -28,9 +30,9 @@ function buildTariffFacts(items: z.infer<typeof ItemIn>[]): string {
     .map((it, i) => {
       const lines = [
         `${i + 1}. ${it.name}`,
-        `   УКТЗЕД: ${it.uctzedCode ?? 'не визначено'} (джерело: ${it.dutyRateSource ?? '—'})`,
+        `   УКТЗЕД: ${it.uctzedCode ?? 'не визначено'} (джерело: ${it.dutyRateSource ?? '—'}, впевненість коду: ${it.codeConfidence ?? '—'})`,
         `   Ставка мита: ${it.dutyRatePercent ?? '?'}%`,
-        `   Походження (попередньо): ${it.originType ?? '—'}${it.category ? `; категорія: ${it.category}` : ''}`,
+        `   Походження (попередньо): ${it.originType ?? '—'}${it.recommendedOrigin ? `; рекомендований тип: ${it.recommendedOrigin}` : ''}${it.category ? `; категорія: ${it.category}` : ''}`,
       ];
       if (it.precursorNote) lines.push(`   УВАГА (прекурсор/контроль): ${it.precursorNote}`);
       return lines.join('\n');
@@ -47,6 +49,7 @@ function buildUserPrompt(items: z.infer<typeof ItemIn>[]): string {
 - originType, productionMethod, originShortNote, category, applications, hazardAnalysis, storageRequirements;
 - risk ("Критичний"/"Середній"/"Низький") + riskNote; needsReview.
 Кожна перевірка: {item, status: "green"|"yellow"|"red", note}. Спирайся на CONTEXT вище; НЕ рахуй гроші; НЕ додавай позицій, яких немає у списку.
+Якщо впевненість коду низька або код не визначено — став needsReview=true і додай перевірку класифікації/лабораторної ідентифікації. Не дублюй те, що вже випливає з рекомендованого типу походження — додавай перевірки, специфічні саме для цього товару, маршруту й документів.
 
 СПИСОК ПОЗИЦІЙ:
 ${list}
