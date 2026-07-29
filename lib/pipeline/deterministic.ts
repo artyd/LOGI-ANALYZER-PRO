@@ -2,7 +2,7 @@ import { selectActualSheet, type SheetInput } from '../sheets/selectActualSheet'
 import { extractRows, type ColumnMap } from '../sheets/parse';
 import { resolveLine, type ResolvedLine } from '../engines/resolve';
 import { calculatePayments } from '../engines/payment';
-import { buildOriginOptions, type OriginProfile } from '../engines/origin';
+import { buildOriginOptions, originKeyFromType, type OriginProfile, type OriginPin } from '../engines/origin';
 import {
   ShipmentCostInput,
   type CalcResponse,
@@ -57,17 +57,26 @@ export function analyzeDeterministic(
     lines: resolved.map((r) => r.calcInput),
   });
 
-  const lines: AnalysisLine[] = resolved.map((r, i) => ({
-    resolved: r,
-    calc: calc.lines[i],
-    originOptions: buildOriginOptions({
-      name: r.calcInput.name,
-      uctzedCode: r.code.value,
-      category: r.origin?.category,
-      originType: r.origin?.originType ?? null,
-      productionMethod: r.origin?.productionMethod ?? null,
-    }),
-  }));
+  const lines: AnalysisLine[] = resolved.map((r, i) => {
+    // Якщо база впевнено визначила речовину — «пінимо» її походження як рекомендоване.
+    const pinKey = r.origin ? originKeyFromType(r.origin.originType) : null;
+    const pinned: OriginPin | null =
+      pinKey && r.originConfidence ? { key: pinKey, confidence: r.originConfidence } : null;
+    return {
+      resolved: r,
+      calc: calc.lines[i],
+      originOptions: buildOriginOptions(
+        {
+          name: r.calcInput.name,
+          uctzedCode: r.code.value,
+          category: r.origin?.category,
+          originType: r.origin?.originType ?? null,
+          productionMethod: r.origin?.productionMethod ?? null,
+        },
+        pinned,
+      ),
+    };
+  });
 
   const warnings = Array.from(
     new Set(lines.flatMap((l) => [...l.resolved.warnings, ...l.calc.warnings])),

@@ -53,8 +53,14 @@ export interface PrecursorEntry {
 export const PRODUCT_ORIGIN_KB = productOriginRaw as ProductOriginEntry[];
 export const MANUFACTURER_KB = manufacturerRaw as ManufacturerEntry[];
 export const ADR_SUBSTANCE_DB = adrRaw as AdrEntry[];
-export const UKTZED_CODE_DB = uktzedRaw as UktzedEntry[];
 export const HS_DUTY_TABLE = hsDutyRaw as HsDutyTable;
+
+// База кодів + оверлей синонімів (розширює розпізнавання, коди ті самі).
+import { UKTZED_CODE_DB_EXTRA } from './uktzed_code_db_extra';
+export const UKTZED_CODE_DB: UktzedEntry[] = [
+  ...(uktzedRaw as UktzedEntry[]),
+  ...UKTZED_CODE_DB_EXTRA,
+];
 
 // Регідратація regex з {__regex, source, flags}
 export const PRECURSOR_WATCH: PrecursorEntry[] = (precursorRaw as PrecursorRaw[]).map((p) => ({

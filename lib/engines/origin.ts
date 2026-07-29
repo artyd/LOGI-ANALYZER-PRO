@@ -266,9 +266,29 @@ function chooseRecommended(item: OriginItem, options: OriginProfile[]): OriginKe
   return (firstNon ?? options[0] ?? { key: 'unknown' as OriginKey }).key;
 }
 
-export function buildOriginOptions(item: OriginItem): OriginProfile[] {
+/** Тип походження з бази (текст) → ключ картки. */
+export function originKeyFromType(t?: string | null): OriginKey | null {
+  const p = String(t ?? '').toLowerCase();
+  if (/рослин|ботан|plant/.test(p)) return 'plant';
+  if (/тварин|animal|біолог|bio/.test(p)) return 'animal';
+  if (/фермент|біотех|ferment|enzyme/.test(p)) return 'fermentation';
+  if (/мінерал|неорган|mineral|inorganic/.test(p)) return 'mineral';
+  if (/синтет|synthetic|орган|нафто|petro/.test(p)) return 'synthetic';
+  if (/зміш|mixed|суміш/.test(p)) return 'mixed';
+  return null;
+}
+
+export interface OriginPin { key: OriginKey; confidence: 'high' | 'medium' | 'low' }
+
+export function buildOriginOptions(item: OriginItem, pinned?: OriginPin | null): OriginProfile[] {
   const keys = inferOriginCandidateKeys(item);
+  // Якщо база впевнено визначила походження — гарантуємо його присутність першим.
+  if (pinned && !keys.includes(pinned.key)) keys.unshift(pinned.key);
   const options = keys.map((k) => ({ ...originProfileByKey(k) }));
-  const rec = chooseRecommended(item, options);
-  return options.map((o) => ({ ...o, recommended: o.key === rec }));
+  const recKey = pinned?.key ?? chooseRecommended(item, options);
+  return options.map((o) => ({
+    ...o,
+    recommended: o.key === recKey,
+    confidence: pinned && o.key === pinned.key ? pinned.confidence : o.confidence,
+  }));
 }

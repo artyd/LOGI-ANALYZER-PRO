@@ -526,7 +526,13 @@ function Results({ r, currency, ai, aiBusy, aiError, hasKey, onExport }: { r: An
                 return (
                   <tr key={i}>
                     <td className="td-name">{l.calc.name}</td>
-                    <td className="td-code">{l.resolved.code.value ?? '—'}</td>
+                    <td className="td-code">
+                      {l.resolved.code.value ?? '—'}
+                      {l.resolved.code.confidence && l.resolved.code.value && (
+                        <span title={`впевненість коду: ${l.resolved.code.confidence}`}
+                          style={{ marginLeft: 6, color: confColor(l.resolved.code.confidence) }}>●</span>
+                      )}
+                    </td>
                     <td style={{ fontFamily: 'var(--mono)' }}>{fmt(l.calc.qtyKg)}</td>
                     <td style={{ fontFamily: 'var(--mono)' }}>{fmt(l.calc.goodsValue.value / (l.calc.qtyKg || 1))}</td>
                     <td><Cell v={l.calc.customsValue} /></td>

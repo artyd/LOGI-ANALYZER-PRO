@@ -10,57 +10,32 @@ import {
   type AdrEntry,
 } from '../data';
 import type { ValueSource } from '../types/contract';
+import { matchByAliases, normalizeName, type Confidence } from './match';
 
 /**
- * Движок 2 (in-memory версія) — класифікація/пошук за мігрованими довідниками.
- * Замінює наївний substring-пошук нормалізованим зіставленням; коли з'явиться
- * Neon — цей шар підмінюється на pg_trgm/embedding, контракт лишається.
+ * Движок 2 — класифікація/пошук за довідниками через точний токен-матчер
+ * (замість наївного substring). Кожен збіг повертає впевненість.
  */
 
-export function normalize(s: string | null | undefined): string {
-  return String(s ?? '')
-    .toLowerCase()
-    .replace(/[’'"`.,;:()\[\]/\\]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+export const normalize = normalizeName;
 
-/** Пошук найкращого запису за keys[]: найдовший ключ, що міститься в назві. */
-function bestByKeys<T extends { keys: string[] }>(
-  entries: T[],
-  haystack: string,
-): { entry: T; key: string } | null {
-  const h = normalize(haystack);
-  let best: { entry: T; key: string } | null = null;
-  let bestLen = 0;
-  for (const entry of entries) {
-    for (const key of entry.keys) {
-      const k = normalize(key);
-      if (k.length >= 3 && h.includes(k) && k.length > bestLen) {
-        best = { entry, key };
-        bestLen = k.length;
-      }
-    }
-  }
-  return best;
-}
-
-// ── Пошук коду УКТЗЕД за назвою ───────────────────────────────────
+// ── Код УКТЗЕД за назвою ──────────────────────────────────────────
 export interface CodeMatch {
   code: string;
   name: string;
-  matchedBy: 'alias' | null;
+  matchedBy: 'alias';
+  confidence: Confidence;
 }
 export function lookupUktzedCode(name: string): CodeMatch | null {
-  const m = bestByKeys(UKTZED_CODE_DB, name);
-  if (!m) return null;
-  return { code: m.entry.code, name: m.entry.name, matchedBy: 'alias' };
+  const m = matchByAliases(UKTZED_CODE_DB, name);
+  if (!m || m.confidence === 'low') return null;
+  return { code: m.entry.code, name: m.entry.name, matchedBy: 'alias', confidence: m.confidence };
 }
 
 // ── Ставка мита за кодом (порт lookupDutyRate @9255) ──────────────
 export interface DutyMatch {
   ratePercent: number;
-  source: ValueSource; // 'kb_coarse'
+  source: ValueSource;
   matchedKey: string;
 }
 export function lookupDutyRate(hsCode: string | null | undefined): DutyMatch | null {
@@ -81,17 +56,28 @@ export function lookupDutyRate(hsCode: string | null | undefined): DutyMatch | n
 }
 
 // ── Походження товару ─────────────────────────────────────────────
-export function lookupProductOrigin(name: string, category?: string): ProductOriginEntry | null {
+export interface OriginKBMatch {
+  entry: ProductOriginEntry;
+  confidence: Confidence;
+}
+export function lookupProductOriginMatch(name: string, category?: string): OriginKBMatch | null {
   const hay = category ? `${name} ${category}` : name;
-  return bestByKeys(PRODUCT_ORIGIN_KB, hay)?.entry ?? null;
+  const m = matchByAliases(PRODUCT_ORIGIN_KB, hay);
+  if (!m || m.confidence === 'low') return null;
+  return { entry: m.entry, confidence: m.confidence };
+}
+export function lookupProductOrigin(name: string, category?: string): ProductOriginEntry | null {
+  return lookupProductOriginMatch(name, category)?.entry ?? null;
 }
 
 export function lookupManufacturer(text: string): ManufacturerEntry | null {
-  return bestByKeys(MANUFACTURER_KB, text)?.entry ?? null;
+  const m = matchByAliases(MANUFACTURER_KB, text);
+  return m && m.confidence !== 'low' ? m.entry : null;
 }
 
 export function lookupAdr(name: string): AdrEntry | null {
-  return bestByKeys(ADR_SUBSTANCE_DB, name)?.entry ?? null;
+  const m = matchByAliases(ADR_SUBSTANCE_DB, name);
+  return m && m.confidence !== 'low' ? m.entry : null;
 }
 
 // ── Прекурсори / контрольовані речовини (порт @9270) ──────────────

@@ -18,8 +18,8 @@ describe('дані мігровано', () => {
 });
 
 describe('normalize', () => {
-  it('прибирає пунктуацію і регістр', () => {
-    expect(normalize('L-Лізин, HCl.')).toBe('l-лізин hcl');
+  it('прибирає пунктуацію, регістр і роздільники', () => {
+    expect(normalize('L-Лізин, HCl.')).toBe('l лізин hcl');
   });
 });
 

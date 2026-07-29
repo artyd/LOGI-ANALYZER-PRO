@@ -1,11 +1,12 @@
 import {
   lookupUktzedCode,
   lookupDutyRate,
-  lookupProductOrigin,
+  lookupProductOriginMatch,
   lookupAdr,
   checkPrecursor,
   type PrecursorHit,
 } from './classify';
+import type { Confidence } from './match';
 import type { CalcLineInput, ValueSource, VatRegime } from '../types/contract';
 import type { ProductOriginEntry, AdrEntry } from '../data';
 
@@ -16,19 +17,18 @@ import type { ProductOriginEntry, AdrEntry } from '../data';
  */
 export interface RawLine {
   name: string;
-  /** Код з таблиці (найточніше), якщо є. */
   uctzedCode?: string | null;
   qtyKg: number;
   unitPrice: number;
-  /** Код, запропонований AI (перевіряється тут). */
   aiSuggestedCode?: string | null;
   vatRegime?: VatRegime;
 }
 
 export interface ResolvedLine {
   calcInput: CalcLineInput;
-  code: { value: string | null; source: ValueSource; matchedBy: string | null };
+  code: { value: string | null; source: ValueSource; matchedBy: string | null; confidence: Confidence | null };
   origin: ProductOriginEntry | null;
+  originConfidence: Confidence | null;
   adr: AdrEntry | null;
   precursor: PrecursorHit | null;
   warnings: string[];
@@ -39,25 +39,34 @@ const digitsOnly = (s: string | null | undefined): string => String(s ?? '').rep
 export function resolveLine(raw: RawLine): ResolvedLine {
   const warnings: string[] = [];
 
+  // ── Довідкове визначення речовини (для походження + крос-лінку) ──
+  const originMatch = lookupProductOriginMatch(raw.name);
+  const origin = originMatch?.entry ?? null;
+  const originConfidence = originMatch?.confidence ?? null;
+
   // ── Код УКТЗЕД ──
   let code: string | null = null;
   let codeSource: ValueSource = 'unknown';
   let matchedBy: string | null = null;
+  let codeConfidence: Confidence | null = null;
 
   if (raw.uctzedCode && digitsOnly(raw.uctzedCode).length >= 4) {
     code = digitsOnly(raw.uctzedCode);
     codeSource = 'user';
     matchedBy = 'table';
+    codeConfidence = 'high';
   } else {
     const dict = lookupUktzedCode(raw.name);
     if (dict) {
       code = digitsOnly(dict.code);
       codeSource = 'kb_coarse';
       matchedBy = 'uktzed_dict';
+      codeConfidence = dict.confidence;
     } else if (raw.aiSuggestedCode && digitsOnly(raw.aiSuggestedCode).length >= 4) {
       code = digitsOnly(raw.aiSuggestedCode);
       codeSource = 'ai';
       matchedBy = 'ai_suggested';
+      codeConfidence = 'low';
       warnings.push('Код УКТЗЕД запропоновано AI — перевірити за офіційним тарифом.');
     } else {
       warnings.push('Код УКТЗЕД не визначено — мито не рахується.');
@@ -71,20 +80,16 @@ export function resolveLine(raw: RawLine): ResolvedLine {
     const duty = lookupDutyRate(code);
     if (duty) {
       dutyRatePercent = duty.ratePercent;
-      dutyRateSource = duty.source; // 'kb_coarse'
+      dutyRateSource = duty.source;
     } else {
       warnings.push(`Ставку мита для коду ${code} не знайдено в таблиці — уточнити.`);
     }
   }
 
-  // ── Довідкові сигнали ──
-  const origin = lookupProductOrigin(raw.name);
   const adr = lookupAdr(raw.name);
   const precursor = checkPrecursor(raw.name, code);
   if (precursor) {
-    warnings.push(
-      `Прекурсор/контрольована речовина (таблиця ${precursor.table}): ${precursor.note}`,
-    );
+    warnings.push(`Прекурсор/контрольована речовина (таблиця ${precursor.table}): ${precursor.note}`);
   }
 
   const calcInput: CalcLineInput = {
@@ -98,5 +103,13 @@ export function resolveLine(raw: RawLine): ResolvedLine {
     exciseAmountPerKg: null,
   };
 
-  return { calcInput, code: { value: code, source: codeSource, matchedBy }, origin, adr, precursor, warnings };
+  return {
+    calcInput,
+    code: { value: code, source: codeSource, matchedBy, confidence: codeConfidence },
+    origin,
+    originConfidence,
+    adr,
+    precursor,
+    warnings,
+  };
 }
