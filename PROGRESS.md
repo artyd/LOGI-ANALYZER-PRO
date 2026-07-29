@@ -39,7 +39,9 @@
 - [x] **Дизайн «Control Room» перенесено 1:1** — шрифти JetBrains Mono/Instrument Sans/Serif (next/font), палітра dark+light, фонова сітка+glow, topbar, deck, метрики, таблиця, пілюлі, лоадер (`app/globals.css`, `app/Topbar.tsx`, `app/layout.tsx`). Перемикач теми (без миготіння).
 - [x] **Google Sheets URL** — проксі `/api/sheet` (CORS-safe, парсинг на сервері).
 - [x] **XLSX-експорт** `lib/export/xlsx.ts` (Зведена/Детальний/ЄС/UA) + **архів** `lib/archive.ts` (localStorage, ≤50, відкриття).
-- [ ] Картки можливого походження (originOptions) з вибором і перебудовою перевірок.
+- [x] **Дизайн перенесено 1:1 по-справжньому** — весь оригінальний CSS (5518 рядків) у `globals.css`, точна розмітка в `app/App.tsx` (topbar, akc flip-карта ключа, Command Deck batch/single, сторінки, footer), шрифти через оригінальний Google Fonts link.
+- [x] **Картки можливого походження** `lib/engines/origin.ts` (порт inferOriginCandidateKeys + originProfileByKey) — кандидати за главою/позицією+ключами, вибір перебудовує перевірки ЄС/UA/транзит, QDPro-лінк. Детерміновано.
+- [x] **Повна база знань** — 19 тем `lib/data/zed_topics.json` (сітка + деталі), сторінка ЗЕД.
 - [ ] Оркестратор `/api/analyze` (коли додамо RAG/БД).
 - [ ] Реальний Митний тариф UA; Neon-міграція + сид (після DATABASE_URL).
 - [ ] Паритет-фікстури старий-vs-новий.
