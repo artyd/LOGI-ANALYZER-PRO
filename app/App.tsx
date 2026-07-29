@@ -72,6 +72,7 @@ export default function App() {
   const [freight, setFreight] = useState('');
   const [insurance, setInsurance] = useState('');
   const [fx, setFx] = useState('');
+  const [vatRegime, setVatRegime] = useState('standard_20');
 
   // single
   const [spName, setSpName] = useState('');
@@ -187,7 +188,7 @@ export default function App() {
         sheets = data.sheets as SheetInput[]; srcLabel = '🔗 Google Sheets';
       }
       if (!sheets) { setError('Завантажте файл, вставте посилання Google Sheets або натисніть «Демо».'); return; }
-      const res = analyzeDeterministic(sheets, shipmentInput(), new Date());
+      const res = analyzeDeterministic(sheets, shipmentInput(), new Date(), vatRegime as any);
       setResult(res); void runAi(res, srcLabel);
     } catch (err) { setError((err as Error).message); }
     finally { setBusy(false); }
@@ -196,7 +197,7 @@ export default function App() {
   function runDemo() {
     setError(''); setAi(null); setBusy(true);
     try {
-      const res = analyzeDeterministic(DEMO, shipmentInput(), new Date());
+      const res = analyzeDeterministic(DEMO, shipmentInput(), new Date(), vatRegime as any);
       setResult(res); void runAi(res, 'Демо-дані');
     } catch (err) { setError((err as Error).message); } finally { setBusy(false); }
   }
@@ -206,7 +207,7 @@ export default function App() {
     setError(''); setAi(null); setBusy(true);
     try {
       const sheets: SheetInput[] = [{ name: 'single', rows: [['Номенклатура', 'Кількість, кг', 'Ціна', 'УКТЗЕД'], [spName, '1', '0', spCode]] }];
-      const res = analyzeDeterministic(sheets, shipmentInput(), new Date());
+      const res = analyzeDeterministic(sheets, shipmentInput(), new Date(), vatRegime as any);
       setResult(res); void runAi(res, `🧪 ${spName}`);
     } catch (err) { setError((err as Error).message); } finally { setBusy(false); }
   }
@@ -344,6 +345,14 @@ export default function App() {
                     <ParamInput label="Фрахт" v={freight} set={setFreight} />
                     <ParamInput label="Страхування" v={insurance} set={setInsurance} />
                     <ParamInput label="Курс→UAH" v={fx} set={setFx} />
+                    <div>
+                      <label style={{ fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--ink-3)', display: 'block', marginBottom: 4 }}>ПДВ</label>
+                      <select value={vatRegime} onChange={(e) => setVatRegime(e.target.value)} style={selStyle}>
+                        <option value="standard_20">20% (загальна)</option>
+                        <option value="medicine_7">7% (зареєстр. ЛЗ)</option>
+                        <option value="zero_0">0%</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
