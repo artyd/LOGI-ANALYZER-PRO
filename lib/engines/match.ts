@@ -10,6 +10,12 @@ const NOISE = new Set([
   'eur', 'feed', 'food', 'кормовий', 'кормова', 'кормовой', 'харчовий', 'технічний', 'мін', 'макс',
   'кристал', 'crystal', 'anhydrous', 'безводний', 'mono', 'моно', 'pure', 'чистий', 'фарм', 'pharma',
   'кг', 'kg', 'мішок', 'bag', 'коробка', 'l', 'мл', 'ml', 'г', 'g',
+  // солеві/гідратні/формні слова — не змінюють ідентичність речовини для розпізнавання
+  'hydrochloride', 'hcl', 'гідрохлорид', 'гидрохлорид', 'гхл', 'sulfate', 'sulphate', 'сульфат',
+  'phosphate', 'фосфат', 'acetate', 'ацетат', 'citrate', 'цитрат', 'sodium', 'натрію', 'натрия',
+  'calcium', 'кальцію', 'кальция', 'potassium', 'калію', 'magnesium', 'магнію', 'zinc', 'цинку',
+  'monohydrate', 'моногідрат', 'dihydrate', 'дигідрат', 'trihydrate', 'тригідрат', 'hydrate', 'гідрат',
+  'salt', 'сіль', 'solution', 'розчин',
 ]);
 
 export function normalizeName(s: string | null | undefined): string {
@@ -59,7 +65,13 @@ export function matchByAliases<T extends { keys: string[] }>(
 ): AliasMatch<T> | null {
   const hay = normalizeName(name);
   if (!hay) return null;
-  const hayTokens = new Set(tokenize(name));
+  const hayTokens = tokenize(name);
+
+  // Стем-сумісність: 'лізин' ~ 'лізину' (відмінки), 'sulfate' ~ 'sulfates'.
+  const tokenMatches = (kt: string): boolean =>
+    hayTokens.some(
+      (ht) => ht === kt || (kt.length >= 4 && ht.length >= 4 && (ht.startsWith(kt) || kt.startsWith(ht))),
+    );
 
   let best: AliasMatch<T> | null = null;
   for (const entry of entries) {
@@ -73,7 +85,8 @@ export function matchByAliases<T extends { keys: string[] }>(
         score = 1000 + key.length;
       } else if (new RegExp(`(^| )${escapeRe(key)}( |$)`).test(hay)) {
         score = 200 + key.length * 3;
-      } else if (kTokens.length > 0 && kTokens.every((t) => hayTokens.has(t))) {
+      } else if (kTokens.length > 0 && kTokens.every(tokenMatches)) {
+        // усі значущі токени ключа присутні (з урахуванням відмінків/форм)
         score = 100 + kTokens.reduce((a, t) => a + t.length, 0) + (kTokens.length - 1) * 10;
       } else if (key.length >= 4 && hay.includes(key)) {
         score = 40 + key.length;

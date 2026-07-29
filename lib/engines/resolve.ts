@@ -2,6 +2,7 @@ import {
   lookupUktzedCode,
   lookupDutyRate,
   lookupProductOriginMatch,
+  lookupManufacturer,
   lookupAdr,
   checkPrecursor,
   type PrecursorHit,
@@ -29,6 +30,8 @@ export interface ResolvedLine {
   code: { value: string | null; source: ValueSource; matchedBy: string | null; confidence: Confidence | null };
   origin: ProductOriginEntry | null;
   originConfidence: Confidence | null;
+  /** Підказка типу походження, коли речовини немає в базі (з виробника). */
+  originTypeHint: string | null;
   adr: AdrEntry | null;
   precursor: PrecursorHit | null;
   warnings: string[];
@@ -42,7 +45,17 @@ export function resolveLine(raw: RawLine): ResolvedLine {
   // ── Довідкове визначення речовини (для походження + крос-лінку) ──
   const originMatch = lookupProductOriginMatch(raw.name);
   const origin = originMatch?.entry ?? null;
-  const originConfidence = originMatch?.confidence ?? null;
+  let originConfidence = originMatch?.confidence ?? null;
+  // Крос-сигнал: якщо речовини немає в базі, але відомий виробник — беремо тип виробництва.
+  let originTypeHint: string | null = origin?.originType ?? null;
+  if (!origin) {
+    const manuf = lookupManufacturer(raw.name);
+    if (manuf?.originType) {
+      originTypeHint = manuf.originType;
+      originConfidence = 'medium';
+      warnings.push(`Походження визначено за виробником: ${manuf.originType}.`);
+    }
+  }
 
   // ── Код УКТЗЕД ──
   let code: string | null = null;
@@ -108,6 +121,7 @@ export function resolveLine(raw: RawLine): ResolvedLine {
     code: { value: code, source: codeSource, matchedBy, confidence: codeConfidence },
     origin,
     originConfidence,
+    originTypeHint,
     adr,
     precursor,
     warnings,

@@ -7,8 +7,18 @@ describe('normalizeName / contentTokens', () => {
     expect(normalizeName("Кальцію хлорид (безводний)")).toBe('кальцію хлорид безводний');
     expect(normalizeName('L-Лізин')).toBe('l лізин');
   });
-  it('відкидає шумові й короткі токени', () => {
-    expect(contentTokens('L-Лізин сульфат 70% GMP порошок')).toEqual(['лізин', 'сульфат']);
+  it('відкидає шумові (у т.ч. солеві форми) й короткі токени', () => {
+    expect(contentTokens('L-Лізин сульфат 70% GMP порошок')).toEqual(['лізин']);
+  });
+});
+
+describe('стійкість до відмінків і солевих форм', () => {
+  it('відмінок: "лізину" матчиться з "лізин"', () => {
+    expect(lookupProductOriginMatch('L-Лізину моногідрохлорид')?.entry.originType).toBe('ферментаційне');
+  });
+  it('солева форма не заважає визначенню коду', () => {
+    expect(lookupUktzedCode('L-Лізину сульфат')?.code).toBe('2922410000');
+    expect(lookupUktzedCode('метіоніну гідрохлорид')?.code).toBe('2930400000');
   });
 });
 

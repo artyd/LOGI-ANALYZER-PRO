@@ -59,8 +59,9 @@ export function analyzeDeterministic(
   });
 
   const lines: AnalysisLine[] = resolved.map((r, i) => {
-    // Якщо база впевнено визначила речовину — «пінимо» її походження як рекомендоване.
-    const pinKey = r.origin ? originKeyFromType(r.origin.originType) : null;
+    // Якщо база/виробник визначили речовину — «пінимо» її походження як рекомендоване.
+    const pinType = r.origin?.originType ?? r.originTypeHint;
+    const pinKey = pinType ? originKeyFromType(pinType) : null;
     const pinned: OriginPin | null =
       pinKey && r.originConfidence ? { key: pinKey, confidence: r.originConfidence } : null;
     return {
