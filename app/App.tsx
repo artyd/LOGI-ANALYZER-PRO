@@ -9,6 +9,13 @@ import type { NumberWithSource } from '@/lib/types/contract';
 import type { AiResponse, AiItem } from '@/lib/ai/schema';
 import { exportReport } from '@/lib/export/xlsx';
 import { loadArchive, saveToArchive, clearArchive, type ArchiveEntry } from '@/lib/archive';
+import { buildQdProGoodInfoUrl } from '@/lib/engines/origin';
+import zedTopicsRaw from '@/lib/data/zed_topics.json';
+
+interface ZedTopic { ico: string; topic: string; short: string; sections: { title: string; rows: [string, string][] }[] }
+const ZED_TOPICS = zedTopicsRaw as ZedTopic[];
+const confLabel = (c: string) => (c === 'high' ? 'ВИСОКА' : c === 'medium' ? 'СЕРЕДНЯ' : 'НИЗЬКА');
+const confColor = (c: string) => (c === 'high' ? 'var(--green-bright)' : c === 'medium' ? 'var(--yellow)' : 'var(--red-bright)');
 
 const PROVIDER_META: Record<string, { label: string; placeholder: string }> = {
   openai: { label: 'OpenAI', placeholder: 'sk-proj-...' },
@@ -79,6 +86,7 @@ export default function App() {
   const [aiError, setAiError] = useState('');
 
   const [archive, setArchive] = useState<ArchiveEntry[]>([]);
+  const [zedIdx, setZedIdx] = useState<number | null>(null);
 
   const sceneRef = useRef<HTMLDivElement>(null);
   const batchRef = useRef<HTMLDivElement>(null);
@@ -393,11 +401,32 @@ export default function App() {
       {/* KNOWLEDGE BASE */}
       <main className={`page ${page === 'zed' ? 'active' : ''}`} id="page-zed">
         <h1 className="page-title">База знань <em>ЗЕД</em></h1>
-        <div className="page-sub">Reference · EU → UA customs operations</div>
-        <div className="status-box" style={{ maxWidth: 'none', marginTop: 20 }}>
-          Розділ бази знань переноситься з попередньої версії. Зараз доступні робочі рушії: розрахунок платежів,
-          класифікація УКТЗЕД, походження, прекурсори/ADR та AI-перевірки ЄС/UA.
-        </div>
+        <div className="page-sub">Reference · EU → UA customs operations · {ZED_TOPICS.length} тем</div>
+        {zedIdx === null ? (
+          <div className="zed-grid" id="zedGrid">
+            {ZED_TOPICS.map((t, i) => (
+              <div className="zed-card" key={i} onClick={() => setZedIdx(i)}>
+                <div className="zed-ico">{t.ico}</div>
+                <h4>{t.topic}</h4>
+                <p>{t.short}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="zed-detail open" id="zedDetail">
+            <button className="zed-back" onClick={() => setZedIdx(null)}>← Назад</button>
+            <div className="zed-detail-title">{ZED_TOPICS[zedIdx].ico} {ZED_TOPICS[zedIdx].topic}</div>
+            <div className="zed-detail-sub">{ZED_TOPICS[zedIdx].short}</div>
+            {ZED_TOPICS[zedIdx].sections.map((s, si) => (
+              <div className="zed-sec" key={si}>
+                <h5>{s.title}</h5>
+                {s.rows.map((row, ri) => (
+                  <div className="zed-row" key={ri}><span className="zed-k">{row[0]}</span><span className="zed-v">{row[1]}</span></div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </main>
 
       <footer>
@@ -441,6 +470,7 @@ function CheckList({ checks }: { checks: { item: string; status: string; note: s
 
 function Results({ r, currency, ai, aiBusy, aiError, hasKey, onExport }: { r: AnalysisResult; currency: string; ai: AiResponse | null; aiBusy: boolean; aiError: string; hasKey: boolean; onExport: () => void }) {
   const s = r.calc.summary;
+  const [originSel, setOriginSel] = useState<Record<number, string>>({});
   const metrics = [
     { k: 'Митна вартість', v: s.totalCustomsValue, cls: '' },
     { k: 'Мито', v: s.totalDuty, cls: 'is-duty' },
@@ -517,9 +547,49 @@ function Results({ r, currency, ai, aiBusy, aiError, hasKey, onExport }: { r: An
         </div>
       </div>
 
+      {/* Origin cards */}
+      <div className="sec-head"><span className="sec-num">03</span><span className="sec-title">Можливе походження · перевірки за типом</span><span className="sec-line" /></div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {r.lines.map((l, i) => {
+          const opts = l.originOptions;
+          if (!opts.length) return null;
+          const recKey = opts.find((o) => o.recommended)?.key ?? opts[0].key;
+          const selKey = originSel[i] ?? recKey;
+          const sel = opts.find((o) => o.key === selKey) ?? opts[0];
+          const qurl = buildQdProGoodInfoUrl(l.resolved.code.value);
+          return (
+            <div className="metric" key={i}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap', marginBottom: 10 }}>
+                <b>{l.calc.name}</b>
+                {l.resolved.code.value && <span style={{ fontFamily: 'var(--mono)', color: 'var(--ink-3)', fontSize: 12 }}>{l.resolved.code.value}</span>}
+                <a className="qdpro-link" style={{ marginLeft: 'auto', fontSize: 12 }} href={qurl} target="_blank" rel="noopener">QDPro goodinfo ↗</a>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {opts.map((o) => {
+                  const active = o.key === selKey;
+                  return (
+                    <button key={o.key} onClick={() => setOriginSel((s2) => ({ ...s2, [i]: o.key }))}
+                      style={{ cursor: 'pointer', textAlign: 'left', padding: '8px 12px', borderRadius: 8, background: active ? 'var(--amber-dim)' : 'var(--surface-2)', border: `1px solid ${active ? 'var(--amber)' : 'var(--line-2)'}`, color: 'var(--ink)', minWidth: 130 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600 }}>{o.shortLabel}{o.recommended ? ' ★' : ''}</div>
+                      <div style={{ fontSize: 10, fontFamily: 'var(--mono)', letterSpacing: '.1em', color: confColor(o.confidence), marginTop: 3 }}>{confLabel(o.confidence)}</div>
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--ink-2)', marginBottom: 12 }}>{sel.basis}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+                <div><div className="metric-label" style={{ color: 'var(--ink)' }}>🇪🇺 Транзит ЄС</div><CheckList checks={sel.euChecks} /></div>
+                <div><div className="metric-label" style={{ color: 'var(--ink)' }}>🇺🇦 Розмитнення UA</div><CheckList checks={sel.uaChecks} /></div>
+                <div><div className="metric-label" style={{ color: 'var(--ink)' }}>🚚 Транзит / логістика</div><CheckList checks={sel.transitChecks} /></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {ai && (
         <>
-          <div className="sec-head"><span className="sec-num">03</span><span className="sec-title">Перевірки для брокера · ЄС / UA</span><span className="sec-line" /></div>
+          <div className="sec-head"><span className="sec-num">04</span><span className="sec-title">AI-перевірки для брокера · ЄС / UA</span><span className="sec-line" /></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {r.lines.map((l, i) => {
               const it = aiByName.get(normalize(l.calc.name));

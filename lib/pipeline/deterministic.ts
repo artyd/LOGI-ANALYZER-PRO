@@ -2,6 +2,7 @@ import { selectActualSheet, type SheetInput } from '../sheets/selectActualSheet'
 import { extractRows, type ColumnMap } from '../sheets/parse';
 import { resolveLine, type ResolvedLine } from '../engines/resolve';
 import { calculatePayments } from '../engines/payment';
+import { buildOriginOptions, type OriginProfile } from '../engines/origin';
 import {
   ShipmentCostInput,
   type CalcResponse,
@@ -15,6 +16,7 @@ import {
 export interface AnalysisLine {
   resolved: ResolvedLine;
   calc: CalcLineResult;
+  originOptions: OriginProfile[];
 }
 
 export interface AnalysisResult {
@@ -55,7 +57,17 @@ export function analyzeDeterministic(
     lines: resolved.map((r) => r.calcInput),
   });
 
-  const lines: AnalysisLine[] = resolved.map((r, i) => ({ resolved: r, calc: calc.lines[i] }));
+  const lines: AnalysisLine[] = resolved.map((r, i) => ({
+    resolved: r,
+    calc: calc.lines[i],
+    originOptions: buildOriginOptions({
+      name: r.calcInput.name,
+      uctzedCode: r.code.value,
+      category: r.origin?.category,
+      originType: r.origin?.originType ?? null,
+      productionMethod: r.origin?.productionMethod ?? null,
+    }),
+  }));
 
   const warnings = Array.from(
     new Set(lines.flatMap((l) => [...l.resolved.warnings, ...l.calc.warnings])),
