@@ -7,9 +7,10 @@ import { z } from 'zod';
  */
 export const CheckStatus = z.enum(['green', 'yellow', 'red']);
 
+/** status лишаємо рядком (моделі бувають вільні) — нормалізуємо в UI. */
 export const CheckItem = z.object({
   item: z.string(),
-  status: CheckStatus,
+  status: z.string().default('yellow'),
   note: z.string().default(''),
 });
 
@@ -26,7 +27,7 @@ export const AiItem = z.object({
   storageRequirements: z.string().default(''),
   euChecks: z.array(CheckItem).default([]),
   uaChecks: z.array(CheckItem).default([]),
-  risk: z.enum(['Критичний', 'Середній', 'Низький']).nullable().default(null),
+  risk: z.string().nullable().default(null),
   riskNote: z.string().default(''),
   /** true, якщо факту немає в CONTEXT — потребує перевірки людиною. */
   needsReview: z.boolean().default(false),

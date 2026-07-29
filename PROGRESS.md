@@ -29,8 +29,17 @@
 - [x] **Тести**: 42 passed (payment, selectActualSheet, classify, resolve). `next build` OK.
 - [ ] Отримати + імпортувати реальний Митний тариф UA → hs_code/duty_rate/vat_rate(20/7)/DCFTA.
 - [ ] Движок 2 у Python (trigram/embedding через pg_trgm) — після Neon.
-- [ ] Оркестратор `/api/analyze` + приймання SheetJS (upload / Google Sheets).
-- [ ] Порт UI-терміналу (globals.css/шрифти, форма Incoterms) + клієнтський XLSX + архів (localStorage).
+- [x] **UI-термінал (клієнтський)** `app/Terminal.tsx` — завантаження Excel/CSV або демо, форма
+      Incoterms/фрахт/страхування/курс, живий детермінований розрахунок у браузері, таблиця з
+      бейджами джерела/оцінки, зведена, застереження. Парсинг `lib/sheets/parse.ts` (SheetJS),
+      пайплайн `lib/pipeline/deterministic.ts`.
+- [x] **Деплой на Vercel живий і публічний** — https://logi-analyzer-pro-djtourist11-1877s-projects.vercel.app
+      (framework=nextjs, protection off; автодеплой з GitHub).
+- [ ] AI-перевірки ЄС/UA у терміналі (виклик `/api/ai` з BYOK-ключем) + картки походження.
+- [ ] Приймання Google Sheets URL (через backend-проксі, CORS).
+- [ ] Клієнтський XLSX-експорт + архів (localStorage).
+- [ ] Оркестратор `/api/analyze` (коли додамо RAG/БД).
+- [ ] Реальний Митний тариф UA; Neon-міграція + сид (після DATABASE_URL).
 - [ ] Паритет-фікстури старий-vs-новий.
 
 ## Потрібно від власника
