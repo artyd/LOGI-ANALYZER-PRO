@@ -10,7 +10,7 @@ import {
   type AdrEntry,
 } from '../data';
 import type { ValueSource } from '../types/contract';
-import { matchByAliases, normalizeName, type Confidence } from './match';
+import { matchByAliases, fuzzyNearestByAliases, normalizeName, type Confidence } from './match';
 
 /**
  * Движок 2 — класифікація/пошук за довідниками через точний токен-матчер
@@ -30,6 +30,21 @@ export function lookupUktzedCode(name: string): CodeMatch | null {
   const m = matchByAliases(UKTZED_CODE_DB, name);
   if (!m || m.confidence === 'low') return null;
   return { code: m.entry.code, name: m.entry.name, matchedBy: 'alias', confidence: m.confidence };
+}
+
+// ── Fuzzy-підказка на одрук (НЕ автозаміна — див. fuzzyNearestByAliases) ──
+export interface TypoSuggestion {
+  code: string;
+  name: string;
+  matchedKey: string;
+  nameToken: string;
+  distance: number;
+}
+/** Близька за написанням позиція словника — щоб підказати можливий одрук людині. */
+export function suggestUktzedByTypo(name: string): TypoSuggestion | null {
+  const h = fuzzyNearestByAliases(UKTZED_CODE_DB, name);
+  if (!h) return null;
+  return { code: h.entry.code, name: h.entry.name, matchedKey: h.keyToken, nameToken: h.nameToken, distance: h.distance };
 }
 
 // ── Ставка мита за кодом (порт lookupDutyRate @9255) ──────────────

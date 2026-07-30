@@ -5,10 +5,13 @@ import {
   lookupManufacturer,
   lookupAdr,
   checkPrecursor,
+  suggestUktzedByTypo,
   type PrecursorHit,
 } from './classify';
 import type { Confidence } from './match';
 import { lookupMfnRate } from './mfn';
+import { STATUTORY_TARIFF } from './statutory';
+import { lookupHsByDescription } from './hsmatch';
 import { validateUktzedStructure, codeClassPlausible, codeExistsInHs, hsHeadingDescription } from './validate';
 import type { TariffTable } from '../tariff/tariff';
 import type { CalcLineInput, ValueSource, VatRegime } from '../types/contract';
@@ -46,7 +49,11 @@ export interface ResolvedLine {
 
 const digitsOnly = (s: string | null | undefined): string => String(s ?? '').replace(/\D/g, '');
 
-export function resolveLine(raw: RawLine, tariff?: TariffTable | null): ResolvedLine {
+export function resolveLine(
+  raw: RawLine,
+  tariff?: TariffTable | null,
+  statutory: TariffTable | null = STATUTORY_TARIFF,
+): ResolvedLine {
   const warnings: string[] = [];
 
   // ── Довідкове визначення речовини (для походження + крос-лінку) ──
@@ -69,6 +76,8 @@ export function resolveLine(raw: RawLine, tariff?: TariffTable | null): Resolved
   let codeSource: ValueSource = 'unknown';
   let matchedBy: string | null = null;
   let codeConfidence: Confidence | null = null;
+  // Частковий код HS-6 (пропозиція за описом) — 10-значну структуру не валідуємо.
+  let isHs6Partial = false;
 
   if (raw.uctzedCode && digitsOnly(raw.uctzedCode).length >= 4) {
     code = digitsOnly(raw.uctzedCode);
@@ -77,11 +86,23 @@ export function resolveLine(raw: RawLine, tariff?: TariffTable | null): Resolved
     codeConfidence = 'high';
   } else {
     const dict = lookupUktzedCode(raw.name);
+    // Семантичний fallback: якщо курований словник промахнувся — матч за офіційним
+    // описом HS (лише коли є токен-ідентичність речовини, інакше мовчить).
+    const hs = dict ? null : lookupHsByDescription(raw.name);
     if (dict) {
       code = digitsOnly(dict.code);
       codeSource = 'kb_coarse';
       matchedBy = 'uktzed_dict';
       codeConfidence = dict.confidence;
+    } else if (hs) {
+      code = digitsOnly(hs.code6);
+      codeSource = 'kb_coarse';
+      matchedBy = 'hs_desc';
+      codeConfidence = hs.confidence;
+      isHs6Partial = true;
+      warnings.push(
+        `Код запропоновано за офіційним описом HS (6 знаків, за «${hs.matched.join(', ')}»): ${hs.desc}. Уточнити 10-значний код за тарифом.`,
+      );
     } else if (
       raw.aiSuggestedCode &&
       validateUktzedStructure(raw.aiSuggestedCode).structureValid &&
@@ -98,15 +119,27 @@ export function resolveLine(raw: RawLine, tariff?: TariffTable | null): Resolved
         : 'підпозиція відсутня в номенклатурі HS';
       warnings.push(`Код від AI відхилено (${why}).`);
     } else {
-      warnings.push('Код УКТЗЕД не визначено — мито не рахується.');
+      // Одрук? Підказуємо схожу позицію, але код НЕ проставляємо (у хім-назвах
+      // різниця в 1 символ = інша речовина; авто-виправлення було б помилкою).
+      const typo = suggestUktzedByTypo(raw.name);
+      if (typo) {
+        warnings.push(
+          `Код УКТЗЕД не визначено. Назва схожа на «${typo.matchedKey}» (${typo.name}, код ${typo.code}) — можливо одрук; перевірити.`,
+        );
+      } else {
+        warnings.push('Код УКТЗЕД не визначено — мито не рахується.');
+      }
     }
   }
 
   // ── Валідація коду (структура + правдоподібність за класом) ──
+  // Код — пропозиція (AI або опис HS), а не підтверджений тариф → ставка не авторитетна.
+  const codeIsProposal = codeSource === 'ai' || matchedBy === 'hs_desc';
   let codeIssue: string | null = null;
   if (code) {
-    const struct = validateUktzedStructure(code);
-    if (!struct.structureValid) {
+    // Частковий HS-6 валідний за побудовою (існує в номенклатурі) — перевіряємо лише клас.
+    const struct = isHs6Partial ? null : validateUktzedStructure(code);
+    if (struct && !struct.structureValid) {
       codeIssue = struct.reason;
       warnings.push(`Код ${code}: ${struct.reason}`);
     } else {
@@ -123,9 +156,10 @@ export function resolveLine(raw: RawLine, tariff?: TariffTable | null): Resolved
   let dutyRateSource: ValueSource = 'unknown';
   let vatFromTariff: VatRegime | null = null;
   if (code) {
-    const te = tariff?.get(code);
+    // Пріоритет: тариф користувача (runtime) > вбудований статутний 10-значний тариф.
+    const te = tariff?.get(code) ?? statutory?.get(code) ?? null;
     if (te) {
-      codeConfidence = 'high'; // код підтверджено офіційним завантаженим тарифом
+      codeConfidence = 'high'; // код підтверджено офіційним тарифом (користувача або статутним)
       vatFromTariff = te.vatRegime ?? null;
       if (te.dutyPercent != null) {
         dutyRatePercent = te.dutyPercent;
@@ -137,9 +171,13 @@ export function resolveLine(raw: RawLine, tariff?: TariffTable | null): Resolved
       if (mfn) {
         // Реальна MFN-ставка UA (WITS/UNCTAD) на рівні HS-6.
         dutyRatePercent = mfn.ratePercent;
-        dutyRateSource = mfn.ranged ? 'kb_coarse' : 'db';
+        // Авторитетно (db) лише коли код надійний і ставка однорідна. Якщо код —
+        // пропозиція (HS-опис/AI), ставку позначаємо як оцінку (потребує звірки).
+        dutyRateSource = mfn.ranged || codeIsProposal ? 'kb_coarse' : 'db';
         if (mfn.ranged) {
           warnings.push(`Ставка мита ${mfn.ratePercent}% — середня по HS-6 ${mfn.hs6} (є діапазон); уточнити на 10-значному коді.`);
+        } else if (codeIsProposal) {
+          warnings.push(`Ставка мита ${mfn.ratePercent}% — реальна MFN по HS-6, але код запропоновано автоматично; підтвердити код за тарифом.`);
         }
       } else {
         const duty = lookupDutyRate(code);
