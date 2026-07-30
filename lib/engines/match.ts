@@ -43,6 +43,30 @@ function escapeRe(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/**
+ * Обмежена відстань Левенштейна: true, якщо ≤ max. Рядкова DP з ранньою відсічкою
+ * (коли весь рядок перевищує бюджет). Дешево, бо max маленький (1–2).
+ */
+export function editDistanceWithin(a: string, b: string, max: number): boolean {
+  const la = a.length;
+  const lb = b.length;
+  if (Math.abs(la - lb) > max) return false;
+  let prev = Array.from({ length: lb + 1 }, (_, j) => j);
+  for (let i = 1; i <= la; i++) {
+    const cur = [i];
+    let rowBest = i;
+    for (let j = 1; j <= lb; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      const v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      cur[j] = v;
+      if (v < rowBest) rowBest = v;
+    }
+    if (rowBest > max) return false; // весь рядок вже за бюджетом → відсічка
+    prev = cur;
+  }
+  return prev[lb] <= max;
+}
+
 export type Confidence = 'high' | 'medium' | 'low';
 
 export interface AliasMatch<T> {
@@ -100,5 +124,54 @@ export function matchByAliases<T extends { keys: string[] }>(
 
   if (!best) return null;
   best.confidence = best.score >= 200 ? 'high' : best.score >= 100 ? 'medium' : 'low';
+  return best;
+}
+
+/**
+ * Fuzzy-ПІДКАЗКА (не автозаміна!) на випадок одруку. Знаходить запис, чий
+ * значущий токен-ключ дуже близький (відстань 1–2) до токена назви.
+ *
+ * ЧОМУ ЛИШЕ ПІДКАЗКА: у хім-номенклатурі різниця в 1 символ часто означає
+ * ІНШУ речовину (sulfate≠sulfite, cystine≠cysteine, -ate≠-ite). Тихо
+ * «виправляти» такі назви = помилка класифікації. Тому повертаємо кандидата
+ * для попередження людині, а код автоматично НЕ проставляємо.
+ *
+ * Гейт: токени ≥5 символів, спільний перший символ, відстань ≤1 (≥8 → ≤2),
+ * і виключаємо точні збіги (то не одрук). Серед кандидатів — найменша
+ * відстань, потім найдовший токен.
+ */
+export interface FuzzyHint<T> {
+  entry: T;
+  key: string;
+  nameToken: string;
+  keyToken: string;
+  distance: number;
+}
+export function fuzzyNearestByAliases<T extends { keys: string[] }>(
+  entries: T[],
+  name: string,
+): FuzzyHint<T> | null {
+  const hayTokens = tokenize(name).filter((t) => t.length >= 5 && !NOISE.has(t) && !/^\d+$/.test(t));
+  if (hayTokens.length === 0) return null;
+
+  let best: FuzzyHint<T> | null = null;
+  for (const entry of entries) {
+    for (const rawKey of entry.keys) {
+      for (const kt of tokenize(rawKey)) {
+        if (kt.length < 5 || NOISE.has(kt) || /^\d+$/.test(kt)) continue;
+        for (const ht of hayTokens) {
+          if (ht === kt) return null; // точний збіг токена — це не одрук, підказка не потрібна
+          if (ht[0] !== kt[0]) continue; // одруки рідко в першій літері; різко зменшує колізії
+          const budget = Math.max(kt.length, ht.length) >= 8 ? 2 : 1;
+          if (!editDistanceWithin(kt, ht, budget)) continue;
+          // фактична відстань (у межах бюджету): 1 краще за 2
+          const dist = editDistanceWithin(kt, ht, 1) ? 1 : 2;
+          const better =
+            !best || dist < best.distance || (dist === best.distance && kt.length > best.keyToken.length);
+          if (better) best = { entry, key: rawKey, nameToken: ht, keyToken: kt, distance: dist };
+        }
+      }
+    }
+  }
   return best;
 }

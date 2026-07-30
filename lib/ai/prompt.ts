@@ -43,7 +43,9 @@ export function buildSystemPrompt(ctx: PromptContext): string {
 === CONTEXT: ТАРИФНІ ФАКТИ ===
 ${ctx.tariffFacts || '(немає)'}
 
-=== CONTEXT: НОРМИ ТА ДОКУМЕНТИ (RAG) ===
-${ctx.ragContext || '(у цій фазі порожньо — став needsReview=true для будь-яких нормативних тверджень)'}
+=== CONTEXT: НОРМИ ТА ДОКУМЕНТИ (RAG — експертний рулбук) ===
+${ctx.ragContext || '(порожньо — став needsReview=true для будь-яких нормативних тверджень)'}
+
+Спирайся на цей рулбук для euChecks/uaChecks. Якщо конкретної норми для позиції в рулбуку НЕМАЄ — не вигадуй її: постав needsReview=true і сформулюй перевірку як «уточнити …».
 `;
 }

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { callAI, type Provider } from '@/lib/ai/providers';
 import { buildSystemPrompt } from '@/lib/ai/prompt';
+import { buildRagContext } from '@/lib/ai/rag';
 import { AiResponse } from '@/lib/ai/schema';
 import hsDescRaw from '@/lib/data/hs_desc.json';
 
@@ -87,7 +88,10 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: `Некоректний запит: ${(e as Error).message}` }, { status: 400 });
   }
 
-  const system = buildSystemPrompt({ tariffFacts: buildTariffFacts(parsed.items), ragContext: '' });
+  const system = buildSystemPrompt({
+    tariffFacts: buildTariffFacts(parsed.items),
+    ragContext: buildRagContext(parsed.items),
+  });
   const user = buildUserPrompt(parsed.items);
 
   let raw: string;

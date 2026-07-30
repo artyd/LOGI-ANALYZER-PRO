@@ -9,10 +9,12 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:golden": "vitest run tests/golden.spec.ts --disableConsoleIntercept",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx scripts/seed/seed.ts",
-    "extract-kb": "node scripts/extract-kb.mjs"
+    "extract-kb": "node scripts/extract-kb.mjs",
+    "build-tariff10": "tsx scripts/build-tariff10.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
